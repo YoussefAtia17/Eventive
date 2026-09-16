@@ -1,0 +1,9 @@
+📂 Partiful-Upwork/
+├── 📁 frontend/
+│   ├── 📄 index.html          (RSVP)
+│   └── 📄 admin.html          
+│
+└── 📁 backend/
+    ├── 📁 venv/               
+    ├── 📄 app.py             
+    └── 📄 requirements.txt    

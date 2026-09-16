@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <style>
+        :root {
+            --bg-color: #F3F4F6;
+            --card-bg: #FFFFFF;
+            --text-main: #111827;
+            --primary-color: #000000;
+            --border-color: #E5E7EB;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .container { width: 100%; max-width: 800px; }
+        
+        /* شاشة تسجيل الدخول */
+        #login-section {
+            background: var(--card-bg); padding: 40px; border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); text-align: center;
+            max-width: 400px; margin: 100px auto;
+        }
+        .form-input {
+            width: 100%; padding: 14px; margin: 10px 0; border: 1px solid var(--border-color);
+            border-radius: 8px; font-size: 16px; box-sizing: border-box;
+        }
+        .btn {
+            background-color: var(--primary-color); color: white; border: none;
+            padding: 14px 24px; border-radius: 8px; font-size: 16px; font-weight: 600;
+            cursor: pointer; width: 100%; transition: opacity 0.2s; margin-top: 10px;
+        }
+        .btn:hover { opacity: 0.8; }
+        
+        /* لوحة التحكم */
+        #dashboard-section {
+            display: none; background: var(--card-bg); padding: 30px;
+            border-radius: 16px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid var(--border-color); padding-bottom: 20px; margin-bottom: 20px;
+        }
+        select { padding: 10px; border-radius: 8px; border: 1px solid var(--border-color); width: 100%; margin-bottom: 20px; font-size: 16px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { text-align: left; padding: 12px 16px; border-bottom: 1px solid var(--border-color); }
+        th { background-color: #F9FAFB; font-weight: 600; color: #4B5563; }
+        
+        .section-title { margin-top: 30px; margin-bottom: 15px; font-size: 20px; border-bottom: 2px solid var(--border-color); padding-bottom: 5px; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- شاشة تسجيل الدخول -->
+        <div id="login-section">
+            <h2>Admin Login</h2>
+            <input type="password" id="adminPassword" class="form-input" placeholder="Password (hint: admin123)">
+            <button class="btn" onclick="login()">Login</button>
+        </div>
+
+        <!-- لوحة التحكم -->
+        <div id="dashboard-section">
+            <div class="header">
+                <h2>Admin Dashboard</h2>
+                <button class="btn" style="width: auto; background: #EF4444;" onclick="logout()">Logout</button>
+            </div>
+
+            <!-- قسم إضافة فعالية جديدة -->
+            <h3 class="section-title">✨ Create New Event</h3>
+            <form id="createEventForm" onsubmit="submitNewEvent(event)">
+                <input type="text" id="newEventTitle" class="form-input" placeholder="Event Title" required>
+                <input type="datetime-local" id="newEventDate" class="form-input" required>
+                <input type="text" id="newEventLocation" class="form-input" placeholder="Location" required>
+                <textarea id="newEventDesc" class="form-input" placeholder="Event Description..." rows="3" required></textarea>
+                <button type="submit" class="btn" style="background-color: #10B981;">+ Create Event</button>
+            </form>
+
+            <!-- قسم عرض الحضور -->
+            <h3 class="section-title" style="margin-top: 40px;"> View Eventive 📋 </h3>
+            <label for="eventSelect"><strong>Select Event:</strong></label>
+            <select id="eventSelect" onchange="loadRSVPs()">
+                <option value="">-- Choose an event --</option>
+            </select>
+
+            <table>
+                <thead>
+                    <tr><th>Name</th><th>Email</th><th>Phone</th></tr>
+                </thead>
+                <tbody id="attendeesTable"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // دالة تسجيل الدخول
+        function login() {
+            const pass = document.getElementById('adminPassword').value;
+            if(pass === 'admin123') {
+                document.getElementById('login-section').style.display = 'none';
+                document.getElementById('dashboard-section').style.display = 'block';
+                loadEvents(); 
+            } else { alert('Wrong password!'); }
+        }
+
+        // دالة تسجيل الخروج
+        function logout() {
+            document.getElementById('dashboard-section').style.display = 'none';
+            document.getElementById('login-section').style.display = 'block';
+            document.getElementById('adminPassword').value = '';
+        }
+
+        // جلب الفعاليات لقائمة الاختيار
+        async function loadEvents() {
+            try {
+                const response = await fetch('http://127.0.0.1:5000/api/events');
+                const result = await response.json();
+                
+                if(result.status === 'success') {
+                    const select = document.getElementById('eventSelect');
+                    select.innerHTML = '<option value="">-- Choose an event --</option>';
+                    result.data.forEach(event => {
+                        const option = document.createElement('option');
+                        option.value = event.id;
+                        option.textContent = event.title;
+                        select.appendChild(option);
+                    });
+                }
+            } catch (error) { console.error("Error loading events:", error); }
+        }
+
+        // جلب الحضور للفعالية المختارة
+        async function loadRSVPs() {
+            const eventId = document.getElementById('eventSelect').value;
+            const tbody = document.getElementById('attendeesTable');
+            tbody.innerHTML = '';
+            if(!eventId) return;
+
+            try {
+                tbody.innerHTML = '<tr><td colspan="3">Loading...</td></tr>';
+                const response = await fetch(`http://127.0.0.1:5000/api/admin/rsvps/${eventId}`);
+                const result = await response.json();
+
+                if(result.status === 'success') {
+                    tbody.innerHTML = '';
+                    if(result.data.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="3">No RSVPs yet.</td></tr>';
+                        return;
+                    }
+                    result.data.forEach(person => {
+                        tbody.innerHTML += `<tr><td>${person.full_name}</td><td>${person.email}</td><td>${person.phone_number}</td></tr>`;
+                    });
+                }
+            } catch (error) { tbody.innerHTML = '<tr><td colspan="3" style="color:red;">Error loading data</td></tr>'; }
+        }
+
+        // دالة إنشاء فعالية جديدة (تم تغيير الاسم وتفعيل منع الريفريش)
+        async function submitNewEvent(e) {
+            e.preventDefault(); 
+            const btn = document.querySelector('#createEventForm button');
+            btn.innerText = "Creating...";
+            btn.disabled = true;
+
+            const newEvent = {
+                title: document.getElementById('newEventTitle').value,
+                event_date: document.getElementById('newEventDate').value,
+                location: document.getElementById('newEventLocation').value,
+                description: document.getElementById('newEventDesc').value
+            };
+
+            try {
+                const response = await fetch('http://127.0.0.1:5000/api/admin/events', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(newEvent)
+                });
+
+                if (response.ok) {
+                    alert('Event created successfully!');
+                    document.getElementById('createEventForm').reset(); 
+                    loadEvents(); // تحديث القائمة عشان الفعالية الجديدة تظهر فوراً
+                } else {
+                    alert('Failed to create event. Check backend.');
+                }
+            } catch (error) {
+                alert('Connection error. Is the Flask server running?');
+            } finally {
+                btn.innerText = "+ Create Event";
+                btn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>
