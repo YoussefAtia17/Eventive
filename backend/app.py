@@ -25,7 +25,7 @@ supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 @app.route('/api/events', methods=['GET'])
 def get_events():
     try:
-        response = supabase.table("events").select("*").order("event_date", desc=False).execute()
+        response = supabase.from_("events").select("*").execute()
         return jsonify({"status": "success", "data": response.data}), 200
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
