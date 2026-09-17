@@ -161,25 +161,27 @@ def delete_event(event_id):
         if data.get('role') != 'admin':
             return jsonify({"status": "error", "message": "Unauthorized"}), 403
             
-        supabase.table("rsvps").delete().eq("event_id", event_id).execute()
+        # تم التعديل هنا لـ attendees
+        supabase.table("attendees").delete().eq("event_id", event_id).execute()
         supabase.table("events").delete().eq("id", event_id).execute()
         
         return jsonify({"status": "success", "message": "Event deleted"}), 200
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
-# ----------------- RSVP & AUTH ENDPOINTS (باقي الأكواد القديمة) -----------------
+# ----------------- RSVP & AUTH ENDPOINTS -----------------
 
 @app.route('/api/rsvp', methods=['POST'])
 def rsvp():
     try:
         data = request.json
-        # Check if already RSVPed
-        existing = supabase.table("rsvps").select("*").eq("email", data['email']).eq("event_id", data['event_id']).execute()
+        # تم التعديل هنا لـ attendees
+        existing = supabase.table("attendees").select("*").eq("email", data['email']).eq("event_id", data['event_id']).execute()
         if existing.data:
             return jsonify({"status": "error", "message": "You have already RSVP'd for this event."}), 400
             
-        supabase.table("rsvps").insert({
+        # تم التعديل هنا لـ attendees
+        supabase.table("attendees").insert({
             "full_name": data['name'],
             "email": data['email'],
             "phone_number": data.get('phone', ''),
@@ -192,7 +194,8 @@ def rsvp():
 @app.route('/api/admin/rsvps/<event_id>', methods=['GET'])
 def get_event_rsvps(event_id):
     try:
-        response = supabase.table("rsvps").select("*").eq("event_id", event_id).execute()
+        # تم التعديل هنا لـ attendees
+        response = supabase.table("attendees").select("*").eq("event_id", event_id).execute()
         return jsonify({"status": "success", "data": response.data}), 200
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
@@ -226,7 +229,6 @@ def login():
         if user['password_hash'] != str(data['password']):
             return jsonify({"status": "error", "message": "Invalid password"}), 401
             
-        # ضفنا هنا كل البيانات الجديدة عشان ترجع للواجهة
         user_data = {
             "id": user.get('id'),
             "name": user.get('full_name', ''),
@@ -246,25 +248,21 @@ def login():
 @app.route('/api/update', methods=['POST', 'PUT'])
 def update_profile():
     try:
-        # الواجهة بتبعت الإيميل الأساسي عشان نعرف نحدث بيانات مين
         email = request.form.get('email') or request.json.get('email')
         if not email:
             return jsonify({"status": "error", "message": "Email is required"}), 400
 
         update_data = {}
         
-        # لو الواجهة باعتة بيانات نصية إضافية
         if request.form.get('secondary_email'):
             update_data['secondary_email'] = request.form.get('secondary_email')
         if request.form.get('secondary_phone'):
             update_data['secondary_phone'] = request.form.get('secondary_phone')
 
-        # التعامل مع رفع الصورة
         file = request.files.get('avatar') or request.files.get('file') or request.files.get('profile_picture')
         if file and file.filename != '':
             filename = secure_filename(f"avatar_{uuid.uuid4().hex}_{file.filename}")
             
-            # الرفع على باكت avatars
             supabase.storage.from_("avatars").upload(
                 file=file.read(), 
                 path=filename, 
