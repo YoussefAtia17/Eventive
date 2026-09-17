@@ -237,5 +237,42 @@ def login():
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
+@app.route('/api/update', methods=['POST', 'PUT'])
+def update_profile():
+    try:
+        # الواجهة بتبعت الإيميل الأساسي عشان نعرف نحدث بيانات مين
+        email = request.form.get('email') or request.json.get('email')
+        if not email:
+            return jsonify({"status": "error", "message": "Email is required"}), 400
+
+        update_data = {}
+        
+        # لو الواجهة باعتة بيانات نصية إضافية
+        if request.form.get('secondary_email'):
+            update_data['secondary_email'] = request.form.get('secondary_email')
+        if request.form.get('secondary_phone'):
+            update_data['secondary_phone'] = request.form.get('secondary_phone')
+
+        # التعامل مع رفع الصورة
+        file = request.files.get('avatar') or request.files.get('file') or request.files.get('profile_picture')
+        if file and file.filename != '':
+            filename = secure_filename(f"avatar_{uuid.uuid4().hex}_{file.filename}")
+            
+            # الرفع على باكت avatars
+            supabase.storage.from_("avatars").upload(
+                file=file.read(), 
+                path=filename, 
+                file_options={"content-type": file.content_type}
+            )
+            update_data['avatar_url'] = supabase.storage.from_("avatars").get_public_url(filename)
+
+        if update_data:
+            supabase.table("users").update(update_data).eq("email", email).execute()
+        
+        return jsonify({"status": "success", "message": "Profile updated!"}), 200
+    except Exception as e:
+        print("UPDATE ERROR:", str(e))
+        return jsonify({"status": "error", "message": str(e)}), 500
+    
 if __name__ == '__main__':
     app.run(debug=True)
