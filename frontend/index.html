@@ -67,10 +67,9 @@
             position: relative;
         }
         
-        /* 1. تحديث شكل العداد عشان يظهر فوق الصور الفاتحة */
         .countdown {
             position: absolute; top: 20px; right: 20px; 
-            background: rgba(0, 0, 0, 0.75); /* خلفية سودا عشان تكسر اللون الأبيض */
+            background: rgba(0, 0, 0, 0.75);
             backdrop-filter: blur(8px); padding: 6px 12px; border-radius: 8px; 
             font-size: 11px; font-weight: 600; color: #fff; border: 1px solid rgba(255,255,255,0.1);
             letter-spacing: 0.5px; z-index: 10;
@@ -140,7 +139,6 @@
     </nav>
 
     <div class="container">
-        <!-- Events View -->
         <div id="events-view" class="view-section">
             <div class="hero-section">
                 <h1>Crafting <i>digital</i><br>experiences.</h1>
@@ -156,7 +154,6 @@
             </div>
         </div>
 
-        <!-- Admin Dashboard View -->
         <div id="admin-view" class="view-section hidden">
             <div style="margin-bottom: 40px; margin-top: 20px;">
                 <h1 style="font-size: 2.5rem;">Dashboard</h1>
@@ -213,7 +210,7 @@
         </div>
     </div>
 
-    <!-- 2. Edit Event Modal -->
+    <!-- Edit Event Modal -->
     <div class="modal-overlay" id="editEventModal">
         <div class="modal-content" style="max-width: 550px;">
             <div class="modal-header">
@@ -302,7 +299,6 @@
                 <div style="display: flex; gap: 15px; margin-bottom: 20px;">
                     <img id="profileAvatarImg" src="" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover;">
                     <input type="file" id="profileAvatarFile" class="form-input" accept="image/*" onchange="previewAvatar(event)">
-                    <input type="hidden" id="profileAvatarUrl">
                 </div>
                 <input type="email" id="profilePrimaryEmail" class="form-input" disabled style="opacity: 0.6;">
                 <input type="email" id="profileSecondaryEmail" class="form-input" placeholder="Secondary Email">
@@ -352,7 +348,7 @@
                 nav.innerHTML = html;
             } else {
                 nav.innerHTML = `<button class="btn btn-outline" onclick="openAuthModal(true)">Log in</button><button class="btn btn-primary" onclick="openAuthModal(false)">Join</button>`;
-                adminBar.style.display = 'none';
+                if(adminBar) adminBar.style.display = 'none';
             }
         }
         
@@ -406,7 +402,6 @@
                         
                         const coverHtml = coverUrl ? `<div class="card-cover" style="background-image: url('${coverUrl}');"></div>` : '';
 
-                        // 3. إضافة زراير الأدمن (Edit + Delete)
                         let adminButtons = '';
                         if (currentUser && currentUser.role === 'admin') {
                             adminButtons = `
@@ -435,12 +430,12 @@
                     });
                     updateCountdowns(); 
                 } else { 
-                    adminBar.style.display = 'none'; 
+                    if(adminBar) adminBar.style.display = 'none'; 
                     let adminShortcut = (currentUser && currentUser.role === 'admin') ? `<button class="btn btn-primary" style="margin-top: 25px; padding: 14px 28px; font-size: 16px;" onclick="openCreateModal()">✨ Publish Your First Event</button>` : '';
                     container.innerHTML = `<div class="empty-state-box"><div style="font-size: 48px; margin-bottom: 20px; opacity: 0.8;">🌌</div><h2 style="font-size: 28px; font-weight: 700; margin-bottom: 10px;">No Active Experiences</h2><p style="color: var(--text-muted); font-size: 16px; max-width: 400px;">The canvas is blank. Check back later for upcoming exclusive events.</p>${adminShortcut}</div>`; 
                 }
             } catch (error) { 
-                document.getElementById('adminActionContainer').style.display = 'none';
+                if(document.getElementById('adminActionContainer')) document.getElementById('adminActionContainer').style.display = 'none';
                 document.getElementById('events-container').innerHTML = `<div class="empty-state-box" style="border-color: #ef4444;"><div style="font-size: 48px; margin-bottom: 20px;">🔌</div><h2 style="color: #ef4444;">System Offline</h2><p style="color: var(--text-muted);">Cannot connect to the server.</p></div>`; 
             }
         }
@@ -455,7 +450,6 @@
             } catch (error) { showToast("Connection error.", "error"); }
         }
 
-        // 4. دوال فتح وحفظ نافذة التعديل (Edit Logic)
         function openEditModal(eventId, e) {
             e.stopPropagation();
             const event = allEvents.find(e => e.id === eventId);
@@ -466,7 +460,6 @@
             document.getElementById('editEventLocation').value = event.location;
             document.getElementById('editEventDesc').value = event.description;
             
-            // تظبيط صيغة التاريخ والوقت عشان تظهر جوه الـ Input
             const dateObj = new Date(event.event_date);
             const offset = dateObj.getTimezoneOffset() * 60000;
             const localISOTime = (new Date(dateObj - offset)).toISOString().slice(0, 16);
@@ -637,27 +630,70 @@
         function openProfileModal() {
             if(!currentUser) return;
             document.getElementById('profileAvatarImg').src = currentUser.avatar_url || `https://ui-avatars.com/api/?name=${currentUser.name}&background=111&color=fff`;
-            document.getElementById('profilePrimaryEmail').value = currentUser.email || ''; document.getElementById('profileSecondaryEmail').value = currentUser.secondary_email || ''; document.getElementById('profileActiveEmail').value = currentUser.active_email || 'primary';
-            document.getElementById('profilePrimaryPhone').value = currentUser.phone || ''; document.getElementById('profileSecondaryPhone').value = currentUser.secondary_phone || ''; document.getElementById('profileActivePhone').value = currentUser.active_phone || 'primary';
+            document.getElementById('profilePrimaryEmail').value = currentUser.email || ''; 
+            document.getElementById('profileSecondaryEmail').value = currentUser.secondary_email || ''; 
+            document.getElementById('profileActiveEmail').value = currentUser.active_email || 'primary';
+            document.getElementById('profilePrimaryPhone').value = currentUser.phone || ''; 
+            document.getElementById('profileSecondaryPhone').value = currentUser.secondary_phone || ''; 
+            document.getElementById('profileActivePhone').value = currentUser.active_phone || 'primary';
             document.getElementById('profileModal').classList.add('active');
         }
+
         function previewAvatar(event) {
             const file = event.target.files[0];
-            if (file) { const reader = new FileReader(); reader.onload = function(e) { document.getElementById('profileAvatarImg').src = e.target.result; }; reader.readAsDataURL(file); }
+            if (file) { 
+                const reader = new FileReader(); 
+                reader.onload = function(e) { document.getElementById('profileAvatarImg').src = e.target.result; }; 
+                reader.readAsDataURL(file); 
+            }
         }
+
         async function submitProfile(e) {
-            e.preventDefault(); const formData = new FormData();
-            formData.append('id', currentUser.id); formData.append('primary_email', currentUser.email); formData.append('primary_phone', currentUser.phone || '');
-            formData.append('secondary_email', document.getElementById('profileSecondaryEmail').value); formData.append('active_email', document.getElementById('profileActiveEmail').value);
-            formData.append('secondary_phone', document.getElementById('profileSecondaryPhone').value); formData.append('active_phone', document.getElementById('profileActivePhone').value);
-            formData.append('avatar_url_existing', document.getElementById('profileAvatarUrl').value);
-            const fileInput = document.getElementById('profileAvatarFile'); if (fileInput.files.length > 0) formData.append('avatar_file', fileInput.files[0]);
+            e.preventDefault(); 
+            const btn = document.querySelector('#profileForm button[type="submit"]');
+            btn.innerText = "Saving..."; btn.disabled = true;
+
+            const formData = new FormData();
+            formData.append('email', currentUser.email); 
+            formData.append('secondary_email', document.getElementById('profileSecondaryEmail').value); 
+            formData.append('secondary_phone', document.getElementById('profileSecondaryPhone').value); 
+            
+            const fileInput = document.getElementById('profileAvatarFile'); 
+            if (fileInput.files.length > 0) formData.append('avatar', fileInput.files[0]);
+
             try {
-                const response = await fetch(API_BASE + '/profile/update', { method: 'POST', body: formData });
+                const response = await fetch(API_BASE + '/update', { method: 'POST', body: formData });
                 const result = await response.json();
-                if(response.ok) { currentUser = result.data; localStorage.setItem('user', JSON.stringify(currentUser)); updateNavbar(); closeModal('profileModal'); showToast("Profile updated successfully!", "success"); } 
-                else { showToast(result.message, "error"); }
-            } catch(error) { showToast("Failed to update profile.", "error"); }
+                
+                if(response.ok) { 
+                    currentUser.secondary_email = document.getElementById('profileSecondaryEmail').value;
+                    currentUser.secondary_phone = document.getElementById('profileSecondaryPhone').value;
+                    currentUser.active_email = document.getElementById('profileActiveEmail').value;
+                    currentUser.active_phone = document.getElementById('profileActivePhone').value;
+                    
+                    if (fileInput.files.length > 0) {
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            currentUser.avatar_url = e.target.result;
+                            localStorage.setItem('user', JSON.stringify(currentUser));
+                            updateNavbar();
+                        };
+                        reader.readAsDataURL(fileInput.files[0]);
+                    } else {
+                        localStorage.setItem('user', JSON.stringify(currentUser));
+                        updateNavbar();
+                    }
+
+                    closeModal('profileModal'); 
+                    showToast("Profile updated successfully!", "success"); 
+                } else { 
+                    showToast(result.message || "Failed to update.", "error"); 
+                }
+            } catch(error) { 
+                showToast("Failed to connect to server.", "error"); 
+            } finally {
+                btn.innerText = "Save"; btn.disabled = false;
+            }
         }
         
         function populateAdminEventsDropdown() {
