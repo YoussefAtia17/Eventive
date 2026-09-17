@@ -226,12 +226,18 @@ def login():
         if user['password_hash'] != str(data['password']):
             return jsonify({"status": "error", "message": "Invalid password"}), 401
             
+        # ضفنا هنا كل البيانات الجديدة عشان ترجع للواجهة
         user_data = {
-            "id": user['id'],
-            "name": user['full_name'],
-            "email": user['email'],
-            "phone": user['phone_number'],
-            "role": user['role']
+            "id": user.get('id'),
+            "name": user.get('full_name', ''),
+            "email": user.get('email', ''),
+            "phone": user.get('phone_number', ''),
+            "role": user.get('role', 'user'),
+            "avatar_url": user.get('avatar_url', ''),
+            "secondary_email": user.get('secondary_email', ''),
+            "secondary_phone": user.get('secondary_phone', ''),
+            "active_email": user.get('active_email', 'primary'),
+            "active_phone": user.get('active_phone', 'primary')
         }
         return jsonify({"status": "success", "data": user_data}), 200
     except Exception as e:
