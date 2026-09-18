@@ -325,9 +325,23 @@
         document.addEventListener("DOMContentLoaded", () => { updateNavbar(); loadEvents(); setInterval(updateCountdowns, 60000); });
 
         function showToast(message, type = 'success') {
+            let finalMessage = message;
+            
+            // فلترة رسايل الإيرور الكبيرة والمعقدة
+            if (type === 'error' && typeof message === 'string') {
+                // لو الإيرور يخص إن الإيفنت اتمسح أو مش موجود (Foreign Key / Not Found)
+                if (message.includes('foreign key') || message.toLowerCase().includes('not present in table')) {
+                    finalMessage = "This experience is no longer available or has been deleted.";
+                } 
+                // لو الإيرور جاي على شكل كود JSON طويل أو رسالة مش مفهومة لليوزر
+                else if (message.includes('{') || message.length > 80) {
+                    finalMessage = "Something went wrong. Please refresh the page and try again.";
+                }
+            }
+
             const toast = document.getElementById('appToast');
             document.getElementById('toastIcon').innerText = type === 'success' ? '✅' : '⚠️';
-            document.getElementById('toastMessage').innerText = message;
+            document.getElementById('toastMessage').innerText = finalMessage;
             toast.className = `toast-container show ${type}`;
             clearTimeout(toastTimeout);
             toastTimeout = setTimeout(() => { toast.classList.remove('show'); }, 3500);
