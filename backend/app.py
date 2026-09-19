@@ -277,6 +277,20 @@ def update_profile():
     except Exception as e:
         print("UPDATE ERROR:", str(e))
         return jsonify({"status": "error", "message": str(e)}), 500
+
+@app.route('/api/my-rsvps/<email>', methods=['GET'])
+def get_my_rsvps(email):
+    try:
+        # بنبحث في جدول الحضور عن كل الإيفنتات المرتبطة بإيميل اليوزر ده
+        records = supabase.table("attendees").select("event_id").eq("email", email).execute()
+        
+        # بنستخرج أرقام الفعاليات بس ونحطها في ليست
+        event_ids = [row['event_id'] for row in records.data]
+        
+        return jsonify({"status": "success", "data": event_ids}), 200
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+    
     
 if __name__ == '__main__':
     app.run(debug=True)

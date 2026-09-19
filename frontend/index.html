@@ -49,12 +49,7 @@
         .hero-section h1 { font-size: clamp(3rem, 6vw, 5.5rem); margin-bottom: 20px; }
         .hero-section p { color: var(--text-muted); font-size: 1.1rem; max-width: 500px; margin: 0 auto; }
 
-        .form-input {
-            width: 100%; padding: 14px; margin-bottom: 15px; border: 1px solid var(--border); 
-            border-radius: 8px; font-size: 14px; background: var(--bg-body); color: var(--text-main); outline: none;
-        }
-
-        #events-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 25px; }
+        #events-container, #my-events-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 25px; }
         
         .card { background: var(--bg-surface); border-radius: var(--radius-card); padding: 30px; border: 1px solid var(--border); overflow: hidden; }
         .event-card { position: relative; cursor: pointer; transition: transform 0.3s ease, border-color 0.3s; }
@@ -73,6 +68,14 @@
             backdrop-filter: blur(8px); padding: 6px 12px; border-radius: 8px; 
             font-size: 11px; font-weight: 600; color: #fff; border: 1px solid rgba(255,255,255,0.1);
             letter-spacing: 0.5px; z-index: 10;
+        }
+
+        .registered-badge {
+            position: absolute; top: 20px; left: 20px; 
+            background: rgba(16, 185, 129, 0.9);
+            backdrop-filter: blur(8px); padding: 6px 12px; border-radius: 8px; 
+            font-size: 11px; font-weight: 700; color: #fff; border: 1px solid rgba(255,255,255,0.2);
+            z-index: 10; box-shadow: 0 4px 10px rgba(0,0,0,0.3);
         }
 
         .event-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 15px; }
@@ -125,6 +128,11 @@
         .badge { background: var(--primary); color: var(--primary-invert); padding: 2px 10px; border-radius: 20px; font-size: 14px; margin-left: 10px; font-weight: 600; }
         .export-btn { display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); padding: 8px 16px; border-radius: 8px; color: var(--text-main); cursor: pointer; transition: var(--transition); font-size: 13px; }
         .export-btn:hover { background: rgba(255,255,255,0.1); }
+        
+        .form-input {
+            width: 100%; padding: 14px; margin-bottom: 15px; border: 1px solid var(--border); 
+            border-radius: 8px; font-size: 14px; background: var(--bg-body); color: var(--text-main); outline: none;
+        }
     </style>
 </head>
 <body>
@@ -139,6 +147,7 @@
     </nav>
 
     <div class="container">
+        <!-- All Events View -->
         <div id="events-view" class="view-section">
             <div class="hero-section">
                 <h1>Crafting <i>digital</i><br>experiences.</h1>
@@ -154,6 +163,18 @@
             </div>
         </div>
 
+        <!-- My Events View -->
+        <div id="my-events-view" class="view-section hidden">
+            <div style="margin-bottom: 40px; margin-top: 20px;">
+                <h1 style="font-size: 2.5rem;">My Events</h1>
+                <p style="color: var(--text-muted);">Experiences you have reserved spots for.</p>
+            </div>
+            <div id="my-events-container">
+                <div style="text-align:center; padding: 50px; grid-column: 1 / -1; color: var(--text-muted);">Loading...</div>
+            </div>
+        </div>
+
+        <!-- Admin Dashboard View -->
         <div id="admin-view" class="view-section hidden">
             <div style="margin-bottom: 40px; margin-top: 20px;">
                 <h1 style="font-size: 2.5rem;">Dashboard</h1>
@@ -257,7 +278,7 @@
 
             <div class="event-tags" id="detailsTags"></div>
             <p id="detailsDesc" style="color: var(--text-muted); font-size: 14px; margin-bottom: 25px; white-space: pre-line;"></p>
-            <button class="btn btn-primary" style="width: 100%;" onclick="proceedToRSVP()">Reserve Spot</button>
+            <button id="mainRsvpBtn" class="btn btn-primary" style="width: 100%;" onclick="proceedToRSVP()">Reserve Spot</button>
         </div>
     </div>
 
@@ -319,14 +340,19 @@
         let currentSliderImages = [];
         let currentSlideIndex = 0;
         let allEvents = [];
+        let myBookedEventIds = []; // لیستة الفعاليات المحجوزة
         const API_BASE = 'https://eventive-steel.vercel.app/api';
         let toastTimeout;
+
+        const bannerGradients = [
+            'linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%)',
+            'linear-gradient(135deg, rgba(79,70,229,0.1) 0%, rgba(0,0,0,0) 100%)'
+        ];
 
         document.addEventListener("DOMContentLoaded", () => { updateNavbar(); loadEvents(); setInterval(updateCountdowns, 60000); });
 
         function showToast(message, type = 'success') {
             let finalMessage = message;
-            
             if (type === 'error' && typeof message === 'string') {
                 if (message.includes('foreign key') || message.toLowerCase().includes('not present in table')) {
                     finalMessage = "This experience is no longer available or has been deleted.";
@@ -334,7 +360,6 @@
                     finalMessage = "Something went wrong. Please refresh the page and try again.";
                 }
             }
-
             const toast = document.getElementById('appToast');
             document.getElementById('toastIcon').innerText = type === 'success' ? '✅' : '⚠️';
             document.getElementById('toastMessage').innerText = finalMessage;
@@ -349,12 +374,15 @@
             
             if (currentUser) {
                 const avatarSrc = currentUser.avatar_url || `https://ui-avatars.com/api/?name=${currentUser.name}&background=111&color=fff`;
-                let html = `<div class="profile-badge" onclick="openProfileModal()">
-                                <img src="${avatarSrc}" style="width:32px; height:32px; border-radius:50%; object-fit:cover;">
-                                <span class="greeting-text">${currentUser.name.split(' ')[0]}</span>
-                            </div>`;
+                let html = `<button class="btn btn-outline" onclick="switchView('my-events-view')" style="border-color: rgba(16, 185, 129, 0.4); color: #10b981;">🎟️ My Events</button>`;
                 if (currentUser.role === 'admin') html += `<button class="btn btn-outline" onclick="switchView('admin-view')">Dashboard</button>`;
-                html += `<button class="btn btn-outline btn-danger" onclick="logout()">Logout</button>`;
+                html += `
+                    <div class="profile-badge" onclick="openProfileModal()">
+                        <img src="${avatarSrc}" style="width:32px; height:32px; border-radius:50%; object-fit:cover;">
+                        <span class="greeting-text">${currentUser.name.split(' ')[0]}</span>
+                    </div>
+                    <button class="btn btn-outline btn-danger" onclick="logout()">Logout</button>
+                `;
                 nav.innerHTML = html;
             } else {
                 nav.innerHTML = `<button class="btn btn-outline" onclick="openAuthModal(true)">Log in</button><button class="btn btn-primary" onclick="openAuthModal(false)">Join</button>`;
@@ -365,84 +393,43 @@
         function switchView(viewId) { 
             document.getElementById('events-view').classList.add('hidden'); 
             document.getElementById('admin-view').classList.add('hidden'); 
+            document.getElementById('my-events-view').classList.add('hidden');
             const targetView = document.getElementById(viewId);
             targetView.classList.remove('hidden'); 
             void targetView.offsetWidth; 
             if(viewId === 'admin-view' && currentUser?.role === 'admin') populateAdminEventsDropdown(); 
+            if(viewId === 'my-events-view') renderMyEvents(); // تحديث القائمة الخاصة بك
         }
         
         function closeModal(id) { document.getElementById(id).classList.remove('active'); }
         function openCreateModal() { document.getElementById('createEventModal').classList.add('active'); }
         
         function logout() { 
-            localStorage.removeItem('user'); currentUser = null; 
-            updateNavbar(); switchView('events-view'); loadEvents(); 
+            localStorage.removeItem('user'); currentUser = null; myBookedEventIds = [];
+            updateNavbar(); switchView('events-view'); renderEventsUI(); 
             showToast('Logged out successfully', 'success');
         }
 
-        const bannerGradients = [
-            'linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%)',
-            'linear-gradient(135deg, rgba(79,70,229,0.1) 0%, rgba(0,0,0,0) 100%)'
-        ];
+        async function fetchMyBookedEventsIds() {
+            if (!currentUser) { myBookedEventIds = []; return; }
+            const activeEmail = (currentUser.active_email === 'secondary' && currentUser.secondary_email) ? currentUser.secondary_email : currentUser.email;
+            try {
+                const response = await fetch(API_BASE + '/my-rsvps/' + encodeURIComponent(activeEmail));
+                const result = await response.json();
+                if (result.status === 'success') { myBookedEventIds = result.data; }
+            } catch (error) { console.error("Error fetching my events:", error); }
+        }
 
         async function loadEvents() {
             try {
                 const response = await fetch(API_BASE + '/events');
                 const result = await response.json();
-                const container = document.getElementById('events-container');
-                const adminBar = document.getElementById('adminActionContainer');
-
-                if (result.status === 'success' && result.data.length > 0) {
-                    allEvents = result.data;
-                    container.innerHTML = '';
-                    if (currentUser && currentUser.role === 'admin') adminBar.style.display = 'flex';
-                    else adminBar.style.display = 'none';
-
-                    result.data.forEach((evt, index) => {
-                        const dateObj = new Date(evt.event_date);
-                        const formattedDate = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-                        const formattedTime = dateObj.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
-                        const randomGradient = bannerGradients[index % bannerGradients.length];
-                        
-                        let coverUrl = '';
-                        try {
-                            const parsedImages = JSON.parse(evt.image_urls || '[]');
-                            if (parsedImages.length > 0) coverUrl = parsedImages[0];
-                        } catch(e) {}
-                        
-                        const coverHtml = coverUrl ? `<div class="card-cover" style="background-image: url('${coverUrl}');"></div>` : '';
-
-                        let adminButtons = '';
-                        if (currentUser && currentUser.role === 'admin') {
-                            adminButtons = `
-                                <div style="position:absolute; top:20px; left:20px; z-index:20; display:flex; gap:8px;">
-                                    <button onclick="openEditModal('${evt.id}', event)" title="Edit Event" style="background:rgba(59, 130, 246, 0.9); color:white; border:none; width:34px; height:34px; border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center; box-shadow:0 4px 10px rgba(0,0,0,0.3); transition:all 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">✏️</button>
-                                    <button onclick="deleteEvent('${evt.id}', event)" title="Delete Event" style="background:rgba(239, 68, 68, 0.9); color:white; border:none; width:34px; height:34px; border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center; box-shadow:0 4px 10px rgba(0,0,0,0.3); transition:all 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">🗑️</button>
-                                </div>
-                            `;
-                        }
-
-                        container.innerHTML += `
-                            <div class="card event-card" style="background: ${randomGradient};" onclick="openEventDetails('${evt.id}')">
-                                ${adminButtons}
-                                ${coverHtml}
-                                <div class="countdown" data-date="${evt.event_date}">Calculating...</div>
-                                <div class="event-tags" style="margin-top: ${coverUrl ? '0' : '30px'};">
-                                    <span class="tag">📅 ${formattedDate}</span>
-                                    <span class="tag">⏰ ${formattedTime}</span>
-                                    <span class="tag">📍 ${evt.location}</span>
-                                </div>
-                                <h2 style="font-size:24px; margin-bottom:15px;">${evt.title}</h2>
-                                <div class="desc-fade">${evt.description}</div>
-                                <button class="btn btn-outline" style="width: 100%;">View Details / RSVP</button>
-                            </div>
-                        `;
-                    });
-                    updateCountdowns(); 
+                if (result.status === 'success') {
+                    allEvents = result.data || [];
+                    await fetchMyBookedEventsIds(); // جلب حجوزاتي الأول
+                    renderEventsUI(); // رسم الواجهة
                 } else { 
-                    if(adminBar) adminBar.style.display = 'none'; 
-                    let adminShortcut = (currentUser && currentUser.role === 'admin') ? `<button class="btn btn-primary" style="margin-top: 25px; padding: 14px 28px; font-size: 16px;" onclick="openCreateModal()">✨ Publish Your First Event</button>` : '';
-                    container.innerHTML = `<div class="empty-state-box"><div style="font-size: 48px; margin-bottom: 20px; opacity: 0.8;">🌌</div><h2 style="font-size: 28px; font-weight: 700; margin-bottom: 10px;">No Active Experiences</h2><p style="color: var(--text-muted); font-size: 16px; max-width: 400px;">The canvas is blank. Check back later for upcoming exclusive events.</p>${adminShortcut}</div>`; 
+                    renderEmptyState();
                 }
             } catch (error) { 
                 if(document.getElementById('adminActionContainer')) document.getElementById('adminActionContainer').style.display = 'none';
@@ -450,6 +437,94 @@
             }
         }
 
+        // دالة مساعدة عشان نرسم أي إيفنت
+        function generateEventCardHTML(evt, index) {
+            const dateObj = new Date(evt.event_date);
+            const formattedDate = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+            const formattedTime = dateObj.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+            const randomGradient = bannerGradients[index % bannerGradients.length];
+            
+            let coverUrl = '';
+            try {
+                const parsedImages = JSON.parse(evt.image_urls || '[]');
+                if (parsedImages.length > 0) coverUrl = parsedImages[0];
+            } catch(e) {}
+            
+            const coverHtml = coverUrl ? `<div class="card-cover" style="background-image: url('${coverUrl}');"></div>` : '';
+            
+            let adminButtons = '';
+            if (currentUser && currentUser.role === 'admin') {
+                adminButtons = `
+                    <div style="position:absolute; top:20px; right: 120px; z-index:20; display:flex; gap:8px;">
+                        <button onclick="openEditModal('${evt.id}', event)" title="Edit Event" style="background:rgba(59, 130, 246, 0.9); color:white; border:none; width:34px; height:34px; border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center; box-shadow:0 4px 10px rgba(0,0,0,0.3); transition:all 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">✏️</button>
+                        <button onclick="deleteEvent('${evt.id}', event)" title="Delete Event" style="background:rgba(239, 68, 68, 0.9); color:white; border:none; width:34px; height:34px; border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center; box-shadow:0 4px 10px rgba(0,0,0,0.3); transition:all 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">🗑️</button>
+                    </div>
+                `;
+            }
+
+            // لو اليوزر مسجل في الإيفنت، اظهر الـ Badge
+            const isBooked = myBookedEventIds.includes(evt.id);
+            const registeredBadge = isBooked ? `<div class="registered-badge">✅ Registered</div>` : '';
+
+            return `
+                <div class="card event-card" style="background: ${randomGradient};" onclick="openEventDetails('${evt.id}')">
+                    ${registeredBadge}
+                    ${adminButtons}
+                    ${coverHtml}
+                    <div class="countdown" data-date="${evt.event_date}">Calculating...</div>
+                    <div class="event-tags" style="margin-top: ${coverUrl ? '0' : '30px'};">
+                        <span class="tag">📅 ${formattedDate}</span>
+                        <span class="tag">⏰ ${formattedTime}</span>
+                        <span class="tag">📍 ${evt.location}</span>
+                    </div>
+                    <h2 style="font-size:24px; margin-bottom:15px;">${evt.title}</h2>
+                    <div class="desc-fade">${evt.description}</div>
+                    <button class="btn btn-outline" style="width: 100%;">${isBooked ? 'View Details' : 'View Details / RSVP'}</button>
+                </div>
+            `;
+        }
+
+        function renderEventsUI() {
+            const container = document.getElementById('events-container');
+            const adminBar = document.getElementById('adminActionContainer');
+            if (allEvents.length > 0) {
+                container.innerHTML = '';
+                if (currentUser && currentUser.role === 'admin') adminBar.style.display = 'flex';
+                else adminBar.style.display = 'none';
+                
+                allEvents.forEach((evt, index) => {
+                    container.innerHTML += generateEventCardHTML(evt, index);
+                });
+                updateCountdowns();
+            } else {
+                renderEmptyState();
+            }
+        }
+
+        function renderEmptyState() {
+            const container = document.getElementById('events-container');
+            const adminBar = document.getElementById('adminActionContainer');
+            if(adminBar) adminBar.style.display = 'none'; 
+            let adminShortcut = (currentUser && currentUser.role === 'admin') ? `<button class="btn btn-primary" style="margin-top: 25px; padding: 14px 28px; font-size: 16px;" onclick="openCreateModal()">✨ Publish Your First Event</button>` : '';
+            container.innerHTML = `<div class="empty-state-box"><div style="font-size: 48px; margin-bottom: 20px; opacity: 0.8;">🌌</div><h2 style="font-size: 28px; font-weight: 700; margin-bottom: 10px;">No Active Experiences</h2><p style="color: var(--text-muted); font-size: 16px; max-width: 400px;">The canvas is blank. Check back later for upcoming exclusive events.</p>${adminShortcut}</div>`; 
+        }
+
+        function renderMyEvents() {
+            const container = document.getElementById('my-events-container');
+            const myEvents = allEvents.filter(evt => myBookedEventIds.includes(evt.id));
+            
+            if (myEvents.length > 0) {
+                container.innerHTML = '';
+                myEvents.forEach((evt, index) => {
+                    container.innerHTML += generateEventCardHTML(evt, index);
+                });
+                updateCountdowns();
+            } else {
+                container.innerHTML = `<div class="empty-state-box"><div style="font-size: 48px; margin-bottom: 20px; opacity: 0.8;">🎟️</div><h2 style="font-size: 28px; font-weight: 700; margin-bottom: 10px;">No Bookings Yet</h2><p style="color: var(--text-muted); font-size: 16px; max-width: 400px;">You haven't reserved spots for any experiences. Explore the homepage to find your next event.</p><button class="btn btn-primary" style="margin-top:20px;" onclick="switchView('events-view')">Explore Events</button></div>`;
+            }
+        }
+
+        // --- باقي الدوال (Delete, Edit, Slider) زي ما هي بالظبط ---
         async function deleteEvent(eventId, e) {
             e.stopPropagation();
             if(!confirm("Are you sure you want to delete this event? This will also remove all attendee RSVPs!")) return;
@@ -464,17 +539,14 @@
             e.stopPropagation();
             const event = allEvents.find(e => e.id === eventId);
             if(!event) return;
-            
             document.getElementById('editEventId').value = event.id;
             document.getElementById('editEventTitle').value = event.title;
             document.getElementById('editEventLocation').value = event.location;
             document.getElementById('editEventDesc').value = event.description;
-            
             const dateObj = new Date(event.event_date);
             const offset = dateObj.getTimezoneOffset() * 60000;
             const localISOTime = (new Date(dateObj - offset)).toISOString().slice(0, 16);
             document.getElementById('editEventDate').value = localISOTime;
-            
             document.getElementById('editEventModal').classList.add('active');
         }
 
@@ -487,22 +559,16 @@
             const galleryInput = document.getElementById('editEventImages');
             
             let totalSize = 0;
-            if (coverInput && coverInput.files.length > 0) {
-                totalSize += coverInput.files[0].size;
-            }
+            if (coverInput && coverInput.files.length > 0) totalSize += coverInput.files[0].size;
             if (galleryInput && galleryInput.files.length > 0) {
-                for (let i = 0; i < galleryInput.files.length; i++) {
-                    totalSize += galleryInput.files[i].size;
-                }
+                for (let i = 0; i < galleryInput.files.length; i++) totalSize += galleryInput.files[i].size;
             }
 
             const maxSizeBytes = 4 * 1024 * 1024;
             if (totalSize > maxSizeBytes) {
                 showToast("Total images size exceeds the 4MB limit. Please choose smaller images.", "error");
-                btn.innerText = "Save Changes"; btn.disabled = false;
-                return;
+                btn.innerText = "Save Changes"; btn.disabled = false; return;
             }
-
             if (galleryInput.files.length > 5) { showToast("Maximum 5 gallery images allowed!", "error"); btn.innerText = "Save Changes"; btn.disabled = false; return; }
             
             const eventId = document.getElementById('editEventId').value;
@@ -518,10 +584,7 @@
             try {
                 const response = await fetch(API_BASE + '/admin/events/' + eventId, { method: 'PUT', body: formData });
                 if (response.ok) { 
-                    document.getElementById('editEventForm').reset(); 
-                    loadEvents(); 
-                    closeModal('editEventModal'); 
-                    showToast("Experience Updated Successfully!", "success"); 
+                    document.getElementById('editEventForm').reset(); loadEvents(); closeModal('editEventModal'); showToast("Experience Updated Successfully!", "success"); 
                 } else { showToast("Failed to update event.", "error"); }
             } catch (error) { showToast("Error connecting to server.", "error"); } 
             finally { btn.innerText = "Save Changes"; btn.disabled = false; }
@@ -564,6 +627,22 @@
             if(currentSliderImages.length > 0) { sliderWrapper.classList.remove('hidden'); currentSlideIndex = 0; updateSliderView(); } 
             else { sliderWrapper.classList.add('hidden'); }
 
+            // تحديث زرار الحجز بناءً على التسجيل المسبق
+            const rsvpBtn = document.getElementById('mainRsvpBtn');
+            if (myBookedEventIds.includes(eventId)) {
+                rsvpBtn.innerText = '🎟️ You are already registered';
+                rsvpBtn.style.background = 'rgba(16, 185, 129, 0.2)';
+                rsvpBtn.style.color = '#10b981';
+                rsvpBtn.style.cursor = 'not-allowed';
+                rsvpBtn.disabled = true;
+            } else {
+                rsvpBtn.innerText = 'Reserve Spot';
+                rsvpBtn.style.background = 'var(--primary)';
+                rsvpBtn.style.color = 'var(--primary-invert)';
+                rsvpBtn.style.cursor = 'pointer';
+                rsvpBtn.disabled = false;
+            }
+
             document.getElementById('eventDetailsModal').classList.add('active');
         }
 
@@ -598,7 +677,13 @@
             try {
                 const response = await fetch(API_BASE + '/rsvp', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: document.getElementById('rsvpName').value, email: document.getElementById('rsvpEmail').value, phone: document.getElementById('rsvpPhone').value, event_id: selectedEventIdForRSVP }) });
                 const result = await response.json();
-                if (response.ok) { showToast("Spot Booked Successfully! 🎉", "success"); closeModal('rsvpModal'); } else { showToast(result.message, "error"); }
+                if (response.ok) { 
+                    showToast("Spot Booked Successfully! 🎉", "success"); 
+                    closeModal('rsvpModal');
+                    // نضيف الإيفنت لليستة المحجوزات محلياً ونعمل ريفريش للصفحة عشان الـ Badge يظهر
+                    myBookedEventIds.push(selectedEventIdForRSVP);
+                    renderEventsUI();
+                } else { showToast(result.message, "error"); }
             } catch (error) { showToast("Connection error. Please try again.", "error"); } finally { btn.innerText = 'Confirm Attendance'; btn.disabled = false; }
         }
 
@@ -611,20 +696,15 @@
             const galleryInput = document.getElementById('newEventImages');
 
             let totalSize = 0;
-            if (coverInput && coverInput.files.length > 0) {
-                totalSize += coverInput.files[0].size;
-            }
+            if (coverInput && coverInput.files.length > 0) totalSize += coverInput.files[0].size;
             if (galleryInput && galleryInput.files.length > 0) {
-                for (let i = 0; i < galleryInput.files.length; i++) {
-                    totalSize += galleryInput.files[i].size;
-                }
+                for (let i = 0; i < galleryInput.files.length; i++) totalSize += galleryInput.files[i].size;
             }
 
             const maxSizeBytes = 4 * 1024 * 1024;
             if (totalSize > maxSizeBytes) {
                 showToast("Total images size exceeds the 4MB limit. Please choose smaller images.", "error");
-                btn.innerText = "Create Experience"; btn.disabled = false;
-                return;
+                btn.innerText = "Create Experience"; btn.disabled = false; return;
             }
 
             if (galleryInput.files.length > 5) { showToast("Maximum 5 gallery images allowed!", "error"); btn.innerText = "Create Experience"; btn.disabled = false; return; }
@@ -665,8 +745,12 @@
                 const response = await fetch(API_BASE + endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
                 const result = await response.json();
                 if (response.ok) {
-                    if (isLoginMode) { currentUser = result.data; localStorage.setItem('user', JSON.stringify(currentUser)); updateNavbar(); closeModal('authModal'); switchView('events-view'); loadEvents(); showToast(`Welcome back, ${currentUser.name.split(' ')[0]}!`, "success"); } 
-                    else { showToast("Account created successfully! Please log in.", "success"); openAuthModal(true); }
+                    if (isLoginMode) { 
+                        currentUser = result.data; localStorage.setItem('user', JSON.stringify(currentUser)); 
+                        updateNavbar(); closeModal('authModal'); switchView('events-view'); 
+                        loadEvents(); // Load events will also fetch RSVPs
+                        showToast(`Welcome back, ${currentUser.name.split(' ')[0]}!`, "success"); 
+                    } else { showToast("Account created successfully! Please log in.", "success"); openAuthModal(true); }
                 } else { showToast(result.message, "error"); }
             } catch (error) { showToast("Authentication failed. Please try again.", "error"); }
         }
@@ -730,14 +814,8 @@
 
                     closeModal('profileModal'); 
                     showToast("Profile updated successfully!", "success"); 
-                } else { 
-                    showToast(result.message || "Failed to update.", "error"); 
-                }
-            } catch(error) { 
-                showToast("Failed to connect to server.", "error"); 
-            } finally {
-                btn.innerText = "Save"; btn.disabled = false;
-            }
+                } else { showToast(result.message || "Failed to update.", "error"); }
+            } catch(error) { showToast("Failed to connect to server.", "error"); } finally { btn.innerText = "Save"; btn.disabled = false; }
         }
         
         function populateAdminEventsDropdown() {
