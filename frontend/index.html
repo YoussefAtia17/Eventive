@@ -317,9 +317,14 @@
         <div class="modal-content">
             <div class="modal-header"><h2>Identity</h2><button class="close-btn" onclick="closeModal('profileModal')">✕</button></div>
             <form id="profileForm" onsubmit="submitProfile(event)">
-                <div style="display: flex; gap: 15px; margin-bottom: 20px;">
-                    <img id="profileAvatarImg" src="" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover;">
-                    <input type="file" id="profileAvatarFile" class="form-input" accept="image/*" onchange="previewAvatar(event)">
+                <div style="display: flex; gap: 15px; margin-bottom: 20px; align-items: center;">
+                    <div style="position: relative; cursor: pointer; width: 60px; height: 60px; flex-shrink: 0;" onclick="viewFullAvatar()" title="View Profile Picture">
+                        <img id="profileAvatarImg" src="" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 1px solid var(--border);">
+                        <div style="position: absolute; inset: 0; background: rgba(0,0,0,0.6); border-radius: 50%; display: flex; align-items: center; justify-content: center; opacity: 0; transition: var(--transition);" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0">
+                            <span style="font-size: 20px;">👁️</span>
+                        </div>
+                    </div>
+                    <input type="file" id="profileAvatarFile" class="form-input" accept="image/*" onchange="previewAvatar(event)" style="margin-bottom: 0;">
                 </div>
                 <input type="email" id="profilePrimaryEmail" class="form-input" disabled style="opacity: 0.6;">
                 <input type="email" id="profileSecondaryEmail" class="form-input" placeholder="Secondary Email">
@@ -345,6 +350,12 @@
                 <button class="btn btn-outline" style="flex: 1;" onclick="closeModal('deleteConfirmModal')">Cancel</button>
                 <button class="btn btn-primary" style="flex: 1; background: #ef4444; border-color: #ef4444;" onclick="executeDeleteEvent()">Yes, Delete</button>
             </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="avatarViewerModal" style="z-index: 1050; cursor: zoom-out;" onclick="closeModal('avatarViewerModal')">
+        <div style="max-width: 90vw; max-height: 90vh; display: flex; justify-content: center; align-items: center;">
+            <img id="fullSizeAvatar" src="" style="max-width: 100%; max-height: 90vh; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.5);">
         </div>
     </div>
 
@@ -812,6 +823,14 @@
                 const reader = new FileReader(); 
                 reader.onload = function(e) { document.getElementById('profileAvatarImg').src = e.target.result; }; 
                 reader.readAsDataURL(file); 
+            }
+        }
+
+        function viewFullAvatar() {
+            const avatarSrc = document.getElementById('profileAvatarImg').src;
+            if (avatarSrc) {
+                document.getElementById('fullSizeAvatar').src = avatarSrc;
+                document.getElementById('avatarViewerModal').classList.add('active');
             }
         }
 
