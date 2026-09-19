@@ -414,7 +414,8 @@
             if (!currentUser) { myBookedEventIds = []; return; }
             const activeEmail = (currentUser.active_email === 'secondary' && currentUser.secondary_email) ? currentUser.secondary_email : currentUser.email;
             try {
-                const response = await fetch(API_BASE + '/my-rsvps/' + encodeURIComponent(activeEmail));
+                // التعديل هنا: غيرنا شكل اللينك عشان يبعت الإيميل بشكل سليم للسيرفر
+                const response = await fetch(API_BASE + '/my-rsvps?email=' + encodeURIComponent(activeEmail));
                 const result = await response.json();
                 if (result.status === 'success') { myBookedEventIds = result.data; }
             } catch (error) { console.error("Error fetching my events:", error); }
