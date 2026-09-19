@@ -327,14 +327,10 @@
         function showToast(message, type = 'success') {
             let finalMessage = message;
             
-            // فلترة رسايل الإيرور الكبيرة والمعقدة
             if (type === 'error' && typeof message === 'string') {
-                // لو الإيرور يخص إن الإيفنت اتمسح أو مش موجود (Foreign Key / Not Found)
                 if (message.includes('foreign key') || message.toLowerCase().includes('not present in table')) {
                     finalMessage = "This experience is no longer available or has been deleted.";
-                } 
-                // لو الإيرور جاي على شكل كود JSON طويل أو رسالة مش مفهومة لليوزر
-                else if (message.includes('{') || message.length > 80) {
+                } else if (message.includes('{') || message.length > 80) {
                     finalMessage = "Something went wrong. Please refresh the page and try again.";
                 }
             }
@@ -487,6 +483,28 @@
             const btn = document.querySelector('#editEventForm button');
             btn.innerText = "Saving..."; btn.disabled = true;
 
+            const coverInput = document.getElementById('editEventCover');
+            const galleryInput = document.getElementById('editEventImages');
+            
+            let totalSize = 0;
+            if (coverInput && coverInput.files.length > 0) {
+                totalSize += coverInput.files[0].size;
+            }
+            if (galleryInput && galleryInput.files.length > 0) {
+                for (let i = 0; i < galleryInput.files.length; i++) {
+                    totalSize += galleryInput.files[i].size;
+                }
+            }
+
+            const maxSizeBytes = 4 * 1024 * 1024;
+            if (totalSize > maxSizeBytes) {
+                showToast("Total images size exceeds the 4MB limit. Please choose smaller images.", "error");
+                btn.innerText = "Save Changes"; btn.disabled = false;
+                return;
+            }
+
+            if (galleryInput.files.length > 5) { showToast("Maximum 5 gallery images allowed!", "error"); btn.innerText = "Save Changes"; btn.disabled = false; return; }
+            
             const eventId = document.getElementById('editEventId').value;
             const formData = new FormData();
             formData.append('title', document.getElementById('editEventTitle').value);
@@ -494,11 +512,6 @@
             formData.append('location', document.getElementById('editEventLocation').value);
             formData.append('description', document.getElementById('editEventDesc').value);
 
-            const coverInput = document.getElementById('editEventCover');
-            const galleryInput = document.getElementById('editEventImages');
-            
-            if (galleryInput.files.length > 5) { showToast("Maximum 5 gallery images allowed!", "error"); btn.innerText = "Save Changes"; btn.disabled = false; return; }
-            
             if(coverInput.files.length > 0) { formData.append('cover', coverInput.files[0]); }
             for (let i = 0; i < galleryInput.files.length; i++) { formData.append('images', galleryInput.files[i]); }
 
@@ -594,17 +607,34 @@
             const btn = document.querySelector('#createEventForm button');
             btn.innerText = "Publishing..."; btn.disabled = true;
 
+            const coverInput = document.getElementById('newEventCover');
+            const galleryInput = document.getElementById('newEventImages');
+
+            let totalSize = 0;
+            if (coverInput && coverInput.files.length > 0) {
+                totalSize += coverInput.files[0].size;
+            }
+            if (galleryInput && galleryInput.files.length > 0) {
+                for (let i = 0; i < galleryInput.files.length; i++) {
+                    totalSize += galleryInput.files[i].size;
+                }
+            }
+
+            const maxSizeBytes = 4 * 1024 * 1024;
+            if (totalSize > maxSizeBytes) {
+                showToast("Total images size exceeds the 4MB limit. Please choose smaller images.", "error");
+                btn.innerText = "Create Experience"; btn.disabled = false;
+                return;
+            }
+
+            if (galleryInput.files.length > 5) { showToast("Maximum 5 gallery images allowed!", "error"); btn.innerText = "Create Experience"; btn.disabled = false; return; }
+            
             const formData = new FormData();
             formData.append('title', document.getElementById('newEventTitle').value);
             formData.append('event_date', document.getElementById('newEventDate').value);
             formData.append('location', document.getElementById('newEventLocation').value);
             formData.append('description', document.getElementById('newEventDesc').value);
             formData.append('created_by', currentUser.id);
-
-            const coverInput = document.getElementById('newEventCover');
-            const galleryInput = document.getElementById('newEventImages');
-            
-            if (galleryInput.files.length > 5) { showToast("Maximum 5 gallery images allowed!", "error"); btn.innerText = "Create Experience"; btn.disabled = false; return; }
             
             if(coverInput.files.length > 0) { formData.append('cover', coverInput.files[0]); }
             for (let i = 0; i < galleryInput.files.length; i++) { formData.append('images', galleryInput.files[i]); }
