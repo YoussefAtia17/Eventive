@@ -194,12 +194,27 @@ def rsvp():
 @app.route('/api/admin/rsvps/<event_id>', methods=['GET'])
 def get_event_rsvps(event_id):
     try:
-        # تم التعديل هنا لـ attendees
-        response = supabase.table("attendees").select("*").eq("event_id", event_id).execute()
-        return jsonify({"status": "success", "data": response.data}), 200
+        # 1. نجيب كل الناس اللي سجلت في الإيفنت ده
+        rsvps_res = supabase.table("attendees").select("*").eq("event_id", event_id).execute()
+        rsvps = rsvps_res.data
+        
+        # 2. نلف عليهم واحد واحد عشان نجيب صورهم وبياناتهم الإضافية من جدول users
+        for person in rsvps:
+            email = person.get('email')
+            if email:
+                user_res = supabase.table("users").select("*").eq("email", email).execute()
+                if user_res.data and len(user_res.data) > 0:
+                    user_data = user_res.data[0]
+                    # نضيف البيانات دي للرد اللي رايح للفرونت إند
+                    person['avatar_url'] = user_data.get('avatar_url')
+                    person['secondary_email'] = user_data.get('secondary_email')
+                    person['secondary_phone'] = user_data.get('secondary_phone')
+        
+        return jsonify({"status": "success", "data": rsvps}), 200
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
+    
 @app.route('/api/signup', methods=['POST'])
 def signup():
     try:
