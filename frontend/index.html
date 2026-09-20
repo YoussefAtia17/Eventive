@@ -195,7 +195,7 @@
                 
                 <div style="overflow-x: auto;">
                     <table>
-                        <thead><tr><th>Name</th><th>Email</th><th>Phone</th></tr></thead>
+                        <thead><tr><th>User</th><th>Email</th><th>Phone</th><th>Actions</th></tr></thead>
                         <tbody id="attendeesTable"></tbody>
                     </table>
                 </div>
@@ -353,9 +353,32 @@
         </div>
     </div>
 
+    <!-- Full Size Avatar Viewer Modal -->
     <div class="modal-overlay" id="avatarViewerModal" style="z-index: 1050; cursor: zoom-out;" onclick="closeModal('avatarViewerModal')">
         <div style="max-width: 90vw; max-height: 90vh; display: flex; justify-content: center; align-items: center;">
             <img id="fullSizeAvatar" src="" style="max-width: 100%; max-height: 90vh; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.5);">
+        </div>
+    </div>
+
+    <!-- Attendee Full Profile Modal -->
+    <div class="modal-overlay" id="attendeeProfileModal">
+        <div class="modal-content" style="max-width: 450px; text-align: center;">
+            <div class="modal-header" style="margin-bottom: 10px;">
+                <h2 style="font-size: 20px;">Attendee Profile</h2>
+                <button class="close-btn" onclick="closeModal('attendeeProfileModal')">✕</button>
+            </div>
+            
+            <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 25px;">
+                <img id="viewAttendeeAvatar" src="" style="width: 90px; height: 90px; border-radius: 50%; object-fit: cover; border: 2px solid var(--border); margin-bottom: 15px; padding: 3px;">
+                <h3 id="viewAttendeeName" style="font-size: 22px; margin-bottom: 5px;"></h3>
+                <p id="viewAttendeeEmail" style="color: var(--text-muted); font-size: 14px;"></p>
+            </div>
+            
+            <div style="background: rgba(255,255,255,0.02); padding: 20px; border-radius: 12px; border: 1px dashed var(--border); text-align: left;">
+                <p style="margin-bottom: 12px; font-size: 14px;"><strong style="color: var(--primary); display: inline-block; width: 130px;">Primary Phone:</strong> <span id="viewAttendeePhone" style="color: var(--text-muted);"></span></p>
+                <p style="margin-bottom: 12px; font-size: 14px;"><strong style="color: var(--primary); display: inline-block; width: 130px;">Secondary Email:</strong> <span id="viewAttendeeSecEmail" style="color: var(--text-muted);"></span></p>
+                <p style="margin-bottom: 0; font-size: 14px;"><strong style="color: var(--primary); display: inline-block; width: 130px;">Secondary Phone:</strong> <span id="viewAttendeeSecPhone" style="color: var(--text-muted);"></span></p>
+            </div>
         </div>
     </div>
 
@@ -367,7 +390,8 @@
         let currentSlideIndex = 0;
         let allEvents = [];
         let myBookedEventIds = [];
-        let eventToDeleteId = null; // متغير لحفظ الـ ID بتاع الإيفنت اللي هيتمسح
+        let eventToDeleteId = null; 
+        let currentAttendeesData = []; // Admin view
         const API_BASE = 'https://eventive-steel.vercel.app/api';
         let toastTimeout;
 
@@ -441,7 +465,6 @@
             if (!currentUser) { myBookedEventIds = []; return; }
             const activeEmail = (currentUser.active_email === 'secondary' && currentUser.secondary_email) ? currentUser.secondary_email : currentUser.email;
             try {
-                // استخدام Query Parameter عشان نتفادى الإيرور بتاع الـ 404
                 const response = await fetch(API_BASE + '/my-rsvps?email=' + encodeURIComponent(activeEmail));
                 const result = await response.json();
                 if (result.status === 'success') { myBookedEventIds = result.data; }
@@ -550,7 +573,6 @@
             }
         }
 
-        // --- دوال الحذف الجديدة ---
         function deleteEvent(eventId, e) {
             e.stopPropagation();
             eventToDeleteId = eventId;
@@ -585,7 +607,6 @@
                 eventToDeleteId = null;
             }
         }
-        // --------------------------
 
         function openEditModal(eventId, e) {
             e.stopPropagation();
@@ -825,7 +846,7 @@
                 reader.readAsDataURL(file); 
             }
         }
-
+        
         function viewFullAvatar() {
             const avatarSrc = document.getElementById('profileAvatarImg').src;
             if (avatarSrc) {
@@ -891,15 +912,58 @@
             const exportBtn = document.getElementById('exportBtn');
             tbody.innerHTML = ''; countBadge.innerText = '0'; exportBtn.style.display = 'none'; 
             if(!eventId) return;
+            
             try {
                 const response = await fetch(API_BASE + `/admin/rsvps/${eventId}`);
                 const result = await response.json();
+                
                 if(result.status === 'success') {
+                    currentAttendeesData = result.data; 
                     countBadge.innerText = result.data.length; 
-                    if(result.data.length === 0) { tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color: var(--text-muted);">No RSVPs yet.</td></tr>'; } 
-                    else { tbody.innerHTML = result.data.map(person => `<tr><td>${person.full_name}</td><td style="color: var(--text-muted);">${person.email}</td><td style="color: var(--text-muted);">${person.phone_number}</td></tr>`).join(''); exportBtn.style.display = 'flex'; }
+                    
+                    if(result.data.length === 0) { 
+                        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color: var(--text-muted); padding: 30px;">No RSVPs yet.</td></tr>'; 
+                    } else { 
+                        tbody.innerHTML = result.data.map((person, index) => {
+                            const displayName = person.full_name || person.name || 'User';
+                            const avatar = person.avatar_url || `https://ui-avatars.com/api/?name=${displayName}&background=111&color=fff`;
+                            
+                            return `<tr>
+                                <td style="display:flex; align-items:center; gap:10px;">
+                                    <img src="${avatar}" style="width:32px; height:32px; border-radius:50%; object-fit:cover; border: 1px solid var(--border);">
+                                    <span style="font-weight: 500;">${displayName}</span>
+                                </td>
+                                <td style="color: var(--text-muted);">${person.email}</td>
+                                <td style="color: var(--text-muted);">${person.phone_number || person.phone || '-'}</td>
+                                <td>
+                                    <button class="btn btn-outline" style="padding: 6px 12px; font-size: 11px;" onclick="viewAttendeeProfile(${index})">View Profile</button>
+                                </td>
+                            </tr>`;
+                        }).join(''); 
+                        exportBtn.style.display = 'flex'; 
+                    }
                 }
-            } catch (error) { tbody.innerHTML = '<tr><td colspan="3" style="color:red;">Error loading data</td></tr>'; }
+            } catch (error) { 
+                tbody.innerHTML = '<tr><td colspan="4" style="color:#ef4444; text-align:center;">Error loading data</td></tr>'; 
+            }
+        }
+
+        function viewAttendeeProfile(index) {
+            const person = currentAttendeesData[index];
+            if (!person) return;
+            
+            const displayName = person.full_name || person.name || 'User';
+            const avatar = person.avatar_url || `https://ui-avatars.com/api/?name=${displayName}&background=111&color=fff`;
+            
+            document.getElementById('viewAttendeeAvatar').src = avatar;
+            document.getElementById('viewAttendeeName').innerText = displayName;
+            document.getElementById('viewAttendeeEmail').innerText = person.email || 'N/A';
+            
+            document.getElementById('viewAttendeePhone').innerText = person.phone_number || person.phone || 'Not provided';
+            document.getElementById('viewAttendeeSecEmail').innerText = person.secondary_email || 'Not provided';
+            document.getElementById('viewAttendeeSecPhone').innerText = person.secondary_phone || 'Not provided';
+            
+            document.getElementById('attendeeProfileModal').classList.add('active');
         }
 
         function exportToCSV() {
@@ -907,7 +971,7 @@
             const eventName = eventSelect.options[eventSelect.selectedIndex].text;
             const rows = document.getElementById('attendeesTable').querySelectorAll('tr');
             let csvContent = "data:text/csv;charset=utf-8,Name,Email,Phone\n"; 
-            rows.forEach(row => { const cols = row.querySelectorAll('td'); if (cols.length === 3) { csvContent += Array.from(cols).map(col => `"${col.innerText}"`).join(",") + "\n"; } });
+            rows.forEach(row => { const cols = row.querySelectorAll('td'); if (cols.length >= 3) { csvContent += `"${cols[0].innerText}","${cols[1].innerText}","${cols[2].innerText}"\n`; } });
             const link = document.createElement("a"); link.setAttribute("href", encodeURI(csvContent)); link.setAttribute("download", `Attendees_${eventName.replace(/\s+/g, '_')}.csv`);
             document.body.appendChild(link); link.click(); document.body.removeChild(link); showToast("Exported successfully!", "success");
         }
