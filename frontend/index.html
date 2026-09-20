@@ -352,6 +352,21 @@
             </div>
         </div>
     </div>
+    
+    <!-- Cancel RSVP Confirmation Modal -->
+    <div class="modal-overlay" id="cancelRsvpConfirmModal" style="z-index: 1100;">
+        <div class="modal-content" style="max-width: 400px; text-align: center;">
+            <div style="font-size: 48px; margin-bottom: 15px;">🎫</div>
+            <h2 style="font-size: 22px; margin-bottom: 10px;">Cancel Reservation?</h2>
+            <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 25px;">
+                Are you sure you want to cancel your spot for this experience? This action cannot be undone.
+            </p>
+            <div style="display: flex; gap: 10px; justify-content: center;">
+                <button class="btn btn-outline" style="flex: 1;" onclick="closeModal('cancelRsvpConfirmModal')">Keep Spot</button>
+                <button class="btn btn-primary" style="flex: 1; background: #ef4444; border-color: #ef4444;" onclick="executeCancelRSVP()">Yes, Cancel</button>
+            </div>
+        </div>
+    </div>
 
     <!-- Full Size Avatar Viewer Modal -->
     <div class="modal-overlay" id="avatarViewerModal" style="z-index: 1050; cursor: zoom-out;" onclick="closeModal('avatarViewerModal')">
@@ -397,6 +412,7 @@
         let myBookedEventIds = [];
         let eventToDeleteId = null; 
         let currentAttendeesData = []; 
+        let rsvpToCancelEventId = null;
         const API_BASE = 'https://eventive-steel.vercel.app/api';
         let toastTimeout;
 
@@ -707,7 +723,6 @@
 
             const rsvpBtn = document.getElementById('mainRsvpBtn');
             if (myBookedEventIds.includes(eventId)) {
-                // ده الكود اللي بيغير الزرار لإلغاء الحجز
                 rsvpBtn.innerText = 'Cancel Reservation ❌';
                 rsvpBtn.style.background = 'transparent';
                 rsvpBtn.style.border = '1px solid #ef4444';
@@ -768,16 +783,11 @@
             } catch (error) { showToast("Connection error. Please try again.", "error"); } finally { btn.innerText = 'Confirm Attendance'; btn.disabled = false; }
         }
 
-        // متغير عشان نحفظ الـ ID بتاع الإيفنت اللي اليوزر عايز يلغيه
-        let rsvpToCancelEventId = null;
-
-        // الدالة دي بتفتح المودال الشيك بدل رسالة المتصفح
         function cancelRSVP(eventId) {
             rsvpToCancelEventId = eventId;
             document.getElementById('cancelRsvpConfirmModal').classList.add('active');
         }
 
-        // الدالة دي اللي بتنفذ الإلغاء الفعلي لما اليوزر يدوس تأكيد
         async function executeCancelRSVP() {
             if (!rsvpToCancelEventId) return;
             
@@ -795,10 +805,9 @@
                 
                 if (response.ok) {
                     showToast("Reservation canceled successfully", "success");
-                    closeModal('cancelRsvpConfirmModal'); // نقفل مودال التأكيد
-                    closeModal('eventDetailsModal'); // نقفل مودال الإيفنت نفسه
+                    closeModal('cancelRsvpConfirmModal'); 
+                    closeModal('eventDetailsModal'); 
                     
-                    // تحديث الواجهة
                     myBookedEventIds = myBookedEventIds.filter(id => id !== rsvpToCancelEventId);
                     renderEventsUI();
                     
@@ -1043,22 +1052,6 @@
             const link = document.createElement("a"); link.setAttribute("href", encodeURI(csvContent)); link.setAttribute("download", `Attendees_${eventName.replace(/\s+/g, '_')}.csv`);
             document.body.appendChild(link); link.click(); document.body.removeChild(link); showToast("Exported successfully!", "success");
         }
-
-        <!-- Cancel RSVP Confirmation Modal -->
-    <div class="modal-overlay" id="cancelRsvpConfirmModal" style="z-index: 1100;">
-        <div class="modal-content" style="max-width: 400px; text-align: center;">
-            <div style="font-size: 48px; margin-bottom: 15px;">🎫</div>
-            <h2 style="font-size: 22px; margin-bottom: 10px;">Cancel Reservation?</h2>
-            <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 25px;">
-                Are you sure you want to cancel your spot for this experience? This action cannot be undone.
-            </p>
-            <div style="display: flex; gap: 10px; justify-content: center;">
-                <button class="btn btn-outline" style="flex: 1;" onclick="closeModal('cancelRsvpConfirmModal')">Keep Spot</button>
-                <button class="btn btn-primary" style="flex: 1; background: #ef4444; border-color: #ef4444;" onclick="executeCancelRSVP()">Yes, Cancel</button>
-            </div>
-        </div>
-    </div>
-
     </script>
 </body>
 </html>
