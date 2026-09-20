@@ -852,13 +852,23 @@
             }
         }
         
-        function viewAttendeeFullAvatar() {
-            const avatarSrc = document.getElementById('viewAttendeeAvatar').src;
-            if (avatarSrc) {
-                document.getElementById('fullSizeAvatar').src = avatarSrc;
-                document.getElementById('avatarViewerModal').classList.add('active');
-            }
-        }
+        // 1. الدالة المسؤولة عن تكبير صورتك إنت في بروفايلك
+function viewFullAvatar() {
+    const avatarSrc = document.getElementById('profileAvatarImg').src;
+    if (avatarSrc && avatarSrc !== window.location.href) {
+        document.getElementById('fullSizeAvatar').src = avatarSrc;
+        document.getElementById('avatarViewerModal').classList.add('active');
+    }
+}
+
+// 2. الدالة المسؤولة عن تكبير صور الحضور في الـ Dashboard للأدمن
+function viewAttendeeFullAvatar() {
+    const avatarSrc = document.getElementById('viewAttendeeAvatar').src;
+    if (avatarSrc && avatarSrc !== window.location.href) {
+        document.getElementById('fullSizeAvatar').src = avatarSrc;
+        document.getElementById('avatarViewerModal').classList.add('active');
+    }
+}
 
         async function submitProfile(e) {
             e.preventDefault(); 
