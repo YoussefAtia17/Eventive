@@ -307,7 +307,23 @@ def get_my_rsvps():
         return jsonify({"status": "success", "data": event_ids}), 200
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
+
+
+@app.route('/api/rsvp', methods=['DELETE'])
+def cancel_rsvp():
+    data = request.json
+    email = data.get('email')
+    event_id = data.get('event_id')
     
+    if not email or not event_id:
+        return jsonify({"status": "error", "message": "Missing data"}), 400
+        
+    try:
+        # مسح بيانات اليوزر من الإيفنت ده بس
+        supabase.table("attendees").delete().match({"email": email, "event_id": event_id}).execute()
+        return jsonify({"status": "success", "message": "Reservation canceled successfully"}), 200
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
     
 if __name__ == '__main__':
     app.run(debug=True)
