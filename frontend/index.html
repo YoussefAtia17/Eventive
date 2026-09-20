@@ -278,7 +278,7 @@
 
             <div class="event-tags" id="detailsTags"></div>
             <p id="detailsDesc" style="color: var(--text-muted); font-size: 14px; margin-bottom: 25px; white-space: pre-line;"></p>
-            <button id="mainRsvpBtn" class="btn btn-primary" style="width: 100%;" onclick="proceedToRSVP()">Reserve Spot</button>
+            <button id="mainRsvpBtn" class="btn btn-primary" style="width: 100%;"></button>
         </div>
     </div>
 
@@ -396,7 +396,7 @@
         let allEvents = [];
         let myBookedEventIds = [];
         let eventToDeleteId = null; 
-        let currentAttendeesData = []; // Admin view
+        let currentAttendeesData = []; 
         const API_BASE = 'https://eventive-steel.vercel.app/api';
         let toastTimeout;
 
@@ -707,17 +707,22 @@
 
             const rsvpBtn = document.getElementById('mainRsvpBtn');
             if (myBookedEventIds.includes(eventId)) {
-                rsvpBtn.innerText = '🎟️ You are already registered';
-                rsvpBtn.style.background = 'rgba(16, 185, 129, 0.2)';
-                rsvpBtn.style.color = '#10b981';
-                rsvpBtn.style.cursor = 'not-allowed';
-                rsvpBtn.disabled = true;
+                // ده الكود اللي بيغير الزرار لإلغاء الحجز
+                rsvpBtn.innerText = 'Cancel Reservation ❌';
+                rsvpBtn.style.background = 'transparent';
+                rsvpBtn.style.border = '1px solid #ef4444';
+                rsvpBtn.style.color = '#ef4444';
+                rsvpBtn.style.cursor = 'pointer';
+                rsvpBtn.disabled = false;
+                rsvpBtn.onclick = () => cancelRSVP(eventId);
             } else {
                 rsvpBtn.innerText = 'Reserve Spot';
                 rsvpBtn.style.background = 'var(--primary)';
+                rsvpBtn.style.border = 'none';
                 rsvpBtn.style.color = 'var(--primary-invert)';
                 rsvpBtn.style.cursor = 'pointer';
                 rsvpBtn.disabled = false;
+                rsvpBtn.onclick = () => proceedToRSVP();
             }
 
             document.getElementById('eventDetailsModal').classList.add('active');
@@ -761,6 +766,41 @@
                     renderEventsUI();
                 } else { showToast(result.message, "error"); }
             } catch (error) { showToast("Connection error. Please try again.", "error"); } finally { btn.innerText = 'Confirm Attendance'; btn.disabled = false; }
+        }
+
+        async function cancelRSVP(eventId) {
+            if (!confirm("Are you sure you want to cancel your reservation?")) return;
+            
+            const btn = document.getElementById('mainRsvpBtn');
+            btn.innerText = 'Canceling...'; btn.disabled = true;
+
+            const activeEmail = (currentUser.active_email === 'secondary' && currentUser.secondary_email) ? currentUser.secondary_email : currentUser.email;
+
+            try {
+                const response = await fetch(API_BASE + '/rsvp', {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: activeEmail, event_id: eventId })
+                });
+                
+                if (response.ok) {
+                    showToast("Reservation canceled successfully", "success");
+                    closeModal('eventDetailsModal');
+                    
+                    myBookedEventIds = myBookedEventIds.filter(id => id !== eventId);
+                    renderEventsUI();
+                    
+                    if (!document.getElementById('my-events-view').classList.contains('hidden')) {
+                        renderMyEvents();
+                    }
+                } else {
+                    showToast("Failed to cancel reservation", "error");
+                    btn.innerText = 'Cancel Reservation ❌'; btn.disabled = false;
+                }
+            } catch (error) {
+                showToast("Connection error", "error");
+                btn.innerText = 'Cancel Reservation ❌'; btn.disabled = false;
+            }
         }
 
         async function submitNewEvent(e) {
@@ -851,24 +891,22 @@
                 reader.readAsDataURL(file); 
             }
         }
-        
-        // 1. الدالة المسؤولة عن تكبير صورتك إنت في بروفايلك
-function viewFullAvatar() {
-    const avatarSrc = document.getElementById('profileAvatarImg').src;
-    if (avatarSrc && avatarSrc !== window.location.href) {
-        document.getElementById('fullSizeAvatar').src = avatarSrc;
-        document.getElementById('avatarViewerModal').classList.add('active');
-    }
-}
 
-// 2. الدالة المسؤولة عن تكبير صور الحضور في الـ Dashboard للأدمن
-function viewAttendeeFullAvatar() {
-    const avatarSrc = document.getElementById('viewAttendeeAvatar').src;
-    if (avatarSrc && avatarSrc !== window.location.href) {
-        document.getElementById('fullSizeAvatar').src = avatarSrc;
-        document.getElementById('avatarViewerModal').classList.add('active');
-    }
-}
+        function viewFullAvatar() {
+            const avatarSrc = document.getElementById('profileAvatarImg').src;
+            if (avatarSrc && avatarSrc !== window.location.href) {
+                document.getElementById('fullSizeAvatar').src = avatarSrc;
+                document.getElementById('avatarViewerModal').classList.add('active');
+            }
+        }
+
+        function viewAttendeeFullAvatar() {
+            const avatarSrc = document.getElementById('viewAttendeeAvatar').src;
+            if (avatarSrc && avatarSrc !== window.location.href) {
+                document.getElementById('fullSizeAvatar').src = avatarSrc;
+                document.getElementById('avatarViewerModal').classList.add('active');
+            }
+        }
 
         async function submitProfile(e) {
             e.preventDefault(); 
