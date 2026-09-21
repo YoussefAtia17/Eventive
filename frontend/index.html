@@ -838,12 +838,24 @@
         function populateAdminEventsDropdown() { fetch(API_BASE + '/events').then(res => res.json()).then(result => { const select = document.getElementById('adminEventSelect'); select.innerHTML = '<option value="">-- Select --</option>'; result.data.forEach(evt => select.innerHTML += `<option value="${evt.id}">${evt.title}</option>`); }); }
 
         function renderAttendeesTable(data) {
-            const tbody = document.getElementById('attendeesTable'); document.getElementById('attendeeCount').innerText = data.length; const exportBtn = document.getElementById('exportBtn');
-            if(data.length === 0) { tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color: var(--text-muted); padding: 30px;">No RSVPs yet.</td></tr>'; exportBtn.style.display = 'none'; } 
-            else { tbody.innerHTML = data.map((person, index) => {
-                    const displayName = person.full_name || person.name || 'User'; const avatar = person.avatar_url || `https://ui-avatars.com/api/?name=${displayName}&background=111&color=fff`;
+            const tbody = document.getElementById('attendeesTable'); 
+            const countBadge = document.getElementById('attendeeCount');
+            if (countBadge) countBadge.innerText = data.length; 
+            
+            const exportBtn = document.getElementById('exportBtn');
+            
+            if(data.length === 0) { 
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color: var(--text-muted); padding: 30px;">No RSVPs yet.</td></tr>'; 
+                if(exportBtn) exportBtn.style.display = 'none'; 
+            } 
+            else { 
+                tbody.innerHTML = data.map((person, index) => {
+                    const displayName = person.full_name || person.name || 'User'; 
+                    const avatar = person.avatar_url || `https://ui-avatars.com/api/?name=${displayName}&background=111&color=fff`;
                     return `<tr><td style="display:flex; align-items:center; gap:10px;"><img src="${avatar}" style="width:32px; height:32px; border-radius:50%; object-fit:cover; border: 1px solid var(--border);"><span style="font-weight: 500;">${displayName}</span></td><td style="color: var(--text-muted);">${person.email}</td><td style="color: var(--text-muted);">${person.phone_number || person.phone || '-'}</td><td><div style="display: flex; gap: 8px;"><button class="btn btn-outline" style="padding: 6px 12px; font-size: 11px;" onclick="viewAttendeeProfile(${index})">View Profile</button><button class="btn btn-outline" style="padding: 6px 12px; font-size: 11px; color: #ef4444; border-color: rgba(239, 68, 68, 0.4);" onclick="removeAttendee(${index})">Remove</button></div></td></tr>`;
-                }).join(''); exportBtn.style.display = 'flex'; }
+                }).join(''); 
+                if(exportBtn) exportBtn.style.display = 'flex'; 
+            }
         }
         
         async function loadRSVPs() {
