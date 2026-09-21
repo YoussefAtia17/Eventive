@@ -75,11 +75,7 @@
         .event-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 15px; }
         .tag { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; color: var(--text-muted); border: 1px solid var(--border); padding: 6px 12px; border-radius: 20px; text-transform: uppercase; background: rgba(255,255,255,0.03); }
         
-        /* Fixed CSS for long descriptions to prevent overflow */
-        .desc-fade { 
-            position: relative; height: 48px; overflow: hidden; color: var(--text-muted); font-size: 14px; margin-bottom: 25px; 
-            word-break: break-all; overflow-wrap: anywhere; white-space: normal; 
-        }
+        .desc-fade { position: relative; height: 48px; overflow: hidden; color: var(--text-muted); font-size: 14px; margin-bottom: 25px; word-break: break-all; overflow-wrap: anywhere; white-space: normal; }
         .desc-fade::after { content: ""; position: absolute; bottom: 0; left: 0; right: 0; height: 30px; background: linear-gradient(transparent, var(--bg-surface)); }
 
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(8px); display: flex; justify-content: center; align-items: center; z-index: 1000; opacity: 0; pointer-events: none; transition: var(--transition); }
@@ -99,7 +95,6 @@
         
         .empty-state-box { grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 80px 20px; border: 1px dashed var(--border); border-radius: var(--radius-card); background: rgba(255,255,255,0.02); text-align: center; }
 
-        /* Toasts & Popups */
         .toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px); background: rgba(17, 17, 17, 0.95); color: var(--text-main); padding: 14px 24px; border-radius: var(--radius-pill); border: 1px solid var(--border); z-index: 9999; display: flex; align-items: center; gap: 10px; opacity: 0; pointer-events: none; transition: transform 0.4s; }
         .toast-container.show { transform: translateX(-50%) translateY(0); opacity: 1; }
         
@@ -118,8 +113,6 @@
 <body>
 
     <div id="appToast" class="toast-container"><span id="toastIcon"></span><span id="toastMessage"></span></div>
-    
-    <!-- Push Notifications Container -->
     <div id="pushNotifContainer" class="push-notif-container"></div>
 
     <nav class="navbar">
@@ -158,14 +151,13 @@
             <div class="card" style="margin-top: 30px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
                     <h2 style="font-size: 20px; margin: 0; display: flex; align-items: center;">Attendees Database <span id="attendeeCount" class="badge">0</span></h2>
+                    <button class="export-btn" id="exportBtn" onclick="exportToCSV()" style="display: none;">📥 Download CSV</button>
                 </div>
                 <select id="adminEventSelect" class="form-input" onchange="loadRSVPs()"><option value="">-- Select an event --</option></select>
                 <div style="overflow-x: auto;">
                     <table>
                         <thead><tr><th>User</th><th>Email</th><th>Phone</th><th>Actions</th></tr></thead>
-                        <tbody id="attendeesTable">
-    <tr><td colspan="4" style="text-align:center; color: var(--text-muted); padding: 30px;">Please select an event from the dropdown above to view its attendees.</td></tr>
-</tbody>
+                        <tbody id="attendeesTable"></tbody>
                     </table>
                 </div>
             </div>
@@ -175,29 +167,18 @@
     <!-- Notifications Modal -->
     <div class="modal-overlay" id="notificationsModal">
         <div class="modal-content" style="max-width: 500px; padding: 0; overflow: hidden; display: flex; flex-direction: column; max-height: 80vh;">
-            <div class="modal-header" style="padding: 25px 25px 15px 25px; margin: 0; border-bottom: 1px solid var(--border);">
-                <h2 style="font-size: 20px;">Notifications</h2>
-                <button class="close-btn" onclick="closeModal('notificationsModal')">✕</button>
-            </div>
-            <div id="notificationsList" style="overflow-y: auto; flex: 1;">
-                <div style="padding: 40px; text-align: center; color: var(--text-muted);">Loading...</div>
-            </div>
+            <div class="modal-header" style="padding: 25px 25px 15px 25px; margin: 0; border-bottom: 1px solid var(--border);"><h2 style="font-size: 20px;">Notifications</h2><button class="close-btn" onclick="closeModal('notificationsModal')">✕</button></div>
+            <div id="notificationsList" style="overflow-y: auto; flex: 1;"><div style="padding: 40px; text-align: center; color: var(--text-muted);">Loading...</div></div>
         </div>
     </div>
 
     <!-- Create Event Modal -->
     <div class="modal-overlay" id="createEventModal">
         <div class="modal-content" style="max-width: 550px;">
-            <div class="modal-header">
-                <h2 style="font-size: 22px;">Publish Experience</h2>
-                <button class="close-btn" onclick="closeModal('createEventModal')">✕</button>
-            </div>
+            <div class="modal-header"><h2 style="font-size: 22px;">Publish Experience</h2><button class="close-btn" onclick="closeModal('createEventModal')">✕</button></div>
             <form id="createEventForm" onsubmit="submitNewEvent(event)">
                 <input type="text" id="newEventTitle" class="form-input" placeholder="Event Title" required>
-                <div style="display: flex; gap: 15px;">
-                    <input type="datetime-local" id="newEventDate" class="form-input" required>
-                    <input type="text" id="newEventLocation" class="form-input" placeholder="Location" required>
-                </div>
+                <div style="display: flex; gap: 15px;"><input type="datetime-local" id="newEventDate" class="form-input" required><input type="text" id="newEventLocation" class="form-input" placeholder="Location" required></div>
                 <textarea id="newEventDesc" class="form-input" placeholder="Event Description..." rows="4" required></textarea>
                 <div style="background: rgba(255,255,255,0.02); padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px dashed var(--border);">
                     <label style="font-size: 13px; color: var(--primary); display: block; margin-bottom: 5px; font-weight: 600;">Main Cover Image (Required)</label>
@@ -215,8 +196,7 @@
         <div class="modal-content" style="max-width: 550px;">
             <div class="modal-header"><h2 style="font-size: 22px;">Edit Experience</h2><button class="close-btn" onclick="closeModal('editEventModal')">✕</button></div>
             <form id="editEventForm" onsubmit="submitEditEvent(event)">
-                <input type="hidden" id="editEventId">
-                <input type="text" id="editEventTitle" class="form-input" required>
+                <input type="hidden" id="editEventId"><input type="text" id="editEventTitle" class="form-input" required>
                 <div style="display: flex; gap: 15px;"><input type="datetime-local" id="editEventDate" class="form-input" required><input type="text" id="editEventLocation" class="form-input" required></div>
                 <textarea id="editEventDesc" class="form-input" rows="4" required></textarea>
                 <div style="background: rgba(255,255,255,0.02); padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px dashed var(--border);">
@@ -238,7 +218,6 @@
                 <div id="sliderCounter" style="position: absolute; bottom: 10px; right: 10px; background: rgba(0,0,0,0.6); color: white; padding: 2px 8px; border-radius: 10px; font-size: 11px;"></div>
             </div>
             <div class="event-tags" id="detailsTags"></div>
-            <!-- Fixed Description Container: Allows scrolling if text is too long and prevents overflow -->
             <p id="detailsDesc" style="color: var(--text-muted); font-size: 14px; margin-bottom: 25px; white-space: pre-wrap; word-break: break-all; overflow-wrap: anywhere; max-height: 40vh; overflow-y: auto; padding-right: 5px;"></p>
             <button id="mainRsvpBtn" class="btn btn-primary" style="width: 100%;"></button>
         </div>
@@ -280,7 +259,7 @@
             <div class="modal-header"><h2>Identity</h2><button class="close-btn" onclick="closeModal('profileModal')">✕</button></div>
             <form id="profileForm" onsubmit="submitProfile(event)">
                 <div style="display: flex; gap: 15px; margin-bottom: 20px; align-items: center;">
-                    <div style="position: relative; cursor: pointer; width: 60px; height: 60px; flex-shrink: 0;" onclick="viewFullAvatar()" title="View Profile Picture">
+                    <div style="position: relative; cursor: pointer; width: 60px; height: 60px; flex-shrink: 0;" onclick="viewFullAvatar()">
                         <img id="profileAvatarImg" src="" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 1px solid var(--border);">
                         <div style="position: absolute; inset: 0; background: rgba(0,0,0,0.6); border-radius: 50%; display: flex; align-items: center; justify-content: center; opacity: 0; transition: var(--transition);" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0"><span style="font-size: 20px;">👁️</span></div>
                     </div>
@@ -297,7 +276,7 @@
         </div>
     </div>
 
-    <!-- Delete Confirmation Modal -->
+    <!-- Delete Event Confirm Modal -->
     <div class="modal-overlay" id="deleteConfirmModal">
         <div class="modal-content" style="max-width: 400px; text-align: center;">
             <div style="font-size: 48px; margin-bottom: 15px;">⚠️</div><h2 style="font-size: 22px; margin-bottom: 10px;">Are you sure?</h2>
@@ -308,8 +287,8 @@
         </div>
     </div>
     
-    <!-- Cancel RSVP Confirmation Modal -->
-    <div class="modal-overlay" id="cancelRsvpConfirmModal" style="z-index: 1100;">
+    <!-- Cancel RSVP Confirm Modal -->
+    <div class="modal-overlay" id="cancelRsvpConfirmModal">
         <div class="modal-content" style="max-width: 400px; text-align: center;">
             <div style="font-size: 48px; margin-bottom: 15px;">🎫</div><h2 style="font-size: 22px; margin-bottom: 10px;">Cancel Reservation?</h2>
             <div style="display: flex; gap: 10px; justify-content: center;">
@@ -320,10 +299,9 @@
     </div>
 
     <!-- Remove Attendee Confirmation Modal (Admin) -->
-    <div class="modal-overlay" id="removeAttendeeConfirmModal" style="z-index: 1100;">
+    <div class="modal-overlay" id="removeAttendeeConfirmModal">
         <div class="modal-content" style="max-width: 400px; text-align: center;">
-            <div style="font-size: 48px; margin-bottom: 15px;">🚫</div>
-            <h2 style="font-size: 22px; margin-bottom: 10px;">Remove Attendee?</h2>
+            <div style="font-size: 48px; margin-bottom: 15px;">🚫</div><h2 style="font-size: 22px; margin-bottom: 10px;">Remove Attendee?</h2>
             <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 15px;">Remove <strong id="removeAttendeeName" style="color: var(--primary);"></strong> from event?</p>
             <input type="text" id="removeReason" class="form-input" placeholder="Reason for removal (will be sent to user)" required>
             <div style="display: flex; gap: 10px; justify-content: center;">
@@ -334,10 +312,8 @@
     </div>
 
     <!-- Full Size Avatar Viewer Modal -->
-    <div class="modal-overlay" id="avatarViewerModal" style="z-index: 1050; cursor: zoom-out;" onclick="closeModal('avatarViewerModal')">
-        <div style="max-width: 90vw; max-height: 90vh; display: flex; justify-content: center; align-items: center;">
-            <img id="fullSizeAvatar" src="" style="max-width: 100%; max-height: 90vh; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.5);">
-        </div>
+    <div class="modal-overlay" id="avatarViewerModal" onclick="closeModal('avatarViewerModal')">
+        <div style="max-width: 90vw; max-height: 90vh; display: flex; justify-content: center; align-items: center;"><img id="fullSizeAvatar" src="" style="max-width: 100%; max-height: 90vh; border-radius: 12px;"></div>
     </div>
 
     <!-- Attendee Full Profile Modal -->
@@ -345,9 +321,7 @@
         <div class="modal-content" style="max-width: 450px; text-align: center;">
             <div class="modal-header" style="margin-bottom: 10px;"><h2 style="font-size: 20px;">Attendee Profile</h2><button class="close-btn" onclick="closeModal('attendeeProfileModal')">✕</button></div>
             <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 25px;">
-                <div style="position: relative; cursor: pointer; width: 96px; height: 96px; margin-bottom: 15px;" onclick="viewAttendeeFullAvatar()">
-                    <img id="viewAttendeeAvatar" src="" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 2px solid var(--border); padding: 3px;">
-                </div>
+                <div style="position: relative; cursor: pointer; width: 96px; height: 96px; margin-bottom: 15px;" onclick="viewAttendeeFullAvatar()"><img id="viewAttendeeAvatar" src="" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 2px solid var(--border); padding: 3px;"></div>
                 <h3 id="viewAttendeeName" style="font-size: 22px; margin-bottom: 5px;"></h3><p id="viewAttendeeEmail" style="color: var(--text-muted); font-size: 14px;"></p>
             </div>
             <div style="background: rgba(255,255,255,0.02); padding: 20px; border-radius: 12px; border: 1px dashed var(--border); text-align: left;">
@@ -380,19 +354,56 @@
         const bannerGradients = ['linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%)', 'linear-gradient(135deg, rgba(79,70,229,0.1) 0%, rgba(0,0,0,0) 100%)'];
 
         document.addEventListener("DOMContentLoaded", () => { 
-            updateNavbar(); 
-            loadEvents(); 
-            setInterval(updateCountdowns, 60000); 
+            updateNavbar(); loadEvents(); setInterval(updateCountdowns, 60000); 
             if(currentUser) startNotificationPolling();
         });
 
         function showToast(message, type = 'success') {
             const toast = document.getElementById('appToast');
-            document.getElementById('toastIcon').innerText = type === 'success' ? '✅' : '⚠️';
+            document.getElementById('toastIcon').innerText = type === 'success' ? '✅' : (type === 'error' ? '❌' : '⏳');
             document.getElementById('toastMessage').innerText = message;
             toast.className = `toast-container show ${type}`;
             clearTimeout(toastTimeout);
             toastTimeout = setTimeout(() => { toast.classList.remove('show'); }, 3500);
+        }
+
+        // --- BACKGROUND SILENT SYNC (NO REFRESH NEEDED) ---
+        async function silentSync() {
+            if (!currentUser) return;
+            const activeEmail = (currentUser.active_email === 'secondary' && currentUser.secondary_email) ? currentUser.secondary_email : currentUser.email;
+            try {
+                // 1. Sync User's RSVPs silently
+                const rsvpRes = await fetch(API_BASE + '/my-rsvps?email=' + encodeURIComponent(activeEmail));
+                if (rsvpRes.ok) {
+                    const rsvpResult = await rsvpRes.json();
+                    if (rsvpResult.status === 'success') {
+                        const newIds = rsvpResult.data.sort();
+                        const oldIds = [...myBookedEventIds].sort();
+                        if (JSON.stringify(newIds) !== JSON.stringify(oldIds)) {
+                            myBookedEventIds = rsvpResult.data;
+                            renderEventsUI();
+                            if (!document.getElementById('my-events-view').classList.contains('hidden')) renderMyEvents();
+                        }
+                    }
+                }
+                // 2. Sync Admin Dashboard silently if it's currently open
+                const adminView = document.getElementById('admin-view');
+                if (currentUser.role === 'admin' && !adminView.classList.contains('hidden')) {
+                    const eventId = document.getElementById('adminEventSelect').value;
+                    if (eventId) {
+                        const adminRes = await fetch(API_BASE + `/admin/rsvps/${eventId}`);
+                        if (adminRes.ok) {
+                            const adminResult = await adminRes.json();
+                            if (adminResult.status === 'success') {
+                                if (JSON.stringify(currentAttendeesData) !== JSON.stringify(adminResult.data)) {
+                                    currentAttendeesData = adminResult.data;
+                                    renderAttendeesTable(currentAttendeesData);
+                                }
+                            }
+                        }
+                    }
+                }
+            } catch(e) {}
         }
 
         function startNotificationPolling() {
@@ -402,6 +413,7 @@
 
         async function pollNotifications() {
             if (!currentUser) return;
+            silentSync(); // Sync data silently every time we poll for notifications
             const activeEmail = (currentUser.active_email === 'secondary' && currentUser.secondary_email) ? currentUser.secondary_email : currentUser.email;
             try {
                 const response = await fetch(API_BASE + `/notifications?email=${encodeURIComponent(activeEmail)}`);
@@ -412,49 +424,27 @@
                     allNotifications.forEach(notif => {
                         if (!notif.is_read) unreadCount++;
                         if (!seenNotifIds.has(notif.id)) {
-                            seenNotifIds.add(notif.id);
-                            localStorage.setItem('seenNotifs', JSON.stringify([...seenNotifIds]));
-                            showPushNotification(notif);
+                            seenNotifIds.add(notif.id); localStorage.setItem('seenNotifs', JSON.stringify([...seenNotifIds])); showPushNotification(notif);
                         }
                     });
-                    
                     const badge = document.getElementById('notifBadge');
-                    if (badge) {
-                        badge.innerText = unreadCount > 9 ? '9+' : unreadCount;
-                        badge.style.display = unreadCount > 0 ? 'flex' : 'none';
-                    }
-                    
-                    if (document.getElementById('notificationsModal').classList.contains('active')) {
-                        renderNotificationsModal();
-                    }
+                    if (badge) { badge.innerText = unreadCount > 9 ? '9+' : unreadCount; badge.style.display = unreadCount > 0 ? 'flex' : 'none'; }
+                    if (document.getElementById('notificationsModal').classList.contains('active')) renderNotificationsModal();
                 }
             } catch (error) {}
         }
 
         function showPushNotification(notif) {
-            const container = document.getElementById('pushNotifContainer');
-            const el = document.createElement('div');
-            el.className = 'push-notif';
+            const container = document.getElementById('pushNotifContainer'); const el = document.createElement('div'); el.className = 'push-notif';
             el.innerHTML = `<h4 style="font-size: 15px; margin-bottom: 2px;">${notif.title}</h4><p style="font-size: 13px; color: var(--text-muted); line-height: 1.4;">${notif.message}</p>`;
-            container.appendChild(el);
-            setTimeout(() => {
-                el.style.animation = 'slideOutRight 0.5s forwards';
-                setTimeout(() => el.remove(), 500);
-            }, 10000);
+            container.appendChild(el); setTimeout(() => { el.style.animation = 'slideOutRight 0.5s forwards'; setTimeout(() => el.remove(), 500); }, 10000);
         }
 
-        function openNotificationsModal() {
-            document.getElementById('notificationsModal').classList.add('active');
-            renderNotificationsModal();
-            markNotificationsAsRead();
-        }
+        function openNotificationsModal() { document.getElementById('notificationsModal').classList.add('active'); renderNotificationsModal(); markNotificationsAsRead(); }
 
         function renderNotificationsModal() {
             const list = document.getElementById('notificationsList');
-            if (allNotifications.length === 0) {
-                list.innerHTML = `<div style="padding: 40px; text-align: center; color: var(--text-muted);">No notifications yet.</div>`;
-                return;
-            }
+            if (allNotifications.length === 0) { list.innerHTML = `<div style="padding: 40px; text-align: center; color: var(--text-muted);">No notifications yet.</div>`; return; }
             list.innerHTML = allNotifications.map(n => {
                 const date = new Date(n.created_at).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
                 return `<div class="notif-item ${!n.is_read ? 'unread' : ''}"><div style="display: flex; justify-content: space-between; align-items: baseline;"><strong style="font-size: 15px;">${n.title}</strong><span style="font-size: 11px; color: var(--text-muted);">${date}</span></div><p style="font-size: 13px; color: var(--text-muted); margin-top: 5px; line-height: 1.5;">${n.message}</p></div>`;
@@ -462,197 +452,119 @@
         }
 
         async function markNotificationsAsRead() {
-            if (!currentUser) return;
-            const activeEmail = (currentUser.active_email === 'secondary' && currentUser.secondary_email) ? currentUser.secondary_email : currentUser.email;
-            const badge = document.getElementById('notifBadge');
-            if(badge) badge.style.display = 'none';
-            try {
-                await fetch(API_BASE + '/notifications/read_all', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: activeEmail }) });
-                allNotifications.forEach(n => n.is_read = true);
-            } catch(e) {}
+            if (!currentUser) return; const activeEmail = (currentUser.active_email === 'secondary' && currentUser.secondary_email) ? currentUser.secondary_email : currentUser.email;
+            const badge = document.getElementById('notifBadge'); if(badge) badge.style.display = 'none';
+            try { await fetch(API_BASE + '/notifications/read_all', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: activeEmail }) }); allNotifications.forEach(n => n.is_read = true); } catch(e) {}
         }
 
         function updateNavbar() {
-            const nav = document.getElementById('authNav');
-            const adminBar = document.getElementById('adminActionContainer');
+            const nav = document.getElementById('authNav'); const adminBar = document.getElementById('adminActionContainer');
             if (currentUser) {
                 const avatarSrc = currentUser.avatar_url || `https://ui-avatars.com/api/?name=${currentUser.name}&background=111&color=fff`;
-                let html = `
-                    <button class="notif-btn" onclick="openNotificationsModal()">🔔<span id="notifBadge" class="notif-badge" style="display:none;">0</span></button>
-                    <button class="btn btn-outline" onclick="switchView('my-events-view')" style="border-color: rgba(16, 185, 129, 0.4); color: #10b981;">🎟️ My Events</button>`;
+                let html = `<button class="notif-btn" onclick="openNotificationsModal()">🔔<span id="notifBadge" class="notif-badge" style="display:none;">0</span></button><button class="btn btn-outline" onclick="switchView('my-events-view')" style="border-color: rgba(16, 185, 129, 0.4); color: #10b981;">🎟️ My Events</button>`;
                 if (currentUser.role === 'admin') html += `<button class="btn btn-outline" onclick="switchView('admin-view')">Dashboard</button>`;
-                html += `
-                    <div class="profile-badge" onclick="openProfileModal()"><img src="${avatarSrc}" style="width:32px; height:32px; border-radius:50%; object-fit:cover;"><span class="greeting-text">${currentUser.name.split(' ')[0]}</span></div>
-                    <button class="btn btn-outline btn-danger" onclick="logout()">Logout</button>
-                `;
+                html += `<div class="profile-badge" onclick="openProfileModal()"><img src="${avatarSrc}" style="width:32px; height:32px; border-radius:50%; object-fit:cover;"><span class="greeting-text">${currentUser.name.split(' ')[0]}</span></div><button class="btn btn-outline btn-danger" onclick="logout()">Logout</button>`;
                 nav.innerHTML = html;
-            } else {
-                nav.innerHTML = `<button class="btn btn-outline" onclick="openAuthModal(true)">Log in</button><button class="btn btn-primary" onclick="openAuthModal(false)">Join</button>`;
-                if(adminBar) adminBar.style.display = 'none';
-            }
+            } else { nav.innerHTML = `<button class="btn btn-outline" onclick="openAuthModal(true)">Log in</button><button class="btn btn-primary" onclick="openAuthModal(false)">Join</button>`; if(adminBar) adminBar.style.display = 'none'; }
         }
         
         function switchView(viewId) { 
             document.getElementById('events-view').classList.add('hidden'); document.getElementById('admin-view').classList.add('hidden'); document.getElementById('my-events-view').classList.add('hidden');
             const targetView = document.getElementById(viewId); targetView.classList.remove('hidden'); void targetView.offsetWidth; 
-            if(viewId === 'admin-view' && currentUser?.role === 'admin') populateAdminEventsDropdown(); 
+            
+            // Force Data Sync when switching views
+            silentSync();
+            
+            if(viewId === 'admin-view' && currentUser?.role === 'admin') { populateAdminEventsDropdown(); loadRSVPs(); } 
             if(viewId === 'my-events-view') renderMyEvents(); 
         }
         
         function closeModal(id) { document.getElementById(id).classList.remove('active'); }
         function openCreateModal() { document.getElementById('createEventModal').classList.add('active'); }
         
-        function logout() { 
-            localStorage.removeItem('user'); currentUser = null; myBookedEventIds = [];
-            clearInterval(notifPollInterval); allNotifications = [];
-            updateNavbar(); switchView('events-view'); renderEventsUI(); 
-            showToast('Logged out successfully', 'success');
-        }
+        function logout() { localStorage.removeItem('user'); currentUser = null; myBookedEventIds = []; clearInterval(notifPollInterval); allNotifications = []; updateNavbar(); switchView('events-view'); renderEventsUI(); showToast('Logged out successfully', 'success'); }
 
         async function fetchMyBookedEventsIds() {
             if (!currentUser) { myBookedEventIds = []; return; }
             const activeEmail = (currentUser.active_email === 'secondary' && currentUser.secondary_email) ? currentUser.secondary_email : currentUser.email;
-            try {
-                const response = await fetch(API_BASE + '/my-rsvps?email=' + encodeURIComponent(activeEmail));
-                const result = await response.json();
-                if (result.status === 'success') { myBookedEventIds = result.data; }
-            } catch (error) {}
+            try { const response = await fetch(API_BASE + '/my-rsvps?email=' + encodeURIComponent(activeEmail)); const result = await response.json(); if (result.status === 'success') { myBookedEventIds = result.data; } } catch (error) {}
         }
 
         async function loadEvents() {
             try {
-                const response = await fetch(API_BASE + '/events');
-                const result = await response.json();
-                if (result.status === 'success') {
-                    // Update main events list but avoid overriding optimistically added events
-                    const serverEvents = result.data || [];
-                    const localTempEvents = allEvents.filter(e => e.id.toString().startsWith('temp-'));
-                    allEvents = [...localTempEvents, ...serverEvents];
-                    await fetchMyBookedEventsIds(); 
-                    renderEventsUI(); 
-                } else { renderEmptyState(); }
+                const response = await fetch(API_BASE + '/events'); const result = await response.json();
+                if (result.status === 'success') { const serverEvents = result.data || []; const localTempEvents = allEvents.filter(e => e.id.toString().startsWith('temp-')); allEvents = [...localTempEvents, ...serverEvents]; await fetchMyBookedEventsIds(); renderEventsUI(); } else { renderEmptyState(); }
             } catch (error) { renderEmptyState(); }
         }
 
         function generateEventCardHTML(evt, index) {
-            const dateObj = new Date(evt.event_date);
-            const formattedDate = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-            const formattedTime = dateObj.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+            const dateObj = new Date(evt.event_date); const formattedDate = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }); const formattedTime = dateObj.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
             const randomGradient = bannerGradients[index % bannerGradients.length];
-            
-            let coverUrl = '';
-            try { const parsedImages = JSON.parse(evt.image_urls || '[]'); if (parsedImages.length > 0) coverUrl = parsedImages[0]; } catch(e) {}
+            let coverUrl = ''; try { const parsedImages = JSON.parse(evt.image_urls || '[]'); if (parsedImages.length > 0) coverUrl = parsedImages[0]; } catch(e) {}
             const coverHtml = coverUrl ? `<div class="card-cover" style="background-image: url('${coverUrl}');"></div>` : '';
-            
             let adminButtons = '';
             if (currentUser && currentUser.role === 'admin' && !evt.id.toString().startsWith('temp-')) {
-                adminButtons = `<div style="position:absolute; top:20px; right: 120px; z-index:20; display:flex; gap:8px;">
-                    <button onclick="openEditModal('${evt.id}', event)" title="Edit Event" style="background:rgba(59, 130, 246, 0.9); color:white; border:none; width:34px; height:34px; border-radius:50%; cursor:pointer; box-shadow:0 4px 10px rgba(0,0,0,0.3);">✏️</button>
-                    <button onclick="deleteEvent('${evt.id}', event)" title="Delete Event" style="background:rgba(239, 68, 68, 0.9); color:white; border:none; width:34px; height:34px; border-radius:50%; cursor:pointer; box-shadow:0 4px 10px rgba(0,0,0,0.3);">🗑️</button></div>`;
+                adminButtons = `<div style="position:absolute; top:20px; right: 120px; z-index:20; display:flex; gap:8px;"><button onclick="openEditModal('${evt.id}', event)" title="Edit Event" style="background:rgba(59, 130, 246, 0.9); color:white; border:none; width:34px; height:34px; border-radius:50%; cursor:pointer;">✏️</button><button onclick="deleteEvent('${evt.id}', event)" title="Delete Event" style="background:rgba(239, 68, 68, 0.9); color:white; border:none; width:34px; height:34px; border-radius:50%; cursor:pointer;">🗑️</button></div>`;
             }
-
-            const isBooked = myBookedEventIds.includes(evt.id);
-            const registeredBadge = isBooked ? `<div class="registered-badge">✅ Registered</div>` : '';
-            const loadingBadge = evt.id.toString().startsWith('temp-') ? `<div class="registered-badge" style="background: rgba(245, 158, 11, 0.9); left: auto; right: 20px;">⏳ Uploading...</div>` : '';
-
+            const isBooked = myBookedEventIds.includes(evt.id); const registeredBadge = isBooked ? `<div class="registered-badge">✅ Registered</div>` : ''; const loadingBadge = evt.id.toString().startsWith('temp-') ? `<div class="registered-badge" style="background: rgba(245, 158, 11, 0.9); left: auto; right: 20px;">⏳ Uploading...</div>` : '';
             return `
                 <div class="card event-card" style="background: ${randomGradient};" onclick="openEventDetails('${evt.id}')">
                     ${registeredBadge}${loadingBadge}${adminButtons}${coverHtml}
                     ${!evt.id.toString().startsWith('temp-') ? `<div class="countdown" data-date="${evt.event_date}">Calculating...</div>` : ''}
-                    <div class="event-tags" style="margin-top: ${coverUrl ? '0' : '30px'};">
-                        <span class="tag">📅 ${formattedDate}</span><span class="tag">⏰ ${formattedTime}</span><span class="tag">📍 ${evt.location}</span>
-                    </div>
-                    <h2 style="font-size:24px; margin-bottom:15px;">${evt.title}</h2>
-                    <div class="desc-fade">${evt.description}</div>
+                    <div class="event-tags" style="margin-top: ${coverUrl ? '0' : '30px'};"><span class="tag">📅 ${formattedDate}</span><span class="tag">⏰ ${formattedTime}</span><span class="tag">📍 ${evt.location}</span></div>
+                    <h2 style="font-size:24px; margin-bottom:15px;">${evt.title}</h2><div class="desc-fade">${evt.description}</div>
                     <button class="btn btn-outline" style="width: 100%;" ${evt.id.toString().startsWith('temp-') ? 'disabled' : ''}>${evt.id.toString().startsWith('temp-') ? 'Processing...' : (isBooked ? 'View Details' : 'View Details / RSVP')}</button>
                 </div>`;
         }
 
         function renderEventsUI() {
-            const container = document.getElementById('events-container');
-            const adminBar = document.getElementById('adminActionContainer');
-            if (allEvents.length > 0) {
-                container.innerHTML = '';
-                if (currentUser && currentUser.role === 'admin') adminBar.style.display = 'flex'; else adminBar.style.display = 'none';
-                allEvents.forEach((evt, index) => { container.innerHTML += generateEventCardHTML(evt, index); });
-                updateCountdowns();
-            } else { renderEmptyState(); }
+            const container = document.getElementById('events-container'); const adminBar = document.getElementById('adminActionContainer');
+            if (allEvents.length > 0) { container.innerHTML = ''; if (currentUser && currentUser.role === 'admin') adminBar.style.display = 'flex'; else adminBar.style.display = 'none'; allEvents.forEach((evt, index) => { container.innerHTML += generateEventCardHTML(evt, index); }); updateCountdowns(); } else { renderEmptyState(); }
         }
 
         function renderEmptyState() {
-            const container = document.getElementById('events-container');
-            const adminBar = document.getElementById('adminActionContainer');
-            if(adminBar) adminBar.style.display = 'none'; 
+            const container = document.getElementById('events-container'); const adminBar = document.getElementById('adminActionContainer'); if(adminBar) adminBar.style.display = 'none'; 
             let adminShortcut = (currentUser && currentUser.role === 'admin') ? `<button class="btn btn-primary" style="margin-top: 25px;" onclick="openCreateModal()">✨ Publish Your First Event</button>` : '';
             container.innerHTML = `<div class="empty-state-box"><h2 style="font-size: 28px; margin-bottom: 10px;">No Active Experiences</h2><p style="color: var(--text-muted);">Check back later.</p>${adminShortcut}</div>`; 
         }
 
         function renderMyEvents() {
-            const container = document.getElementById('my-events-container');
-            const myEvents = allEvents.filter(evt => myBookedEventIds.includes(evt.id));
-            if (myEvents.length > 0) {
-                container.innerHTML = '';
-                myEvents.forEach((evt, index) => { container.innerHTML += generateEventCardHTML(evt, index); });
-                updateCountdowns();
-            } else {
-                container.innerHTML = `<div class="empty-state-box"><h2 style="font-size: 28px;">No Bookings Yet</h2><p style="color: var(--text-muted);">Explore the homepage to find your next event.</p><button class="btn btn-primary" style="margin-top:20px;" onclick="switchView('events-view')">Explore Events</button></div>`;
-            }
+            const container = document.getElementById('my-events-container'); const myEvents = allEvents.filter(evt => myBookedEventIds.includes(evt.id));
+            if (myEvents.length > 0) { container.innerHTML = ''; myEvents.forEach((evt, index) => { container.innerHTML += generateEventCardHTML(evt, index); }); updateCountdowns(); } 
+            else { container.innerHTML = `<div class="empty-state-box"><h2 style="font-size: 28px;">No Bookings Yet</h2><p style="color: var(--text-muted);">Explore the homepage to find your next event.</p><button class="btn btn-primary" style="margin-top:20px;" onclick="switchView('events-view')">Explore Events</button></div>`; }
         }
 
-        function deleteEvent(eventId, e) {
-            e.stopPropagation(); eventToDeleteId = eventId; document.getElementById('deleteConfirmModal').classList.add('active');
-        }
+        function deleteEvent(eventId, e) { e.stopPropagation(); eventToDeleteId = eventId; document.getElementById('deleteConfirmModal').classList.add('active'); }
 
         async function executeDeleteEvent() {
-            if (!eventToDeleteId) return;
-            const eventId = eventToDeleteId;
-            closeModal('deleteConfirmModal');
-            const originalEvents = [...allEvents];
-            allEvents = allEvents.filter(e => e.id !== eventId);
-            renderEventsUI();
-            if (!document.getElementById('my-events-view').classList.contains('hidden')) renderMyEvents();
-            showToast("Event removed successfully!", "success"); 
-
+            if (!eventToDeleteId) return; const eventId = eventToDeleteId; closeModal('deleteConfirmModal');
+            const originalEvents = [...allEvents]; allEvents = allEvents.filter(e => e.id !== eventId); renderEventsUI(); if (!document.getElementById('my-events-view').classList.contains('hidden')) renderMyEvents();
+            showToast("Processing deletion... ⏳", "success"); 
             try {
                 const response = await fetch(API_BASE + '/events/' + eventId, { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ role: currentUser.role }) });
-                if (response.ok) { if(currentUser.role === 'admin') populateAdminEventsDropdown(); } 
+                if (response.ok) { if(currentUser.role === 'admin') populateAdminEventsDropdown(); showToast("Event removed successfully! ✅", "success"); silentSync(); } 
                 else { throw new Error("Delete failed"); }
-            } catch (error) { 
-                allEvents = originalEvents; renderEventsUI(); showToast("Connection error. Failed to delete.", "error"); 
-            } finally { eventToDeleteId = null; }
+            } catch (error) { allEvents = originalEvents; renderEventsUI(); showToast("Connection error. Failed to delete.", "error"); } finally { eventToDeleteId = null; }
         }
 
         function openEditModal(eventId, e) {
-            e.stopPropagation();
-            const event = allEvents.find(e => e.id === eventId);
-            if(!event) return;
-            document.getElementById('editEventId').value = event.id;
-            document.getElementById('editEventTitle').value = event.title;
-            document.getElementById('editEventLocation').value = event.location;
-            document.getElementById('editEventDesc').value = event.description;
-            const dateObj = new Date(event.event_date);
-            document.getElementById('editEventDate').value = (new Date(dateObj - dateObj.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
-            document.getElementById('editEventModal').classList.add('active');
+            e.stopPropagation(); const event = allEvents.find(e => e.id === eventId); if(!event) return;
+            document.getElementById('editEventId').value = event.id; document.getElementById('editEventTitle').value = event.title; document.getElementById('editEventLocation').value = event.location; document.getElementById('editEventDesc').value = event.description;
+            const dateObj = new Date(event.event_date); document.getElementById('editEventDate').value = (new Date(dateObj - dateObj.getTimezoneOffset() * 60000)).toISOString().slice(0, 16); document.getElementById('editEventModal').classList.add('active');
         }
 
         async function submitEditEvent(e) {
-            e.preventDefault();
-            const coverInput = document.getElementById('editEventCover'); const galleryInput = document.getElementById('editEventImages');
-            const eventId = document.getElementById('editEventId').value;
-            const formData = new FormData();
-            formData.append('title', document.getElementById('editEventTitle').value);
-            formData.append('event_date', document.getElementById('editEventDate').value);
-            formData.append('location', document.getElementById('editEventLocation').value);
-            formData.append('description', document.getElementById('editEventDesc').value);
-            if(coverInput.files.length > 0) formData.append('cover', coverInput.files[0]);
-            for (let i = 0; i < galleryInput.files.length; i++) formData.append('images', galleryInput.files[i]);
-            
-            closeModal('editEventModal'); showToast("Updating experience in background... ⏳", "success"); 
-            try {
-                const response = await fetch(API_BASE + '/admin/events/' + eventId, { method: 'PUT', body: formData });
-                if (response.ok) { document.getElementById('editEventForm').reset(); loadEvents(); showToast("Experience Updated Successfully! 🚀", "success"); } 
-                else { showToast("Failed to update event.", "error"); }
-            } catch (error) { showToast("Error connecting to server.", "error"); } 
+            e.preventDefault(); const coverInput = document.getElementById('editEventCover'); const galleryInput = document.getElementById('editEventImages'); const eventId = document.getElementById('editEventId').value;
+            const title = document.getElementById('editEventTitle').value; const date = document.getElementById('editEventDate').value; const location = document.getElementById('editEventLocation').value; const desc = document.getElementById('editEventDesc').value;
+            const eventIndex = allEvents.findIndex(ev => ev.id === eventId);
+            if (eventIndex !== -1) {
+                allEvents[eventIndex].title = title; allEvents[eventIndex].event_date = date; allEvents[eventIndex].location = location; allEvents[eventIndex].description = desc;
+                if (coverInput.files.length > 0) { const localCover = URL.createObjectURL(coverInput.files[0]); let images = []; try { images = JSON.parse(allEvents[eventIndex].image_urls || '[]'); } catch(err){} if (images.length > 0) images[0] = localCover; else images.push(localCover); allEvents[eventIndex].image_urls = JSON.stringify(images); }
+            }
+            closeModal('editEventModal'); renderEventsUI(); if (!document.getElementById('my-events-view').classList.contains('hidden')) renderMyEvents(); showToast("Saving changes in background... ⏳", "success"); 
+            const formData = new FormData(); formData.append('title', title); formData.append('event_date', date); formData.append('location', location); formData.append('description', desc);
+            if(coverInput.files.length > 0) formData.append('cover', coverInput.files[0]); for (let i = 0; i < galleryInput.files.length; i++) formData.append('images', galleryInput.files[i]);
+            try { const response = await fetch(API_BASE + '/admin/events/' + eventId, { method: 'PUT', body: formData }); if (response.ok) { document.getElementById('editEventForm').reset(); showToast("Experience Updated Successfully! ✅", "success"); silentSync(); } else { showToast("Failed to update event on server.", "error"); } } catch (error) { showToast("Error connecting to server.", "error"); } 
         }
 
         function updateCountdowns() {
@@ -665,132 +577,68 @@
         }
 
         function openEventDetails(eventId) {
-            if(eventId.toString().startsWith('temp-')) return; // منمنعش فتح التفاصيل للإيفنت المؤقت
-            const event = allEvents.find(e => e.id === eventId);
-            if(!event) return;
-            selectedEventIdForRSVP = eventId;
-            document.getElementById('detailsTitle').innerText = event.title;
-            document.getElementById('detailsDesc').innerText = event.description;
-            const dateObj = new Date(event.event_date);
-            document.getElementById('detailsTags').innerHTML = `<span class="tag">📅 ${dateObj.toLocaleDateString('en-US')}</span><span class="tag">⏰ ${dateObj.toLocaleTimeString('en-US', {hour:'numeric', minute:'2-digit'})}</span><span class="tag">📍 ${event.location}</span>`;
+            if(eventId.toString().startsWith('temp-')) return; 
+            const event = allEvents.find(e => e.id === eventId); if(!event) return; selectedEventIdForRSVP = eventId;
+            document.getElementById('detailsTitle').innerText = event.title; document.getElementById('detailsDesc').innerText = event.description;
+            const dateObj = new Date(event.event_date); document.getElementById('detailsTags').innerHTML = `<span class="tag">📅 ${dateObj.toLocaleDateString('en-US')}</span><span class="tag">⏰ ${dateObj.toLocaleTimeString('en-US', {hour:'numeric', minute:'2-digit'})}</span><span class="tag">📍 ${event.location}</span>`;
             try { currentSliderImages = JSON.parse(event.image_urls || '[]').slice(1); } catch(e){ currentSliderImages = []; }
-            const sliderWrapper = document.getElementById('sliderWrapper');
-            if(currentSliderImages.length > 0) { sliderWrapper.classList.remove('hidden'); currentSlideIndex = 0; updateSliderView(); } else { sliderWrapper.classList.add('hidden'); }
-
+            const sliderWrapper = document.getElementById('sliderWrapper'); if(currentSliderImages.length > 0) { sliderWrapper.classList.remove('hidden'); currentSlideIndex = 0; updateSliderView(); } else { sliderWrapper.classList.add('hidden'); }
             const rsvpBtn = document.getElementById('mainRsvpBtn');
-            if (myBookedEventIds.includes(eventId)) {
-                rsvpBtn.innerText = 'Cancel Reservation ❌'; rsvpBtn.style.background = 'transparent'; rsvpBtn.style.border = '1px solid #ef4444'; rsvpBtn.style.color = '#ef4444'; rsvpBtn.onclick = () => cancelRSVP(eventId);
-            } else {
-                rsvpBtn.innerText = 'Reserve Spot'; rsvpBtn.style.background = 'var(--primary)'; rsvpBtn.style.border = 'none'; rsvpBtn.style.color = 'var(--primary-invert)'; rsvpBtn.onclick = () => proceedToRSVP();
-            }
+            if (myBookedEventIds.includes(eventId)) { rsvpBtn.innerText = 'Cancel Reservation ❌'; rsvpBtn.style.background = 'transparent'; rsvpBtn.style.border = '1px solid #ef4444'; rsvpBtn.style.color = '#ef4444'; rsvpBtn.onclick = () => cancelRSVP(eventId); } 
+            else { rsvpBtn.innerText = 'Reserve Spot'; rsvpBtn.style.background = 'var(--primary)'; rsvpBtn.style.border = 'none'; rsvpBtn.style.color = 'var(--primary-invert)'; rsvpBtn.onclick = () => proceedToRSVP(); }
             document.getElementById('eventDetailsModal').classList.add('active');
         }
 
-        function updateSliderView() {
-            document.getElementById('sliderMainImg').src = currentSliderImages[currentSlideIndex];
-            document.querySelectorAll('.slider-btn').forEach(btn => btn.style.display = currentSliderImages.length > 1 ? 'block' : 'none');
-            document.getElementById('sliderCounter').innerText = currentSliderImages.length > 0 ? `${currentSlideIndex + 1} / ${currentSliderImages.length}` : '';
-        }
-
+        function updateSliderView() { document.getElementById('sliderMainImg').src = currentSliderImages[currentSlideIndex]; document.querySelectorAll('.slider-btn').forEach(btn => btn.style.display = currentSliderImages.length > 1 ? 'block' : 'none'); document.getElementById('sliderCounter').innerText = currentSliderImages.length > 0 ? `${currentSlideIndex + 1} / ${currentSliderImages.length}` : ''; }
         function changeSlide(dir) { if(currentSliderImages.length <= 1) return; currentSlideIndex = (currentSlideIndex + dir + currentSliderImages.length) % currentSliderImages.length; updateSliderView(); }
 
         function proceedToRSVP() {
             if (!currentUser) { closeModal('eventDetailsModal'); showToast("Please log in to reserve a spot.", "error"); setTimeout(() => openAuthModal(true), 500); return; }
             closeModal('eventDetailsModal');
-            document.getElementById('rsvpName').value = currentUser.name;
-            document.getElementById('rsvpEmail').value = (currentUser.active_email === 'secondary' && currentUser.secondary_email) ? currentUser.secondary_email : currentUser.email;
-            document.getElementById('rsvpPhone').value = (currentUser.active_phone === 'secondary' && currentUser.secondary_phone) ? currentUser.secondary_phone : (currentUser.phone || '');
+            document.getElementById('rsvpName').value = currentUser.name; document.getElementById('rsvpEmail').value = (currentUser.active_email === 'secondary' && currentUser.secondary_email) ? currentUser.secondary_email : currentUser.email; document.getElementById('rsvpPhone').value = (currentUser.active_phone === 'secondary' && currentUser.secondary_phone) ? currentUser.secondary_phone : (currentUser.phone || '');
             document.getElementById('rsvpModal').classList.add('active');
         }
 
         async function submitRSVP(e) {
             e.preventDefault(); const eventId = selectedEventIdForRSVP;
-            myBookedEventIds.push(eventId); closeModal('rsvpModal'); renderEventsUI(); showToast("Spot Booked Successfully! 🎉", "success");
+            myBookedEventIds.push(eventId); closeModal('rsvpModal'); renderEventsUI(); showToast("Processing booking... ⏳", "success");
             const payload = { name: document.getElementById('rsvpName').value, email: document.getElementById('rsvpEmail').value, phone: document.getElementById('rsvpPhone').value, event_id: eventId };
             try {
                 const response = await fetch(API_BASE + '/rsvp', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
                 if (!response.ok) throw new Error("Booking failed");
-                pollNotifications(); 
-            } catch (error) { myBookedEventIds = myBookedEventIds.filter(id => id !== eventId); renderEventsUI(); showToast("Booking failed.", "error"); }
+                showToast("Spot Booked Successfully! 🎉", "success"); pollNotifications(); silentSync();
+            } catch (error) { myBookedEventIds = myBookedEventIds.filter(id => id !== eventId); renderEventsUI(); showToast("Booking failed. Spot unavailable.", "error"); }
         }
 
         function cancelRSVP(eventId) { rsvpToCancelEventId = eventId; document.getElementById('cancelRsvpConfirmModal').classList.add('active'); }
 
         async function executeCancelRSVP() {
-            if (!rsvpToCancelEventId) return; const eventId = rsvpToCancelEventId;
-            const activeEmail = (currentUser.active_email === 'secondary' && currentUser.secondary_email) ? currentUser.secondary_email : currentUser.email;
-            closeModal('cancelRsvpConfirmModal'); closeModal('eventDetailsModal'); 
-            myBookedEventIds = myBookedEventIds.filter(id => id !== eventId); renderEventsUI(); if (!document.getElementById('my-events-view').classList.contains('hidden')) { renderMyEvents(); }
-            showToast("Reservation canceled successfully", "success");
+            if (!rsvpToCancelEventId) return; const eventId = rsvpToCancelEventId; const activeEmail = (currentUser.active_email === 'secondary' && currentUser.secondary_email) ? currentUser.secondary_email : currentUser.email;
+            closeModal('cancelRsvpConfirmModal'); closeModal('eventDetailsModal'); myBookedEventIds = myBookedEventIds.filter(id => id !== eventId); renderEventsUI(); if (!document.getElementById('my-events-view').classList.contains('hidden')) { renderMyEvents(); }
+            showToast("Processing cancellation... ⏳", "success");
             try {
                 const response = await fetch(API_BASE + '/rsvp', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: activeEmail, event_id: eventId }) });
                 if (!response.ok) throw new Error("Cancel failed");
-                pollNotifications(); 
-            } catch (error) { myBookedEventIds.push(eventId); renderEventsUI(); if (!document.getElementById('my-events-view').classList.contains('hidden')) renderMyEvents(); showToast("Failed to cancel.", "error"); } 
-            finally { rsvpToCancelEventId = null; }
+                showToast("Reservation canceled successfully ✅", "success"); pollNotifications(); silentSync();
+            } catch (error) { myBookedEventIds.push(eventId); renderEventsUI(); if (!document.getElementById('my-events-view').classList.contains('hidden')) renderMyEvents(); showToast("Failed to cancel.", "error"); } finally { rsvpToCancelEventId = null; }
         }
 
         async function submitNewEvent(e) {
-            e.preventDefault(); 
+            e.preventDefault(); const title = document.getElementById('newEventTitle').value; const date = document.getElementById('newEventDate').value; const location = document.getElementById('newEventLocation').value; const desc = document.getElementById('newEventDesc').value; const coverInput = document.getElementById('newEventCover'); const galleryInput = document.getElementById('newEventImages');
+            let totalSize = 0; if (coverInput && coverInput.files.length > 0) totalSize += coverInput.files[0].size; if (galleryInput && galleryInput.files.length > 0) { for (let i = 0; i < galleryInput.files.length; i++) totalSize += galleryInput.files[i].size; }
+            if (totalSize > 4 * 1024 * 1024) { showToast("Total images size exceeds the 4MB limit.", "error"); return; } if (galleryInput.files.length > 5) { showToast("Maximum 5 gallery images allowed!", "error"); return; }
             
-            const title = document.getElementById('newEventTitle').value;
-            const date = document.getElementById('newEventDate').value;
-            const location = document.getElementById('newEventLocation').value;
-            const desc = document.getElementById('newEventDesc').value;
-            const coverInput = document.getElementById('newEventCover'); 
-            const galleryInput = document.getElementById('newEventImages');
+            const tempId = 'temp-' + Date.now(); let localCover = ''; if (coverInput.files.length > 0) localCover = URL.createObjectURL(coverInput.files[0]);
+            const tempEvent = { id: tempId, title: title, event_date: date, location: location, description: desc, image_urls: JSON.stringify(localCover ? [localCover] : []), created_by: currentUser.id };
+            allEvents.unshift(tempEvent); renderEventsUI(); closeModal('createEventModal'); showToast("Publishing in background... please wait ⏳", "success");
 
-            let totalSize = 0;
-            if (coverInput && coverInput.files.length > 0) totalSize += coverInput.files[0].size;
-            if (galleryInput && galleryInput.files.length > 0) {
-                for (let i = 0; i < galleryInput.files.length; i++) totalSize += galleryInput.files[i].size;
-            }
-
-            if (totalSize > 4 * 1024 * 1024) { showToast("Total images size exceeds the 4MB limit.", "error"); return; }
-            if (galleryInput.files.length > 5) { showToast("Maximum 5 gallery images allowed!", "error"); return; }
-            
-            // Optimistic UI for Event Creation (Fast Render)
-            const tempId = 'temp-' + Date.now();
-            let localCover = '';
-            if (coverInput.files.length > 0) {
-                localCover = URL.createObjectURL(coverInput.files[0]);
-            }
-            
-            const tempEvent = {
-                id: tempId, title: title, event_date: date, location: location, description: desc,
-                image_urls: JSON.stringify(localCover ? [localCover] : []), created_by: currentUser.id
-            };
-            
-            allEvents.unshift(tempEvent); // إضافة في البداية فوراً
-            renderEventsUI();
-            
-            closeModal('createEventModal'); 
-            showToast("Publishing in background... please wait ⏳", "success");
-
-            const formData = new FormData();
-            formData.append('title', title); formData.append('event_date', date); 
-            formData.append('location', location); formData.append('description', desc); 
-            formData.append('created_by', currentUser.id);
-            
-            if(coverInput.files.length > 0) formData.append('cover', coverInput.files[0]);
-            for (let i = 0; i < galleryInput.files.length; i++) formData.append('images', galleryInput.files[i]);
-            
+            const formData = new FormData(); formData.append('title', title); formData.append('event_date', date); formData.append('location', location); formData.append('description', desc); formData.append('created_by', currentUser.id);
+            if(coverInput.files.length > 0) formData.append('cover', coverInput.files[0]); for (let i = 0; i < galleryInput.files.length; i++) formData.append('images', galleryInput.files[i]);
             try {
                 const response = await fetch(API_BASE + '/admin/events', { method: 'POST', body: formData });
-                if (response.ok) { 
-                    document.getElementById('createEventForm').reset(); 
-                    // مسح الكارت الوهمي وجلب الحقيقي
-                    allEvents = allEvents.filter(e => e.id !== tempId);
-                    loadEvents(); 
-                    showToast("Experience Published! 🚀", "success"); 
-                    pollNotifications(); 
-                } 
+                if (response.ok) { document.getElementById('createEventForm').reset(); allEvents = allEvents.filter(e => e.id !== tempId); loadEvents(); showToast("Experience Published! 🚀", "success"); pollNotifications(); silentSync(); } 
                 else { throw new Error("Upload Failed"); }
-            } catch (error) { 
-                allEvents = allEvents.filter(e => e.id !== tempId); // إزالة الكارت الوهمي لو حصل إيرور
-                renderEventsUI();
-                showToast("Error connecting. Event not published.", "error"); 
-            } 
+            } catch (error) { allEvents = allEvents.filter(e => e.id !== tempId); renderEventsUI(); showToast("Error connecting. Event not published.", "error"); } 
         }
 
         function toggleAuthMode() { openAuthModal(!isLoginMode); }
@@ -804,21 +652,13 @@
             e.preventDefault(); const payload = { email: document.getElementById('authEmail').value, password: document.getElementById('authPassword').value };
             if(!isLoginMode) { payload.name = document.getElementById('authName').value; payload.phone = document.getElementById('authPhone').value; }
             try {
-                const response = await fetch(API_BASE + (isLoginMode ? '/login' : '/signup'), { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-                const result = await response.json();
-                if (response.ok) {
-                    if (isLoginMode) { currentUser = result.data; localStorage.setItem('user', JSON.stringify(currentUser)); updateNavbar(); closeModal('authModal'); loadEvents(); showToast(`Welcome back, ${currentUser.name.split(' ')[0]}!`, "success"); startNotificationPolling(); } 
-                    else { showToast("Account created successfully! Please log in.", "success"); openAuthModal(true); }
-                } else showToast(result.message, "error");
+                const response = await fetch(API_BASE + (isLoginMode ? '/login' : '/signup'), { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }); const result = await response.json();
+                if (response.ok) { if (isLoginMode) { currentUser = result.data; localStorage.setItem('user', JSON.stringify(currentUser)); updateNavbar(); closeModal('authModal'); loadEvents(); showToast(`Welcome back, ${currentUser.name.split(' ')[0]}!`, "success"); startNotificationPolling(); } else { showToast("Account created successfully! Please log in.", "success"); openAuthModal(true); } } else showToast(result.message, "error");
             } catch (error) { showToast("Authentication failed.", "error"); }
         }
 
         function openProfileModal() {
-            if(!currentUser) return;
-            document.getElementById('profileAvatarImg').src = currentUser.avatar_url || `https://ui-avatars.com/api/?name=${currentUser.name}&background=111&color=fff`;
-            document.getElementById('profilePrimaryEmail').value = currentUser.email || ''; document.getElementById('profileSecondaryEmail').value = currentUser.secondary_email || ''; document.getElementById('profileActiveEmail').value = currentUser.active_email || 'primary';
-            document.getElementById('profilePrimaryPhone').value = currentUser.phone || ''; document.getElementById('profileSecondaryPhone').value = currentUser.secondary_phone || ''; document.getElementById('profileActivePhone').value = currentUser.active_phone || 'primary';
-            document.getElementById('profileModal').classList.add('active');
+            if(!currentUser) return; document.getElementById('profileAvatarImg').src = currentUser.avatar_url || `https://ui-avatars.com/api/?name=${currentUser.name}&background=111&color=fff`; document.getElementById('profilePrimaryEmail').value = currentUser.email || ''; document.getElementById('profileSecondaryEmail').value = currentUser.secondary_email || ''; document.getElementById('profileActiveEmail').value = currentUser.active_email || 'primary'; document.getElementById('profilePrimaryPhone').value = currentUser.phone || ''; document.getElementById('profileSecondaryPhone').value = currentUser.secondary_phone || ''; document.getElementById('profileActivePhone').value = currentUser.active_phone || 'primary'; document.getElementById('profileModal').classList.add('active');
         }
 
         function previewAvatar(event) { const file = event.target.files[0]; if (file) { const reader = new FileReader(); reader.onload = function(e) { document.getElementById('profileAvatarImg').src = e.target.result; }; reader.readAsDataURL(file); } }
@@ -826,83 +666,38 @@
         function viewAttendeeFullAvatar() { const avatarSrc = document.getElementById('viewAttendeeAvatar').src; if (avatarSrc && avatarSrc !== window.location.href) { document.getElementById('fullSizeAvatar').src = avatarSrc; document.getElementById('avatarViewerModal').classList.add('active'); } }
 
         async function submitProfile(e) {
-            e.preventDefault(); const formData = new FormData();
-            formData.append('email', currentUser.email); formData.append('secondary_email', document.getElementById('profileSecondaryEmail').value); formData.append('secondary_phone', document.getElementById('profileSecondaryPhone').value); 
+            e.preventDefault(); const formData = new FormData(); formData.append('email', currentUser.email); formData.append('secondary_email', document.getElementById('profileSecondaryEmail').value); formData.append('secondary_phone', document.getElementById('profileSecondaryPhone').value); 
             const fileInput = document.getElementById('profileAvatarFile'); if (fileInput.files.length > 0) formData.append('avatar', fileInput.files[0]);
             currentUser.secondary_email = document.getElementById('profileSecondaryEmail').value; currentUser.secondary_phone = document.getElementById('profileSecondaryPhone').value; currentUser.active_email = document.getElementById('profileActiveEmail').value; currentUser.active_phone = document.getElementById('profileActivePhone').value;
             if (fileInput.files.length > 0) { const reader = new FileReader(); reader.onload = function(ev) { currentUser.avatar_url = ev.target.result; localStorage.setItem('user', JSON.stringify(currentUser)); updateNavbar(); }; reader.readAsDataURL(fileInput.files[0]); } else { localStorage.setItem('user', JSON.stringify(currentUser)); updateNavbar(); }
             closeModal('profileModal'); showToast("Profile updating in background... ⏳", "success"); 
-            try { await fetch(API_BASE + '/update', { method: 'POST', body: formData }); showToast("Profile updated successfully! ✅", "success"); } catch(error) { showToast("Failed to connect.", "error"); } 
+            try { await fetch(API_BASE + '/update', { method: 'POST', body: formData }); showToast("Profile updated successfully! ✅", "success"); silentSync(); } catch(error) { showToast("Failed to connect.", "error"); } 
         }
         
         function populateAdminEventsDropdown() { fetch(API_BASE + '/events').then(res => res.json()).then(result => { const select = document.getElementById('adminEventSelect'); select.innerHTML = '<option value="">-- Select --</option>'; result.data.forEach(evt => select.innerHTML += `<option value="${evt.id}">${evt.title}</option>`); }); }
 
         function renderAttendeesTable(data) {
-            const tbody = document.getElementById('attendeesTable'); 
-            const countBadge = document.getElementById('attendeeCount');
-            if (countBadge) countBadge.innerText = data.length; 
-            
-            const exportBtn = document.getElementById('exportBtn');
-            
-            if(data.length === 0) { 
-                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color: var(--text-muted); padding: 30px;">No RSVPs yet.</td></tr>'; 
-                if(exportBtn) exportBtn.style.display = 'none'; 
-            } 
-            else { 
-                tbody.innerHTML = data.map((person, index) => {
-                    const displayName = person.full_name || person.name || 'User'; 
-                    const avatar = person.avatar_url || `https://ui-avatars.com/api/?name=${displayName}&background=111&color=fff`;
+            const tbody = document.getElementById('attendeesTable'); const exportBtn = document.getElementById('exportBtn'); const countBadge = document.getElementById('attendeeCount'); if (countBadge) countBadge.innerText = data.length; 
+            if(data.length === 0) { tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color: var(--text-muted); padding: 30px;">No RSVPs yet.</td></tr>'; if(exportBtn) exportBtn.style.display = 'none'; } 
+            else { tbody.innerHTML = data.map((person, index) => {
+                    const displayName = person.full_name || person.name || 'User'; const avatar = person.avatar_url || `https://ui-avatars.com/api/?name=${displayName}&background=111&color=fff`;
                     return `<tr><td style="display:flex; align-items:center; gap:10px;"><img src="${avatar}" style="width:32px; height:32px; border-radius:50%; object-fit:cover; border: 1px solid var(--border);"><span style="font-weight: 500;">${displayName}</span></td><td style="color: var(--text-muted);">${person.email}</td><td style="color: var(--text-muted);">${person.phone_number || person.phone || '-'}</td><td><div style="display: flex; gap: 8px;"><button class="btn btn-outline" style="padding: 6px 12px; font-size: 11px;" onclick="viewAttendeeProfile(${index})">View Profile</button><button class="btn btn-outline" style="padding: 6px 12px; font-size: 11px; color: #ef4444; border-color: rgba(239, 68, 68, 0.4);" onclick="removeAttendee(${index})">Remove</button></div></td></tr>`;
-                }).join(''); 
-                if(exportBtn) exportBtn.style.display = 'flex'; 
-            }
+                }).join(''); if(exportBtn) exportBtn.style.display = 'flex'; }
         }
         
         async function loadRSVPs() {
-            const eventId = document.getElementById('adminEventSelect').value; 
-            const tbody = document.getElementById('attendeesTable'); 
-            const exportBtn = document.getElementById('exportBtn');
-            
-            tbody.innerHTML = ''; 
-            document.getElementById('attendeeCount').innerText = '0'; 
-            if(exportBtn) exportBtn.style.display = 'none'; 
-            
-            if(!eventId) {
-                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color: var(--text-muted); padding: 30px;">Please select an event from the dropdown above to view its attendees.</td></tr>';
-                return;
-            }
-
+            const eventId = document.getElementById('adminEventSelect').value; const tbody = document.getElementById('attendeesTable'); const exportBtn = document.getElementById('exportBtn');
+            tbody.innerHTML = ''; document.getElementById('attendeeCount').innerText = '0'; if(exportBtn) exportBtn.style.display = 'none'; 
+            if(!eventId) { tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color: var(--text-muted); padding: 30px;">Please select an event from the dropdown above to view its attendees.</td></tr>'; return; }
             tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color: var(--text-muted); padding: 30px;">Loading attendees... ⏳</td></tr>';
-
             try {
-                const response = await fetch(API_BASE + `/admin/rsvps/${eventId}`);
-                
-                // لو السيرفر رجع إيرور 404 أو 500
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    console.error("Vercel Server Error:", errorText);
-                    throw new Error(`Server returned status ${response.status}`);
-                }
-
-                const result = await response.json();
-                
-                if(result.status === 'success') {
-                    // تأمين إضافي لو السيرفر مرجعش داتا
-                    currentAttendeesData = result.data || []; 
-                    renderAttendeesTable(currentAttendeesData);
-                } else {
-                    console.error("Backend Logic Error:", result.message);
-                    tbody.innerHTML = `<tr><td colspan="4" style="color:#ef4444; text-align:center; padding: 30px;">Error: ${result.message}</td></tr>`;
-                }
-            } catch (error) { 
-                console.error("Detailed Fetch Error:", error);
-                tbody.innerHTML = '<tr><td colspan="4" style="color:#ef4444; text-align:center; padding: 30px;">Error loading data. Please check the Console (F12) for details.</td></tr>'; 
-            }
+                const response = await fetch(API_BASE + `/admin/rsvps/${eventId}`); if (!response.ok) throw new Error(); const result = await response.json();
+                if(result.status === 'success') { currentAttendeesData = result.data || []; renderAttendeesTable(currentAttendeesData); } else { throw new Error(result.message); }
+            } catch (error) { tbody.innerHTML = '<tr><td colspan="4" style="color:#ef4444; text-align:center; padding: 30px;">Error loading data.</td></tr>'; }
         }
 
         function viewAttendeeProfile(index) {
-            const person = currentAttendeesData[index]; if (!person) return;
-            const displayName = person.full_name || person.name || 'User'; const avatar = person.avatar_url || `https://ui-avatars.com/api/?name=${displayName}&background=111&color=fff`;
+            const person = currentAttendeesData[index]; if (!person) return; const displayName = person.full_name || person.name || 'User'; const avatar = person.avatar_url || `https://ui-avatars.com/api/?name=${displayName}&background=111&color=fff`;
             document.getElementById('viewAttendeeAvatar').src = avatar; document.getElementById('viewAttendeeName').innerText = displayName; document.getElementById('viewAttendeeEmail').innerText = person.email || 'N/A'; document.getElementById('viewAttendeePhone').innerText = person.phone_number || person.phone || 'Not provided'; document.getElementById('viewAttendeeSecEmail').innerText = person.secondary_email || 'Not provided'; document.getElementById('viewAttendeeSecPhone').innerText = person.secondary_phone || 'Not provided'; document.getElementById('attendeeProfileModal').classList.add('active');
         }
 
@@ -911,14 +706,14 @@
         }
 
         async function executeRemoveAttendee() {
-            if (attendeeToRemoveIndex === null) return;
-            const index = attendeeToRemoveIndex; const person = currentAttendeesData[index]; const eventId = document.getElementById('adminEventSelect').value;
-            const reason = document.getElementById('removeReason').value || "Admin discretion";
+            if (attendeeToRemoveIndex === null) return; const index = attendeeToRemoveIndex; const person = currentAttendeesData[index]; const eventId = document.getElementById('adminEventSelect').value;
+            const reasonInput = document.getElementById('removeReason'); const reason = reasonInput.value.trim();
+            if (!reason) { showToast("⚠️ You must write a reason for removal!", "error"); reasonInput.focus(); return; }
             
-            closeModal('removeAttendeeConfirmModal'); const originalAttendees = [...currentAttendeesData]; currentAttendeesData.splice(index, 1); renderAttendeesTable(currentAttendeesData); showToast("Attendee removed successfully", "success");
+            closeModal('removeAttendeeConfirmModal'); const originalAttendees = [...currentAttendeesData]; currentAttendeesData.splice(index, 1); renderAttendeesTable(currentAttendeesData); showToast("Processing removal... ⏳", "success");
             try {
                 const response = await fetch(API_BASE + '/rsvp', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: person.email, event_id: eventId, reason: reason, admin_name: currentUser.name }) });
-                if (!response.ok) throw new Error("Failed");
+                if (!response.ok) throw new Error("Failed"); reasonInput.value = ''; showToast("Attendee removed successfully! ✅", "success"); silentSync();
             } catch (error) { currentAttendeesData = originalAttendees; renderAttendeesTable(currentAttendeesData); showToast("Connection error. Attendee not removed.", "error"); } finally { attendeeToRemoveIndex = null; }
         }
 
