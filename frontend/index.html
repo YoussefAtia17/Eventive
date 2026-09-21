@@ -75,8 +75,11 @@
         .event-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 15px; }
         .tag { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; color: var(--text-muted); border: 1px solid var(--border); padding: 6px 12px; border-radius: 20px; text-transform: uppercase; background: rgba(255,255,255,0.03); }
         
-        .desc-fade { position: relative; height: 48px; overflow: hidden; color: var(--text-muted); font-size: 14px; margin-bottom: 25px; word-break: break-all; overflow-wrap: anywhere; white-space: normal; }
-        .desc-fade::after { content: ""; position: absolute; bottom: 0; left: 0; right: 0; height: 30px; background: linear-gradient(transparent, var(--bg-surface)); }
+        .desc-fade { 
+            color: var(--text-muted); font-size: 14px; margin-bottom: 25px; 
+            display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; 
+            overflow: hidden; text-overflow: ellipsis; word-break: break-word; 
+        }
 
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(8px); display: flex; justify-content: center; align-items: center; z-index: 1000; opacity: 0; pointer-events: none; transition: var(--transition); }
         .modal-overlay.active { opacity: 1; pointer-events: auto; }
@@ -179,7 +182,7 @@
             <form id="createEventForm" onsubmit="submitNewEvent(event)">
                 <input type="text" id="newEventTitle" class="form-input" placeholder="Event Title" required>
                 <div style="display: flex; gap: 15px;"><input type="datetime-local" id="newEventDate" class="form-input" required><input type="text" id="newEventLocation" class="form-input" placeholder="Location" required></div>
-                <textarea id="newEventDesc" class="form-input" placeholder="Event Description..." rows="4" required></textarea>
+                <textarea id="newEventDesc" class="form-input" placeholder="Event Description (Max 1000 chars)..." rows="4" maxlength="1000" required></textarea>
                 <div style="background: rgba(255,255,255,0.02); padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px dashed var(--border);">
                     <label style="font-size: 13px; color: var(--primary); display: block; margin-bottom: 5px; font-weight: 600;">Main Cover Image (Required)</label>
                     <input type="file" id="newEventCover" class="form-input" accept="image/*" required style="margin-bottom: 10px;">
@@ -198,7 +201,7 @@
             <form id="editEventForm" onsubmit="submitEditEvent(event)">
                 <input type="hidden" id="editEventId"><input type="text" id="editEventTitle" class="form-input" required>
                 <div style="display: flex; gap: 15px;"><input type="datetime-local" id="editEventDate" class="form-input" required><input type="text" id="editEventLocation" class="form-input" required></div>
-                <textarea id="editEventDesc" class="form-input" rows="4" required></textarea>
+                <textarea id="editEventDesc" class="form-input" placeholder="Event Description (Max 1000 chars)..." rows="4" maxlength="1000" required></textarea>
                 <div style="background: rgba(255,255,255,0.02); padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px dashed var(--border);">
                     <input type="file" id="editEventCover" class="form-input" accept="image/*" style="margin-bottom: 10px;">
                     <input type="file" id="editEventImages" class="form-input" accept="image/*" multiple style="margin-bottom: 0;">
@@ -218,7 +221,7 @@
                 <div id="sliderCounter" style="position: absolute; bottom: 10px; right: 10px; background: rgba(0,0,0,0.6); color: white; padding: 2px 8px; border-radius: 10px; font-size: 11px;"></div>
             </div>
             <div class="event-tags" id="detailsTags"></div>
-            <p id="detailsDesc" style="color: var(--text-muted); font-size: 14px; margin-bottom: 25px; white-space: pre-wrap; word-break: break-all; overflow-wrap: anywhere; max-height: 40vh; overflow-y: auto; padding-right: 5px;"></p>
+            <p id="detailsDesc" style="color: var(--text-muted); font-size: 14px; margin-bottom: 25px; white-space: pre-wrap; word-wrap: break-word; overflow-wrap: break-word; max-height: 35vh; overflow-y: auto; padding-right: 10px;"></p>
             <button id="mainRsvpBtn" class="btn btn-primary" style="width: 100%;"></button>
         </div>
     </div>
@@ -372,7 +375,6 @@
             if (!currentUser) return;
             const activeEmail = (currentUser.active_email === 'secondary' && currentUser.secondary_email) ? currentUser.secondary_email : currentUser.email;
             try {
-                // 1. Sync User's RSVPs silently
                 const rsvpRes = await fetch(API_BASE + '/my-rsvps?email=' + encodeURIComponent(activeEmail));
                 if (rsvpRes.ok) {
                     const rsvpResult = await rsvpRes.json();
@@ -386,7 +388,6 @@
                         }
                     }
                 }
-                // 2. Sync Admin Dashboard silently if it's currently open
                 const adminView = document.getElementById('admin-view');
                 if (currentUser.role === 'admin' && !adminView.classList.contains('hidden')) {
                     const eventId = document.getElementById('adminEventSelect').value;
@@ -413,7 +414,7 @@
 
         async function pollNotifications() {
             if (!currentUser) return;
-            silentSync(); // Sync data silently every time we poll for notifications
+            silentSync(); 
             const activeEmail = (currentUser.active_email === 'secondary' && currentUser.secondary_email) ? currentUser.secondary_email : currentUser.email;
             try {
                 const response = await fetch(API_BASE + `/notifications?email=${encodeURIComponent(activeEmail)}`);
@@ -472,9 +473,7 @@
             document.getElementById('events-view').classList.add('hidden'); document.getElementById('admin-view').classList.add('hidden'); document.getElementById('my-events-view').classList.add('hidden');
             const targetView = document.getElementById(viewId); targetView.classList.remove('hidden'); void targetView.offsetWidth; 
             
-            // Force Data Sync when switching views
             silentSync();
-            
             if(viewId === 'admin-view' && currentUser?.role === 'admin') { populateAdminEventsDropdown(); loadRSVPs(); } 
             if(viewId === 'my-events-view') renderMyEvents(); 
         }
