@@ -13,7 +13,7 @@
             --radius-pill: 50px; --radius-card: 16px; --transition: all 0.3s ease;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { background-color: var(--bg-body); color: var(--text-main); font-family: 'Inter', sans-serif; line-height: 1.6; min-height: 100vh; }
+        body { background-color: var(--bg-body); color: var(--text-main); font-family: 'Inter', sans-serif; line-height: 1.6; min-height: 100vh; overflow-x: hidden; }
         h1, h2, h3, .logo { font-family: 'Playfair Display', serif; font-weight: 700; }
         
         .navbar {
@@ -29,6 +29,18 @@
             border-radius: var(--radius-pill); border: 1px solid var(--border); cursor: pointer; transition: var(--transition);
         }
         .profile-badge:hover { background: rgba(255,255,255,0.05); }
+
+        .notif-btn {
+            background: transparent; border: 1px solid var(--border); color: var(--text-main);
+            width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; position: relative; transition: var(--transition);
+        }
+        .notif-btn:hover { background: rgba(255,255,255,0.05); }
+        .notif-badge {
+            position: absolute; top: -2px; right: -2px; background: #ef4444; color: white;
+            font-size: 10px; font-weight: 700; width: 18px; height: 18px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; border: 2px solid var(--bg-body);
+        }
         
         .btn {
             padding: 12px 20px; border-radius: var(--radius-pill); border: none; font-weight: 500;
@@ -55,61 +67,26 @@
         .event-card { position: relative; cursor: pointer; transition: transform 0.3s ease, border-color 0.3s; }
         .event-card:hover { transform: translateY(-5px); border-color: rgba(255,255,255,0.3); }
         
-        .card-cover {
-            height: 180px; width: calc(100% + 60px); margin: -30px -30px 20px -30px;
-            background-size: cover; background-position: center; background-repeat: no-repeat;
-            border-bottom: 1px solid var(--border);
-            position: relative;
-        }
+        .card-cover { height: 180px; width: calc(100% + 60px); margin: -30px -30px 20px -30px; background-size: cover; background-position: center; border-bottom: 1px solid var(--border); position: relative; }
         
-        .countdown {
-            position: absolute; top: 20px; right: 20px; 
-            background: rgba(0, 0, 0, 0.75);
-            backdrop-filter: blur(8px); padding: 6px 12px; border-radius: 8px; 
-            font-size: 11px; font-weight: 600; color: #fff; border: 1px solid rgba(255,255,255,0.1);
-            letter-spacing: 0.5px; z-index: 10;
-        }
-
-        .registered-badge {
-            position: absolute; top: 20px; left: 20px; 
-            background: rgba(16, 185, 129, 0.9);
-            backdrop-filter: blur(8px); padding: 6px 12px; border-radius: 8px; 
-            font-size: 11px; font-weight: 700; color: #fff; border: 1px solid rgba(255,255,255,0.2);
-            z-index: 10; box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-        }
+        .countdown { position: absolute; top: 20px; right: 20px; background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(8px); padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 600; color: #fff; border: 1px solid rgba(255,255,255,0.1); z-index: 10; }
+        .registered-badge { position: absolute; top: 20px; left: 20px; background: rgba(16, 185, 129, 0.9); backdrop-filter: blur(8px); padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 700; color: #fff; z-index: 10; }
 
         .event-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 15px; }
-        .tag {
-            display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; 
-            color: var(--text-muted); border: 1px solid var(--border); padding: 6px 12px; 
-            border-radius: 20px; text-transform: uppercase; background: rgba(255,255,255,0.03);
-        }
-
+        .tag { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; color: var(--text-muted); border: 1px solid var(--border); padding: 6px 12px; border-radius: 20px; text-transform: uppercase; background: rgba(255,255,255,0.03); }
         .desc-fade { position: relative; max-height: 48px; overflow: hidden; color: var(--text-muted); font-size: 14px; margin-bottom: 25px; }
         .desc-fade::after { content: ""; position: absolute; bottom: 0; left: 0; right: 0; height: 30px; background: linear-gradient(transparent, var(--bg-surface)); }
 
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.85); 
-            backdrop-filter: blur(8px); display: flex; justify-content: center; align-items: center;
-            z-index: 1000; opacity: 0; pointer-events: none; transition: var(--transition);
-        }
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(8px); display: flex; justify-content: center; align-items: center; z-index: 1000; opacity: 0; pointer-events: none; transition: var(--transition); }
         .modal-overlay.active { opacity: 1; pointer-events: auto; }
-        .modal-content { 
-            background: var(--bg-surface); padding: 35px; border-radius: var(--radius-card); 
-            width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; border: 1px solid var(--border); 
-            transform: scale(0.95); transition: var(--transition); 
-        }
+        .modal-content { background: var(--bg-surface); padding: 35px; border-radius: var(--radius-card); width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; border: 1px solid var(--border); transform: scale(0.95); transition: var(--transition); }
         .modal-overlay.active .modal-content { transform: scale(1); }
         .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
         .close-btn { background: transparent; border: none; font-size: 24px; color: var(--text-muted); cursor: pointer; }
 
         .slider-container { position: relative; width: 100%; height: 250px; border-radius: 12px; overflow: hidden; margin-bottom: 20px; background: #000; border: 1px solid var(--border); }
-        .slider-img { width: 100%; height: 100%; object-fit: contain; transition: opacity 0.3s; background-color: #000; }
-        .slider-btn { 
-            position: absolute; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.1); backdrop-filter: blur(5px);
-            color: white; border: 1px solid rgba(255,255,255,0.2); width: 34px; height: 34px; border-radius: 50%; cursor: pointer; transition: all 0.2s;
-        }
-        .slider-btn:hover { background: rgba(255,255,255,0.3); }
+        .slider-img { width: 100%; height: 100%; object-fit: contain; }
+        .slider-btn { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); width: 34px; height: 34px; border-radius: 50%; cursor: pointer; }
         .slider-btn.prev { left: 10px; } .slider-btn.next { right: 10px; }
         
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
@@ -117,29 +94,28 @@
         
         .empty-state-box { grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 80px 20px; border: 1px dashed var(--border); border-radius: var(--radius-card); background: rgba(255,255,255,0.02); text-align: center; }
 
-        .toast-container {
-            position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px);
-            background: rgba(17, 17, 17, 0.95); backdrop-filter: blur(10px); color: var(--text-main); padding: 14px 24px; border-radius: var(--radius-pill); border: 1px solid var(--border); z-index: 9999; box-shadow: 0 10px 30px rgba(0,0,0,0.5); transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 10px; opacity: 0; pointer-events: none;
-        }
+        /* Toasts & Popups */
+        .toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px); background: rgba(17, 17, 17, 0.95); color: var(--text-main); padding: 14px 24px; border-radius: var(--radius-pill); border: 1px solid var(--border); z-index: 9999; display: flex; align-items: center; gap: 10px; opacity: 0; pointer-events: none; transition: transform 0.4s; }
         .toast-container.show { transform: translateX(-50%) translateY(0); opacity: 1; }
-        .toast-container.success { border-color: rgba(16, 185, 129, 0.4); }
-        .toast-container.error { border-color: rgba(239, 68, 68, 0.4); }
+        
+        .push-notif-container { position: fixed; bottom: 20px; right: 20px; z-index: 10000; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
+        .push-notif { background: var(--bg-surface); border: 1px solid var(--border); border-left: 4px solid var(--primary); padding: 16px 20px; border-radius: 12px; width: 320px; box-shadow: 0 10px 40px rgba(0,0,0,0.6); pointer-events: auto; animation: slideInRight 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; display: flex; flex-direction: column; gap: 5px; }
+        @keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes slideOutRight { from { transform: translateX(0); opacity: 1; } to { transform: translateX(100%); opacity: 0; } }
+
+        .notif-item { padding: 15px; border-bottom: 1px solid var(--border); display: flex; flex-direction: column; gap: 5px; }
+        .notif-item.unread { background: rgba(255,255,255,0.02); border-left: 3px solid var(--primary); }
 
         .badge { background: var(--primary); color: var(--primary-invert); padding: 2px 10px; border-radius: 20px; font-size: 14px; margin-left: 10px; font-weight: 600; }
-        .export-btn { display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); padding: 8px 16px; border-radius: 8px; color: var(--text-main); cursor: pointer; transition: var(--transition); font-size: 13px; }
-        .export-btn:hover { background: rgba(255,255,255,0.1); }
-        
-        .form-input {
-            width: 100%; padding: 14px; margin-bottom: 15px; border: 1px solid var(--border); 
-            border-radius: 8px; font-size: 14px; background: var(--bg-body); color: var(--text-main); outline: none;
-        }
+        .form-input { width: 100%; padding: 14px; margin-bottom: 15px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; background: var(--bg-body); color: var(--text-main); outline: none; }
     </style>
 </head>
 <body>
 
-    <div id="appToast" class="toast-container">
-        <span id="toastIcon"></span><span id="toastMessage"></span>
-    </div>
+    <div id="appToast" class="toast-container"><span id="toastIcon"></span><span id="toastMessage"></span></div>
+    
+    <!-- Push Notifications Container (For the 10-second popups) -->
+    <div id="pushNotifContainer" class="push-notif-container"></div>
 
     <nav class="navbar">
         <div class="logo" onclick="switchView('events-view')">Eventive.</div>
@@ -153,14 +129,10 @@
                 <h1>Crafting <i>digital</i><br>experiences.</h1>
                 <p>Curated events for the ambitious and creative.</p>
             </div>
-            
             <div id="adminActionContainer" style="display: none; justify-content: flex-end; margin-bottom: 20px;">
                 <button class="btn btn-primary" style="box-shadow: 0 4px 15px rgba(255,255,255,0.1);" onclick="openCreateModal()">+ Publish New Event</button>
             </div>
-
-            <div id="events-container">
-                <div style="text-align:center; padding: 50px; grid-column: 1 / -1; color: var(--text-muted);">Loading...</div>
-            </div>
+            <div id="events-container"><div style="text-align:center; padding: 50px; grid-column: 1 / -1; color: var(--text-muted);">Loading...</div></div>
         </div>
 
         <!-- My Events View -->
@@ -169,9 +141,7 @@
                 <h1 style="font-size: 2.5rem;">My Events</h1>
                 <p style="color: var(--text-muted);">Experiences you have reserved spots for.</p>
             </div>
-            <div id="my-events-container">
-                <div style="text-align:center; padding: 50px; grid-column: 1 / -1; color: var(--text-muted);">Loading...</div>
-            </div>
+            <div id="my-events-container"><div style="text-align:center; padding: 50px; grid-column: 1 / -1; color: var(--text-muted);">Loading...</div></div>
         </div>
 
         <!-- Admin Dashboard View -->
@@ -180,25 +150,30 @@
                 <h1 style="font-size: 2.5rem;">Dashboard</h1>
                 <p style="color: var(--text-muted);">Track attendees and manage RSVPs.</p>
             </div>
-            
             <div class="card" style="margin-top: 30px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
-                    <h2 style="font-size: 20px; margin: 0; display: flex; align-items: center;">
-                        Attendees Database <span id="attendeeCount" class="badge">0</span>
-                    </h2>
-                    <button class="export-btn" id="exportBtn" onclick="exportToCSV()" style="display: none;">📥 Download CSV</button>
+                    <h2 style="font-size: 20px; margin: 0; display: flex; align-items: center;">Attendees Database <span id="attendeeCount" class="badge">0</span></h2>
                 </div>
-                
-                <select id="adminEventSelect" class="form-input" onchange="loadRSVPs()">
-                    <option value="">-- Select an event --</option>
-                </select>
-                
+                <select id="adminEventSelect" class="form-input" onchange="loadRSVPs()"><option value="">-- Select an event --</option></select>
                 <div style="overflow-x: auto;">
                     <table>
                         <thead><tr><th>User</th><th>Email</th><th>Phone</th><th>Actions</th></tr></thead>
                         <tbody id="attendeesTable"></tbody>
                     </table>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notifications Modal -->
+    <div class="modal-overlay" id="notificationsModal">
+        <div class="modal-content" style="max-width: 500px; padding: 0; overflow: hidden; display: flex; flex-direction: column; max-height: 80vh;">
+            <div class="modal-header" style="padding: 25px 25px 15px 25px; margin: 0; border-bottom: 1px solid var(--border);">
+                <h2 style="font-size: 20px;">Notifications</h2>
+                <button class="close-btn" onclick="closeModal('notificationsModal')">✕</button>
+            </div>
+            <div id="notificationsList" style="overflow-y: auto; flex: 1;">
+                <div style="padding: 40px; text-align: center; color: var(--text-muted);">Loading...</div>
             </div>
         </div>
     </div>
@@ -217,15 +192,12 @@
                     <input type="text" id="newEventLocation" class="form-input" placeholder="Location" required>
                 </div>
                 <textarea id="newEventDesc" class="form-input" placeholder="Event Description..." rows="4" required></textarea>
-                
                 <div style="background: rgba(255,255,255,0.02); padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px dashed var(--border);">
                     <label style="font-size: 13px; color: var(--primary); display: block; margin-bottom: 5px; font-weight: 600;">Main Cover Image (Required)</label>
                     <input type="file" id="newEventCover" class="form-input" accept="image/*" required style="margin-bottom: 10px;">
-                    
-                    <label style="font-size: 13px; color: var(--text-muted); display: block; margin-bottom: 5px;">Gallery Images (Max 5 images)</label>
+                    <label style="font-size: 13px; color: var(--text-muted); display: block; margin-bottom: 5px;">Gallery Images (Max 5)</label>
                     <input type="file" id="newEventImages" class="form-input" accept="image/*" multiple style="margin-bottom: 0;">
                 </div>
-                
                 <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 10px;">Create Experience</button>
             </form>
         </div>
@@ -234,29 +206,17 @@
     <!-- Edit Event Modal -->
     <div class="modal-overlay" id="editEventModal">
         <div class="modal-content" style="max-width: 550px;">
-            <div class="modal-header">
-                <h2 style="font-size: 22px;">Edit Experience</h2>
-                <button class="close-btn" onclick="closeModal('editEventModal')">✕</button>
-            </div>
+            <div class="modal-header"><h2 style="font-size: 22px;">Edit Experience</h2><button class="close-btn" onclick="closeModal('editEventModal')">✕</button></div>
             <form id="editEventForm" onsubmit="submitEditEvent(event)">
                 <input type="hidden" id="editEventId">
-                <input type="text" id="editEventTitle" class="form-input" placeholder="Event Title" required>
-                <div style="display: flex; gap: 15px;">
-                    <input type="datetime-local" id="editEventDate" class="form-input" required>
-                    <input type="text" id="editEventLocation" class="form-input" placeholder="Location" required>
-                </div>
-                <textarea id="editEventDesc" class="form-input" placeholder="Event Description..." rows="4" required></textarea>
-                
+                <input type="text" id="editEventTitle" class="form-input" required>
+                <div style="display: flex; gap: 15px;"><input type="datetime-local" id="editEventDate" class="form-input" required><input type="text" id="editEventLocation" class="form-input" required></div>
+                <textarea id="editEventDesc" class="form-input" rows="4" required></textarea>
                 <div style="background: rgba(255,255,255,0.02); padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px dashed var(--border);">
-                    <label style="font-size: 13px; color: var(--primary); display: block; margin-bottom: 5px; font-weight: 600;">Update Cover Image (Optional)</label>
                     <input type="file" id="editEventCover" class="form-input" accept="image/*" style="margin-bottom: 10px;">
-                    
-                    <label style="font-size: 13px; color: var(--text-muted); display: block; margin-bottom: 5px;">Update Gallery Images (Optional)</label>
                     <input type="file" id="editEventImages" class="form-input" accept="image/*" multiple style="margin-bottom: 0;">
-                    <p style="font-size: 11px; color: #ef4444; margin-top: 5px;">Note: Leaving images blank will keep your current ones.</p>
                 </div>
-                
-                <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 10px;">Save Changes</button>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Save Changes</button>
             </form>
         </div>
     </div>
@@ -264,18 +224,12 @@
     <!-- Full Event Details Modal -->
     <div class="modal-overlay" id="eventDetailsModal">
         <div class="modal-content">
-            <div class="modal-header">
-                <h2 id="detailsTitle" style="font-size: 22px;">Event Details</h2>
-                <button class="close-btn" onclick="closeModal('eventDetailsModal')">✕</button>
-            </div>
-            
+            <div class="modal-header"><h2 id="detailsTitle" style="font-size: 22px;">Event Details</h2><button class="close-btn" onclick="closeModal('eventDetailsModal')">✕</button></div>
             <div id="sliderWrapper" class="slider-container hidden">
                 <img id="sliderMainImg" class="slider-img" src="">
-                <button class="slider-btn prev" onclick="changeSlide(-1)">❮</button>
-                <button class="slider-btn next" onclick="changeSlide(1)">❯</button>
-                <div id="sliderCounter" style="position: absolute; bottom: 10px; right: 10px; background: rgba(0,0,0,0.6); color: white; padding: 2px 8px; border-radius: 10px; font-size: 11px; backdrop-filter: blur(4px);"></div>
+                <button class="slider-btn prev" onclick="changeSlide(-1)">❮</button><button class="slider-btn next" onclick="changeSlide(1)">❯</button>
+                <div id="sliderCounter" style="position: absolute; bottom: 10px; right: 10px; background: rgba(0,0,0,0.6); color: white; padding: 2px 8px; border-radius: 10px; font-size: 11px;"></div>
             </div>
-
             <div class="event-tags" id="detailsTags"></div>
             <p id="detailsDesc" style="color: var(--text-muted); font-size: 14px; margin-bottom: 25px; white-space: pre-line;"></p>
             <button id="mainRsvpBtn" class="btn btn-primary" style="width: 100%;"></button>
@@ -320,16 +274,13 @@
                 <div style="display: flex; gap: 15px; margin-bottom: 20px; align-items: center;">
                     <div style="position: relative; cursor: pointer; width: 60px; height: 60px; flex-shrink: 0;" onclick="viewFullAvatar()" title="View Profile Picture">
                         <img id="profileAvatarImg" src="" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 1px solid var(--border);">
-                        <div style="position: absolute; inset: 0; background: rgba(0,0,0,0.6); border-radius: 50%; display: flex; align-items: center; justify-content: center; opacity: 0; transition: var(--transition);" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0">
-                            <span style="font-size: 20px;">👁️</span>
-                        </div>
+                        <div style="position: absolute; inset: 0; background: rgba(0,0,0,0.6); border-radius: 50%; display: flex; align-items: center; justify-content: center; opacity: 0; transition: var(--transition);" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0"><span style="font-size: 20px;">👁️</span></div>
                     </div>
                     <input type="file" id="profileAvatarFile" class="form-input" accept="image/*" onchange="previewAvatar(event)" style="margin-bottom: 0;">
                 </div>
                 <input type="email" id="profilePrimaryEmail" class="form-input" disabled style="opacity: 0.6;">
                 <input type="email" id="profileSecondaryEmail" class="form-input" placeholder="Secondary Email">
                 <select id="profileActiveEmail" class="form-input"><option value="primary">Active: Primary Email</option><option value="secondary">Active: Secondary Email</option></select>
-                
                 <input type="tel" id="profilePrimaryPhone" class="form-input" disabled style="opacity: 0.6;">
                 <input type="tel" id="profileSecondaryPhone" class="form-input" placeholder="Secondary Phone">
                 <select id="profileActivePhone" class="form-input"><option value="primary">Active: Primary Phone</option><option value="secondary">Active: Secondary Phone</option></select>
@@ -341,11 +292,7 @@
     <!-- Delete Confirmation Modal -->
     <div class="modal-overlay" id="deleteConfirmModal">
         <div class="modal-content" style="max-width: 400px; text-align: center;">
-            <div style="font-size: 48px; margin-bottom: 15px;">⚠️</div>
-            <h2 style="font-size: 22px; margin-bottom: 10px;">Are you sure?</h2>
-            <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 25px;">
-                Do you really want to delete this event? This will also remove all attendee RSVPs and cannot be undone.
-            </p>
+            <div style="font-size: 48px; margin-bottom: 15px;">⚠️</div><h2 style="font-size: 22px; margin-bottom: 10px;">Are you sure?</h2>
             <div style="display: flex; gap: 10px; justify-content: center;">
                 <button class="btn btn-outline" style="flex: 1;" onclick="closeModal('deleteConfirmModal')">Cancel</button>
                 <button class="btn btn-primary" style="flex: 1; background: #ef4444; border-color: #ef4444;" onclick="executeDeleteEvent()">Yes, Delete</button>
@@ -356,14 +303,24 @@
     <!-- Cancel RSVP Confirmation Modal -->
     <div class="modal-overlay" id="cancelRsvpConfirmModal" style="z-index: 1100;">
         <div class="modal-content" style="max-width: 400px; text-align: center;">
-            <div style="font-size: 48px; margin-bottom: 15px;">🎫</div>
-            <h2 style="font-size: 22px; margin-bottom: 10px;">Cancel Reservation?</h2>
-            <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 25px;">
-                Are you sure you want to cancel your spot for this experience? This action cannot be undone.
-            </p>
+            <div style="font-size: 48px; margin-bottom: 15px;">🎫</div><h2 style="font-size: 22px; margin-bottom: 10px;">Cancel Reservation?</h2>
             <div style="display: flex; gap: 10px; justify-content: center;">
                 <button class="btn btn-outline" style="flex: 1;" onclick="closeModal('cancelRsvpConfirmModal')">Keep Spot</button>
                 <button class="btn btn-primary" style="flex: 1; background: #ef4444; border-color: #ef4444;" onclick="executeCancelRSVP()">Yes, Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Remove Attendee Confirmation Modal (Admin) -->
+    <div class="modal-overlay" id="removeAttendeeConfirmModal" style="z-index: 1100;">
+        <div class="modal-content" style="max-width: 400px; text-align: center;">
+            <div style="font-size: 48px; margin-bottom: 15px;">🚫</div>
+            <h2 style="font-size: 22px; margin-bottom: 10px;">Remove Attendee?</h2>
+            <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 15px;">Remove <strong id="removeAttendeeName" style="color: var(--primary);"></strong> from event?</p>
+            <input type="text" id="removeReason" class="form-input" placeholder="Reason for removal (will be sent to user)" required>
+            <div style="display: flex; gap: 10px; justify-content: center;">
+                <button class="btn btn-outline" style="flex: 1;" onclick="closeModal('removeAttendeeConfirmModal')">Cancel</button>
+                <button class="btn btn-primary" style="flex: 1; background: #ef4444; border-color: #ef4444;" onclick="executeRemoveAttendee()">Yes, Remove</button>
             </div>
         </div>
     </div>
@@ -375,40 +332,16 @@
         </div>
     </div>
 
-    <!-- Remove Attendee Confirmation Modal (Admin) -->
-    <div class="modal-overlay" id="removeAttendeeConfirmModal" style="z-index: 1100;">
-        <div class="modal-content" style="max-width: 400px; text-align: center;">
-            <div style="font-size: 48px; margin-bottom: 15px;">🚫</div>
-            <h2 style="font-size: 22px; margin-bottom: 10px;">Remove Attendee?</h2>
-            <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 25px;">
-                Are you sure you want to remove <strong id="removeAttendeeName" style="color: var(--primary);"></strong> from this event?
-            </p>
-            <div style="display: flex; gap: 10px; justify-content: center;">
-                <button class="btn btn-outline" style="flex: 1;" onclick="closeModal('removeAttendeeConfirmModal')">Cancel</button>
-                <button class="btn btn-primary" style="flex: 1; background: #ef4444; border-color: #ef4444;" onclick="executeRemoveAttendee()">Yes, Remove</button>
-            </div>
-        </div>
-    </div>
-
     <!-- Attendee Full Profile Modal -->
     <div class="modal-overlay" id="attendeeProfileModal">
         <div class="modal-content" style="max-width: 450px; text-align: center;">
-            <div class="modal-header" style="margin-bottom: 10px;">
-                <h2 style="font-size: 20px;">Attendee Profile</h2>
-                <button class="close-btn" onclick="closeModal('attendeeProfileModal')">✕</button>
-            </div>
-            
+            <div class="modal-header" style="margin-bottom: 10px;"><h2 style="font-size: 20px;">Attendee Profile</h2><button class="close-btn" onclick="closeModal('attendeeProfileModal')">✕</button></div>
             <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 25px;">
-                <div style="position: relative; cursor: pointer; width: 96px; height: 96px; margin-bottom: 15px;" onclick="viewAttendeeFullAvatar()" title="View Profile Picture">
+                <div style="position: relative; cursor: pointer; width: 96px; height: 96px; margin-bottom: 15px;" onclick="viewAttendeeFullAvatar()">
                     <img id="viewAttendeeAvatar" src="" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 2px solid var(--border); padding: 3px;">
-                    <div style="position: absolute; inset: 3px; background: rgba(0,0,0,0.6); border-radius: 50%; display: flex; align-items: center; justify-content: center; opacity: 0; transition: var(--transition);" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0">
-                        <span style="font-size: 24px;">👁️</span>
-                    </div>
                 </div>
-                <h3 id="viewAttendeeName" style="font-size: 22px; margin-bottom: 5px;"></h3>
-                <p id="viewAttendeeEmail" style="color: var(--text-muted); font-size: 14px;"></p>
+                <h3 id="viewAttendeeName" style="font-size: 22px; margin-bottom: 5px;"></h3><p id="viewAttendeeEmail" style="color: var(--text-muted); font-size: 14px;"></p>
             </div>
-            
             <div style="background: rgba(255,255,255,0.02); padding: 20px; border-radius: 12px; border: 1px dashed var(--border); text-align: left;">
                 <p style="margin-bottom: 12px; font-size: 14px;"><strong style="color: var(--primary); display: inline-block; width: 130px;">Primary Phone:</strong> <span id="viewAttendeePhone" style="color: var(--text-muted);"></span></p>
                 <p style="margin-bottom: 12px; font-size: 14px;"><strong style="color: var(--primary); display: inline-block; width: 130px;">Secondary Email:</strong> <span id="viewAttendeeSecEmail" style="color: var(--text-muted);"></span></p>
@@ -431,38 +364,133 @@
         let attendeeToRemoveIndex = null;
         const API_BASE = 'https://eventive-steel.vercel.app/api';
         let toastTimeout;
+        
+        let allNotifications = [];
+        let seenNotifIds = new Set(JSON.parse(localStorage.getItem('seenNotifs') || '[]'));
+        let notifPollInterval;
 
-        const bannerGradients = [
-            'linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%)',
-            'linear-gradient(135deg, rgba(79,70,229,0.1) 0%, rgba(0,0,0,0) 100%)'
-        ];
+        const bannerGradients = ['linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%)', 'linear-gradient(135deg, rgba(79,70,229,0.1) 0%, rgba(0,0,0,0) 100%)'];
 
-        document.addEventListener("DOMContentLoaded", () => { updateNavbar(); loadEvents(); setInterval(updateCountdowns, 60000); });
+        document.addEventListener("DOMContentLoaded", () => { 
+            updateNavbar(); 
+            loadEvents(); 
+            setInterval(updateCountdowns, 60000); 
+            if(currentUser) startNotificationPolling();
+        });
 
         function showToast(message, type = 'success') {
-            let finalMessage = message;
-            if (type === 'error' && typeof message === 'string') {
-                if (message.includes('foreign key') || message.toLowerCase().includes('not present in table')) {
-                    finalMessage = "This experience is no longer available or has been deleted.";
-                } else if (message.includes('{') || message.length > 80) {
-                    finalMessage = "Something went wrong. Please refresh the page and try again.";
-                }
-            }
             const toast = document.getElementById('appToast');
             document.getElementById('toastIcon').innerText = type === 'success' ? '✅' : '⚠️';
-            document.getElementById('toastMessage').innerText = finalMessage;
+            document.getElementById('toastMessage').innerText = message;
             toast.className = `toast-container show ${type}`;
             clearTimeout(toastTimeout);
             toastTimeout = setTimeout(() => { toast.classList.remove('show'); }, 3500);
         }
 
+        // --- Notifications System ---
+        function startNotificationPolling() {
+            pollNotifications();
+            notifPollInterval = setInterval(pollNotifications, 10000); // كل 10 ثواني
+        }
+
+        async function pollNotifications() {
+            if (!currentUser) return;
+            const activeEmail = (currentUser.active_email === 'secondary' && currentUser.secondary_email) ? currentUser.secondary_email : currentUser.email;
+            try {
+                const response = await fetch(API_BASE + `/notifications?email=${encodeURIComponent(activeEmail)}`);
+                const result = await response.json();
+                if (result.status === 'success') {
+                    allNotifications = result.data;
+                    let unreadCount = 0;
+                    allNotifications.forEach(notif => {
+                        if (!notif.is_read) unreadCount++;
+                        // لو إشعار جديد ولسه مشفناهوش كـ Popup
+                        if (!seenNotifIds.has(notif.id)) {
+                            seenNotifIds.add(notif.id);
+                            localStorage.setItem('seenNotifs', JSON.stringify([...seenNotifIds]));
+                            showPushNotification(notif); // إظهار الـ Popup لمدة 10 ثواني
+                        }
+                    });
+                    
+                    const badge = document.getElementById('notifBadge');
+                    if (badge) {
+                        badge.innerText = unreadCount > 9 ? '9+' : unreadCount;
+                        badge.style.display = unreadCount > 0 ? 'flex' : 'none';
+                    }
+                    
+                    if (document.getElementById('notificationsModal').classList.contains('active')) {
+                        renderNotificationsModal();
+                    }
+                }
+            } catch (error) {}
+        }
+
+        function showPushNotification(notif) {
+            const container = document.getElementById('pushNotifContainer');
+            const el = document.createElement('div');
+            el.className = 'push-notif';
+            el.innerHTML = `
+                <h4 style="font-size: 15px; margin-bottom: 2px;">${notif.title}</h4>
+                <p style="font-size: 13px; color: var(--text-muted); line-height: 1.4;">${notif.message}</p>
+            `;
+            container.appendChild(el);
+            // يختفي بعد 10 ثواني
+            setTimeout(() => {
+                el.style.animation = 'slideOutRight 0.5s forwards';
+                setTimeout(() => el.remove(), 500);
+            }, 10000);
+        }
+
+        function openNotificationsModal() {
+            document.getElementById('notificationsModal').classList.add('active');
+            renderNotificationsModal();
+            markNotificationsAsRead();
+        }
+
+        function renderNotificationsModal() {
+            const list = document.getElementById('notificationsList');
+            if (allNotifications.length === 0) {
+                list.innerHTML = `<div style="padding: 40px; text-align: center; color: var(--text-muted);">No notifications yet.</div>`;
+                return;
+            }
+            list.innerHTML = allNotifications.map(n => {
+                const date = new Date(n.created_at).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+                return `
+                    <div class="notif-item ${!n.is_read ? 'unread' : ''}">
+                        <div style="display: flex; justify-content: space-between; align-items: baseline;">
+                            <strong style="font-size: 15px;">${n.title}</strong>
+                            <span style="font-size: 11px; color: var(--text-muted);">${date}</span>
+                        </div>
+                        <p style="font-size: 13px; color: var(--text-muted); margin-top: 5px; line-height: 1.5;">${n.message}</p>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        async function markNotificationsAsRead() {
+            if (!currentUser) return;
+            const activeEmail = (currentUser.active_email === 'secondary' && currentUser.secondary_email) ? currentUser.secondary_email : currentUser.email;
+            const badge = document.getElementById('notifBadge');
+            if(badge) badge.style.display = 'none';
+            try {
+                await fetch(API_BASE + '/notifications/read_all', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: activeEmail })
+                });
+                allNotifications.forEach(n => n.is_read = true);
+            } catch(e) {}
+        }
+        // -----------------------------
+
         function updateNavbar() {
             const nav = document.getElementById('authNav');
             const adminBar = document.getElementById('adminActionContainer');
-            
             if (currentUser) {
                 const avatarSrc = currentUser.avatar_url || `https://ui-avatars.com/api/?name=${currentUser.name}&background=111&color=fff`;
-                let html = `<button class="btn btn-outline" onclick="switchView('my-events-view')" style="border-color: rgba(16, 185, 129, 0.4); color: #10b981;">🎟️ My Events</button>`;
+                let html = `
+                    <button class="notif-btn" onclick="openNotificationsModal()">
+                        🔔<span id="notifBadge" class="notif-badge" style="display:none;">0</span>
+                    </button>
+                    <button class="btn btn-outline" onclick="switchView('my-events-view')" style="border-color: rgba(16, 185, 129, 0.4); color: #10b981;">🎟️ My Events</button>`;
                 if (currentUser.role === 'admin') html += `<button class="btn btn-outline" onclick="switchView('admin-view')">Dashboard</button>`;
                 html += `
                     <div class="profile-badge" onclick="openProfileModal()">
@@ -494,6 +522,7 @@
         
         function logout() { 
             localStorage.removeItem('user'); currentUser = null; myBookedEventIds = [];
+            clearInterval(notifPollInterval); allNotifications = [];
             updateNavbar(); switchView('events-view'); renderEventsUI(); 
             showToast('Logged out successfully', 'success');
         }
@@ -505,7 +534,7 @@
                 const response = await fetch(API_BASE + '/my-rsvps?email=' + encodeURIComponent(activeEmail));
                 const result = await response.json();
                 if (result.status === 'success') { myBookedEventIds = result.data; }
-            } catch (error) { console.error("Error fetching my events:", error); }
+            } catch (error) {}
         }
 
         async function loadEvents() {
@@ -516,13 +545,8 @@
                     allEvents = result.data || [];
                     await fetchMyBookedEventsIds(); 
                     renderEventsUI(); 
-                } else { 
-                    renderEmptyState();
-                }
-            } catch (error) { 
-                if(document.getElementById('adminActionContainer')) document.getElementById('adminActionContainer').style.display = 'none';
-                document.getElementById('events-container').innerHTML = `<div class="empty-state-box" style="border-color: #ef4444;"><div style="font-size: 48px; margin-bottom: 20px;">🔌</div><h2 style="color: #ef4444;">System Offline</h2><p style="color: var(--text-muted);">Cannot connect to the server.</p></div>`; 
-            }
+                } else { renderEmptyState(); }
+            } catch (error) { renderEmptyState(); }
         }
 
         function generateEventCardHTML(evt, index) {
@@ -532,21 +556,14 @@
             const randomGradient = bannerGradients[index % bannerGradients.length];
             
             let coverUrl = '';
-            try {
-                const parsedImages = JSON.parse(evt.image_urls || '[]');
-                if (parsedImages.length > 0) coverUrl = parsedImages[0];
-            } catch(e) {}
-            
+            try { const parsedImages = JSON.parse(evt.image_urls || '[]'); if (parsedImages.length > 0) coverUrl = parsedImages[0]; } catch(e) {}
             const coverHtml = coverUrl ? `<div class="card-cover" style="background-image: url('${coverUrl}');"></div>` : '';
             
             let adminButtons = '';
             if (currentUser && currentUser.role === 'admin') {
-                adminButtons = `
-                    <div style="position:absolute; top:20px; right: 120px; z-index:20; display:flex; gap:8px;">
-                        <button onclick="openEditModal('${evt.id}', event)" title="Edit Event" style="background:rgba(59, 130, 246, 0.9); color:white; border:none; width:34px; height:34px; border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center; box-shadow:0 4px 10px rgba(0,0,0,0.3); transition:all 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">✏️</button>
-                        <button onclick="deleteEvent('${evt.id}', event)" title="Delete Event" style="background:rgba(239, 68, 68, 0.9); color:white; border:none; width:34px; height:34px; border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center; box-shadow:0 4px 10px rgba(0,0,0,0.3); transition:all 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">🗑️</button>
-                    </div>
-                `;
+                adminButtons = `<div style="position:absolute; top:20px; right: 120px; z-index:20; display:flex; gap:8px;">
+                    <button onclick="openEditModal('${evt.id}', event)" title="Edit Event" style="background:rgba(59, 130, 246, 0.9); color:white; border:none; width:34px; height:34px; border-radius:50%; cursor:pointer; box-shadow:0 4px 10px rgba(0,0,0,0.3);">✏️</button>
+                    <button onclick="deleteEvent('${evt.id}', event)" title="Delete Event" style="background:rgba(239, 68, 68, 0.9); color:white; border:none; width:34px; height:34px; border-radius:50%; cursor:pointer; box-shadow:0 4px 10px rgba(0,0,0,0.3);">🗑️</button></div>`;
             }
 
             const isBooked = myBookedEventIds.includes(evt.id);
@@ -554,20 +571,15 @@
 
             return `
                 <div class="card event-card" style="background: ${randomGradient};" onclick="openEventDetails('${evt.id}')">
-                    ${registeredBadge}
-                    ${adminButtons}
-                    ${coverHtml}
+                    ${registeredBadge}${adminButtons}${coverHtml}
                     <div class="countdown" data-date="${evt.event_date}">Calculating...</div>
                     <div class="event-tags" style="margin-top: ${coverUrl ? '0' : '30px'};">
-                        <span class="tag">📅 ${formattedDate}</span>
-                        <span class="tag">⏰ ${formattedTime}</span>
-                        <span class="tag">📍 ${evt.location}</span>
+                        <span class="tag">📅 ${formattedDate}</span><span class="tag">⏰ ${formattedTime}</span><span class="tag">📍 ${evt.location}</span>
                     </div>
                     <h2 style="font-size:24px; margin-bottom:15px;">${evt.title}</h2>
                     <div class="desc-fade">${evt.description}</div>
                     <button class="btn btn-outline" style="width: 100%;">${isBooked ? 'View Details' : 'View Details / RSVP'}</button>
-                </div>
-            `;
+                </div>`;
         }
 
         function renderEventsUI() {
@@ -575,52 +587,39 @@
             const adminBar = document.getElementById('adminActionContainer');
             if (allEvents.length > 0) {
                 container.innerHTML = '';
-                if (currentUser && currentUser.role === 'admin') adminBar.style.display = 'flex';
-                else adminBar.style.display = 'none';
-                
-                allEvents.forEach((evt, index) => {
-                    container.innerHTML += generateEventCardHTML(evt, index);
-                });
+                if (currentUser && currentUser.role === 'admin') adminBar.style.display = 'flex'; else adminBar.style.display = 'none';
+                allEvents.forEach((evt, index) => { container.innerHTML += generateEventCardHTML(evt, index); });
                 updateCountdowns();
-            } else {
-                renderEmptyState();
-            }
+            } else { renderEmptyState(); }
         }
 
         function renderEmptyState() {
             const container = document.getElementById('events-container');
             const adminBar = document.getElementById('adminActionContainer');
             if(adminBar) adminBar.style.display = 'none'; 
-            let adminShortcut = (currentUser && currentUser.role === 'admin') ? `<button class="btn btn-primary" style="margin-top: 25px; padding: 14px 28px; font-size: 16px;" onclick="openCreateModal()">✨ Publish Your First Event</button>` : '';
-            container.innerHTML = `<div class="empty-state-box"><div style="font-size: 48px; margin-bottom: 20px; opacity: 0.8;">🌌</div><h2 style="font-size: 28px; font-weight: 700; margin-bottom: 10px;">No Active Experiences</h2><p style="color: var(--text-muted); font-size: 16px; max-width: 400px;">The canvas is blank. Check back later for upcoming exclusive events.</p>${adminShortcut}</div>`; 
+            let adminShortcut = (currentUser && currentUser.role === 'admin') ? `<button class="btn btn-primary" style="margin-top: 25px;" onclick="openCreateModal()">✨ Publish Your First Event</button>` : '';
+            container.innerHTML = `<div class="empty-state-box"><h2 style="font-size: 28px; margin-bottom: 10px;">No Active Experiences</h2><p style="color: var(--text-muted);">Check back later.</p>${adminShortcut}</div>`; 
         }
 
         function renderMyEvents() {
             const container = document.getElementById('my-events-container');
             const myEvents = allEvents.filter(evt => myBookedEventIds.includes(evt.id));
-            
             if (myEvents.length > 0) {
                 container.innerHTML = '';
-                myEvents.forEach((evt, index) => {
-                    container.innerHTML += generateEventCardHTML(evt, index);
-                });
+                myEvents.forEach((evt, index) => { container.innerHTML += generateEventCardHTML(evt, index); });
                 updateCountdowns();
             } else {
-                container.innerHTML = `<div class="empty-state-box"><div style="font-size: 48px; margin-bottom: 20px; opacity: 0.8;">🎟️</div><h2 style="font-size: 28px; font-weight: 700; margin-bottom: 10px;">No Bookings Yet</h2><p style="color: var(--text-muted); font-size: 16px; max-width: 400px;">You haven't reserved spots for any experiences. Explore the homepage to find your next event.</p><button class="btn btn-primary" style="margin-top:20px;" onclick="switchView('events-view')">Explore Events</button></div>`;
+                container.innerHTML = `<div class="empty-state-box"><h2 style="font-size: 28px;">No Bookings Yet</h2><p style="color: var(--text-muted);">Explore the homepage to find your next event.</p><button class="btn btn-primary" style="margin-top:20px;" onclick="switchView('events-view')">Explore Events</button></div>`;
             }
         }
 
         function deleteEvent(eventId, e) {
-            e.stopPropagation();
-            eventToDeleteId = eventId;
-            document.getElementById('deleteConfirmModal').classList.add('active');
+            e.stopPropagation(); eventToDeleteId = eventId; document.getElementById('deleteConfirmModal').classList.add('active');
         }
 
         async function executeDeleteEvent() {
             if (!eventToDeleteId) return;
             const eventId = eventToDeleteId;
-            
-            // 1. Optimistic UI: مسح سريع من الواجهة
             closeModal('deleteConfirmModal');
             const originalEvents = [...allEvents];
             allEvents = allEvents.filter(e => e.id !== eventId);
@@ -628,22 +627,13 @@
             if (!document.getElementById('my-events-view').classList.contains('hidden')) renderMyEvents();
             showToast("Event removed successfully!", "success"); 
 
-            // 2. التنفيذ في الخلفية
             try {
-                const response = await fetch(API_BASE + '/events/' + eventId, { 
-                    method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ role: currentUser.role }) 
-                });
-                if (response.ok) { 
-                    if(currentUser.role === 'admin') populateAdminEventsDropdown(); 
-                } else { throw new Error("Delete failed"); }
+                const response = await fetch(API_BASE + '/events/' + eventId, { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ role: currentUser.role }) });
+                if (response.ok) { if(currentUser.role === 'admin') populateAdminEventsDropdown(); } 
+                else { throw new Error("Delete failed"); }
             } catch (error) { 
-                // لو فشل، نرجع الإيفنت ونقوله في مشكلة
-                allEvents = originalEvents;
-                renderEventsUI();
-                showToast("Connection error. Failed to delete.", "error"); 
-            } finally {
-                eventToDeleteId = null;
-            }
+                allEvents = originalEvents; renderEventsUI(); showToast("Connection error. Failed to delete.", "error"); 
+            } finally { eventToDeleteId = null; }
         }
 
         function openEditModal(eventId, e) {
@@ -655,62 +645,36 @@
             document.getElementById('editEventLocation').value = event.location;
             document.getElementById('editEventDesc').value = event.description;
             const dateObj = new Date(event.event_date);
-            const offset = dateObj.getTimezoneOffset() * 60000;
-            const localISOTime = (new Date(dateObj - offset)).toISOString().slice(0, 16);
-            document.getElementById('editEventDate').value = localISOTime;
+            document.getElementById('editEventDate').value = (new Date(dateObj - dateObj.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
             document.getElementById('editEventModal').classList.add('active');
         }
 
         async function submitEditEvent(e) {
             e.preventDefault();
-            
-            const coverInput = document.getElementById('editEventCover');
-            const galleryInput = document.getElementById('editEventImages');
-            
-            let totalSize = 0;
-            if (coverInput && coverInput.files.length > 0) totalSize += coverInput.files[0].size;
-            if (galleryInput && galleryInput.files.length > 0) {
-                for (let i = 0; i < galleryInput.files.length; i++) totalSize += galleryInput.files[i].size;
-            }
-
-            if (totalSize > 4 * 1024 * 1024) { showToast("Total images size exceeds the 4MB limit.", "error"); return; }
-            if (galleryInput.files.length > 5) { showToast("Maximum 5 gallery images allowed!", "error"); return; }
-            
+            const coverInput = document.getElementById('editEventCover'); const galleryInput = document.getElementById('editEventImages');
             const eventId = document.getElementById('editEventId').value;
             const formData = new FormData();
             formData.append('title', document.getElementById('editEventTitle').value);
             formData.append('event_date', document.getElementById('editEventDate').value);
             formData.append('location', document.getElementById('editEventLocation').value);
             formData.append('description', document.getElementById('editEventDesc').value);
-
-            if(coverInput.files.length > 0) { formData.append('cover', coverInput.files[0]); }
-            for (let i = 0; i < galleryInput.files.length; i++) { formData.append('images', galleryInput.files[i]); }
-
-            // 1. Optimistic UI: القفل السريع
-            closeModal('editEventModal');
-            showToast("Updating experience in background... ⏳", "success"); 
-
-            // 2. التنفيذ في الخلفية
+            if(coverInput.files.length > 0) formData.append('cover', coverInput.files[0]);
+            for (let i = 0; i < galleryInput.files.length; i++) formData.append('images', galleryInput.files[i]);
+            
+            closeModal('editEventModal'); showToast("Updating experience in background... ⏳", "success"); 
             try {
                 const response = await fetch(API_BASE + '/admin/events/' + eventId, { method: 'PUT', body: formData });
-                if (response.ok) { 
-                    document.getElementById('editEventForm').reset(); 
-                    loadEvents(); // ريفرش للداتا الجديدة
-                    showToast("Experience Updated Successfully! 🚀", "success"); 
-                } else { showToast("Failed to update event.", "error"); }
+                if (response.ok) { document.getElementById('editEventForm').reset(); loadEvents(); showToast("Experience Updated Successfully! 🚀", "success"); } 
+                else { showToast("Failed to update event.", "error"); }
             } catch (error) { showToast("Error connecting to server.", "error"); } 
         }
 
         function updateCountdowns() {
             document.querySelectorAll('.countdown').forEach(el => {
-                const targetDate = new Date(el.dataset.date).getTime();
-                const now = new Date().getTime();
-                const diff = targetDate - now;
+                const targetDate = new Date(el.dataset.date).getTime(); const now = new Date().getTime(); const diff = targetDate - now;
                 if (diff < 0) { el.innerText = "Started/Ended"; el.style.color = "#ef4444"; return; }
-                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-                const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                if (days > 0) el.innerText = `⏳ ${days}d ${hours}h left`;
-                else { const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60)); el.innerText = `🔥 ${hours}h ${mins}m left`; el.style.color = "#fbbf24"; }
+                const days = Math.floor(diff / (1000 * 60 * 60 * 24)); const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                if (days > 0) el.innerText = `⏳ ${days}d ${hours}h left`; else { const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60)); el.innerText = `🔥 ${hours}h ${mins}m left`; el.style.color = "#fbbf24"; }
             });
         }
 
@@ -718,65 +682,33 @@
             const event = allEvents.find(e => e.id === eventId);
             if(!event) return;
             selectedEventIdForRSVP = eventId;
-            
             document.getElementById('detailsTitle').innerText = event.title;
             document.getElementById('detailsDesc').innerText = event.description;
-            
             const dateObj = new Date(event.event_date);
-            document.getElementById('detailsTags').innerHTML = `
-                <span class="tag">📅 ${dateObj.toLocaleDateString('en-US', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })}</span>
-                <span class="tag">⏰ ${dateObj.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}</span>
-                <span class="tag">📍 ${event.location}</span>
-            `;
-
-            try { 
-                const parsedImages = JSON.parse(event.image_urls || '[]'); 
-                currentSliderImages = parsedImages.length > 1 ? parsedImages.slice(1) : []; 
-            } catch(e){ currentSliderImages = []; }
-            
+            document.getElementById('detailsTags').innerHTML = `<span class="tag">📅 ${dateObj.toLocaleDateString('en-US')}</span><span class="tag">⏰ ${dateObj.toLocaleTimeString('en-US', {hour:'numeric', minute:'2-digit'})}</span><span class="tag">📍 ${event.location}</span>`;
+            try { currentSliderImages = JSON.parse(event.image_urls || '[]').slice(1); } catch(e){ currentSliderImages = []; }
             const sliderWrapper = document.getElementById('sliderWrapper');
-            if(currentSliderImages.length > 0) { sliderWrapper.classList.remove('hidden'); currentSlideIndex = 0; updateSliderView(); } 
-            else { sliderWrapper.classList.add('hidden'); }
+            if(currentSliderImages.length > 0) { sliderWrapper.classList.remove('hidden'); currentSlideIndex = 0; updateSliderView(); } else { sliderWrapper.classList.add('hidden'); }
 
             const rsvpBtn = document.getElementById('mainRsvpBtn');
             if (myBookedEventIds.includes(eventId)) {
-                rsvpBtn.innerText = 'Cancel Reservation ❌';
-                rsvpBtn.style.background = 'transparent';
-                rsvpBtn.style.border = '1px solid #ef4444';
-                rsvpBtn.style.color = '#ef4444';
-                rsvpBtn.style.cursor = 'pointer';
-                rsvpBtn.disabled = false;
-                rsvpBtn.onclick = () => cancelRSVP(eventId);
+                rsvpBtn.innerText = 'Cancel Reservation ❌'; rsvpBtn.style.background = 'transparent'; rsvpBtn.style.border = '1px solid #ef4444'; rsvpBtn.style.color = '#ef4444'; rsvpBtn.onclick = () => cancelRSVP(eventId);
             } else {
-                rsvpBtn.innerText = 'Reserve Spot';
-                rsvpBtn.style.background = 'var(--primary)';
-                rsvpBtn.style.border = 'none';
-                rsvpBtn.style.color = 'var(--primary-invert)';
-                rsvpBtn.style.cursor = 'pointer';
-                rsvpBtn.disabled = false;
-                rsvpBtn.onclick = () => proceedToRSVP();
+                rsvpBtn.innerText = 'Reserve Spot'; rsvpBtn.style.background = 'var(--primary)'; rsvpBtn.style.border = 'none'; rsvpBtn.style.color = 'var(--primary-invert)'; rsvpBtn.onclick = () => proceedToRSVP();
             }
-
             document.getElementById('eventDetailsModal').classList.add('active');
         }
 
         function updateSliderView() {
             document.getElementById('sliderMainImg').src = currentSliderImages[currentSlideIndex];
-            const btns = document.querySelectorAll('.slider-btn');
-            btns.forEach(btn => btn.style.display = currentSliderImages.length > 1 ? 'block' : 'none');
+            document.querySelectorAll('.slider-btn').forEach(btn => btn.style.display = currentSliderImages.length > 1 ? 'block' : 'none');
             document.getElementById('sliderCounter').innerText = currentSliderImages.length > 0 ? `${currentSlideIndex + 1} / ${currentSliderImages.length}` : '';
         }
 
-        function changeSlide(direction) {
-            if(currentSliderImages.length <= 1) return;
-            currentSlideIndex += direction;
-            if(currentSlideIndex >= currentSliderImages.length) currentSlideIndex = 0;
-            if(currentSlideIndex < 0) currentSlideIndex = currentSliderImages.length - 1;
-            updateSliderView();
-        }
+        function changeSlide(dir) { if(currentSliderImages.length <= 1) return; currentSlideIndex = (currentSlideIndex + dir + currentSliderImages.length) % currentSliderImages.length; updateSliderView(); }
 
         function proceedToRSVP() {
-            if (!currentUser) { closeModal('eventDetailsModal'); showToast("Please log in or create an account to reserve a spot.", "error"); setTimeout(() => { openAuthModal(true); }, 500); return; }
+            if (!currentUser) { closeModal('eventDetailsModal'); showToast("Please log in to reserve a spot.", "error"); setTimeout(() => openAuthModal(true), 500); return; }
             closeModal('eventDetailsModal');
             document.getElementById('rsvpName').value = currentUser.name;
             document.getElementById('rsvpEmail').value = (currentUser.active_email === 'secondary' && currentUser.secondary_email) ? currentUser.secondary_email : currentUser.email;
@@ -785,334 +717,130 @@
         }
 
         async function submitRSVP(e) {
-            e.preventDefault();
-            const eventId = selectedEventIdForRSVP;
-            
-            // 1. Optimistic UI: حجز سريع
-            myBookedEventIds.push(eventId);
-            closeModal('rsvpModal');
-            renderEventsUI();
-            showToast("Spot Booked Successfully! 🎉", "success");
-
-            const payload = { 
-                name: document.getElementById('rsvpName').value, 
-                email: document.getElementById('rsvpEmail').value, 
-                phone: document.getElementById('rsvpPhone').value, 
-                event_id: eventId 
-            };
-
-            // 2. التنفيذ في الخلفية
+            e.preventDefault(); const eventId = selectedEventIdForRSVP;
+            myBookedEventIds.push(eventId); closeModal('rsvpModal'); renderEventsUI(); showToast("Spot Booked Successfully! 🎉", "success");
+            const payload = { name: document.getElementById('rsvpName').value, email: document.getElementById('rsvpEmail').value, phone: document.getElementById('rsvpPhone').value, event_id: eventId };
             try {
                 const response = await fetch(API_BASE + '/rsvp', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
                 if (!response.ok) throw new Error("Booking failed");
-            } catch (error) { 
-                myBookedEventIds = myBookedEventIds.filter(id => id !== eventId);
-                renderEventsUI();
-                showToast("Connection error. Booking failed.", "error"); 
-            }
+                pollNotifications(); // جلب إشعار التأكيد فوراً
+            } catch (error) { myBookedEventIds = myBookedEventIds.filter(id => id !== eventId); renderEventsUI(); showToast("Booking failed.", "error"); }
         }
 
-        function cancelRSVP(eventId) {
-            rsvpToCancelEventId = eventId;
-            document.getElementById('cancelRsvpConfirmModal').classList.add('active');
-        }
+        function cancelRSVP(eventId) { rsvpToCancelEventId = eventId; document.getElementById('cancelRsvpConfirmModal').classList.add('active'); }
 
         async function executeCancelRSVP() {
-            if (!rsvpToCancelEventId) return;
-            const eventId = rsvpToCancelEventId;
+            if (!rsvpToCancelEventId) return; const eventId = rsvpToCancelEventId;
             const activeEmail = (currentUser.active_email === 'secondary' && currentUser.secondary_email) ? currentUser.secondary_email : currentUser.email;
-
-            // 1. Optimistic UI: إلغاء سريع
-            closeModal('cancelRsvpConfirmModal'); 
-            closeModal('eventDetailsModal'); 
-            myBookedEventIds = myBookedEventIds.filter(id => id !== eventId);
-            renderEventsUI();
-            if (!document.getElementById('my-events-view').classList.contains('hidden')) { renderMyEvents(); }
+            closeModal('cancelRsvpConfirmModal'); closeModal('eventDetailsModal'); 
+            myBookedEventIds = myBookedEventIds.filter(id => id !== eventId); renderEventsUI(); if (!document.getElementById('my-events-view').classList.contains('hidden')) { renderMyEvents(); }
             showToast("Reservation canceled successfully", "success");
-
-            // 2. التنفيذ في الخلفية
             try {
-                const response = await fetch(API_BASE + '/rsvp', {
-                    method: 'DELETE', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email: activeEmail, event_id: eventId })
-                });
+                const response = await fetch(API_BASE + '/rsvp', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: activeEmail, event_id: eventId }) });
                 if (!response.ok) throw new Error("Cancel failed");
-            } catch (error) {
-                myBookedEventIds.push(eventId);
-                renderEventsUI();
-                if (!document.getElementById('my-events-view').classList.contains('hidden')) { renderMyEvents(); }
-                showToast("Failed to cancel reservation", "error");
-            } finally {
-                rsvpToCancelEventId = null;
-            }
+                pollNotifications(); // جلب إشعار الإلغاء فوراً
+            } catch (error) { myBookedEventIds.push(eventId); renderEventsUI(); if (!document.getElementById('my-events-view').classList.contains('hidden')) renderMyEvents(); showToast("Failed to cancel.", "error"); } 
+            finally { rsvpToCancelEventId = null; }
         }
 
         async function submitNewEvent(e) {
-            e.preventDefault();
-            const coverInput = document.getElementById('newEventCover');
-            const galleryInput = document.getElementById('newEventImages');
-
-            let totalSize = 0;
-            if (coverInput && coverInput.files.length > 0) totalSize += coverInput.files[0].size;
-            if (galleryInput && galleryInput.files.length > 0) {
-                for (let i = 0; i < galleryInput.files.length; i++) totalSize += galleryInput.files[i].size;
-            }
-
-            if (totalSize > 4 * 1024 * 1024) { showToast("Total images size exceeds the 4MB limit.", "error"); return; }
-            if (galleryInput.files.length > 5) { showToast("Maximum 5 gallery images allowed!", "error"); return; }
-            
-            const formData = new FormData();
-            formData.append('title', document.getElementById('newEventTitle').value);
-            formData.append('event_date', document.getElementById('newEventDate').value);
-            formData.append('location', document.getElementById('newEventLocation').value);
-            formData.append('description', document.getElementById('newEventDesc').value);
-            formData.append('created_by', currentUser.id);
-            
-            if(coverInput.files.length > 0) { formData.append('cover', coverInput.files[0]); }
-            for (let i = 0; i < galleryInput.files.length; i++) { formData.append('images', galleryInput.files[i]); }
-
-            // 1. Optimistic UI: القفل السريع والرفع في الخلفية
-            closeModal('createEventModal');
-            showToast("Publishing in background... please wait ⏳", "success");
-            
+            e.preventDefault(); const formData = new FormData();
+            formData.append('title', document.getElementById('newEventTitle').value); formData.append('event_date', document.getElementById('newEventDate').value); formData.append('location', document.getElementById('newEventLocation').value); formData.append('description', document.getElementById('newEventDesc').value); formData.append('created_by', currentUser.id);
+            const coverInput = document.getElementById('newEventCover'); const galleryInput = document.getElementById('newEventImages');
+            if(coverInput.files.length > 0) formData.append('cover', coverInput.files[0]);
+            for (let i = 0; i < galleryInput.files.length; i++) formData.append('images', galleryInput.files[i]);
+            closeModal('createEventModal'); showToast("Publishing in background... ⏳", "success");
             try {
                 const response = await fetch(API_BASE + '/admin/events', { method: 'POST', body: formData });
-                if (response.ok) { 
-                    document.getElementById('createEventForm').reset(); 
-                    loadEvents(); 
-                    showToast("Experience Published Successfully! 🚀", "success"); 
-                } else { showToast("Failed to publish event.", "error"); }
-            } catch (error) { showToast("Error connecting to server.", "error"); } 
+                if (response.ok) { document.getElementById('createEventForm').reset(); loadEvents(); showToast("Experience Published! 🚀", "success"); pollNotifications(); } 
+                else showToast("Failed to publish event.", "error");
+            } catch (error) { showToast("Error connecting.", "error"); } 
         }
 
         function toggleAuthMode() { openAuthModal(!isLoginMode); }
         function openAuthModal(isLogin) {
-            isLoginMode = isLogin; document.getElementById('authTitle').innerText = isLogin ? 'Sign In' : 'Register';
-            document.getElementById('authSubmitBtn').innerText = isLogin ? 'Continue' : 'Create Account';
-            document.getElementById('authToggleText').innerText = isLogin ? "No account?" : "Already registered?";
-            if(isLogin) { document.getElementById('authName').classList.add('hidden'); document.getElementById('authName').removeAttribute('required'); document.getElementById('authPhone').classList.add('hidden'); } 
-            else { document.getElementById('authName').classList.remove('hidden'); document.getElementById('authName').setAttribute('required', 'true'); document.getElementById('authPhone').classList.remove('hidden'); }
+            isLoginMode = isLogin; document.getElementById('authTitle').innerText = isLogin ? 'Sign In' : 'Register'; document.getElementById('authSubmitBtn').innerText = isLogin ? 'Continue' : 'Create Account'; document.getElementById('authToggleText').innerText = isLogin ? "No account?" : "Already registered?";
+            if(isLogin) { document.getElementById('authName').classList.add('hidden'); document.getElementById('authName').removeAttribute('required'); document.getElementById('authPhone').classList.add('hidden'); } else { document.getElementById('authName').classList.remove('hidden'); document.getElementById('authName').setAttribute('required', 'true'); document.getElementById('authPhone').classList.remove('hidden'); }
             document.getElementById('authModal').classList.add('active');
         }
         
         async function handleAuth(e) {
-            e.preventDefault();
-            const endpoint = isLoginMode ? '/login' : '/signup';
-            const payload = { email: document.getElementById('authEmail').value, password: document.getElementById('authPassword').value };
+            e.preventDefault(); const payload = { email: document.getElementById('authEmail').value, password: document.getElementById('authPassword').value };
             if(!isLoginMode) { payload.name = document.getElementById('authName').value; payload.phone = document.getElementById('authPhone').value; }
             try {
-                const response = await fetch(API_BASE + endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                const response = await fetch(API_BASE + (isLoginMode ? '/login' : '/signup'), { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
                 const result = await response.json();
                 if (response.ok) {
-                    if (isLoginMode) { 
-                        currentUser = result.data; localStorage.setItem('user', JSON.stringify(currentUser)); 
-                        updateNavbar(); closeModal('authModal'); switchView('events-view'); 
-                        loadEvents(); 
-                        showToast(`Welcome back, ${currentUser.name.split(' ')[0]}!`, "success"); 
-                    } else { showToast("Account created successfully! Please log in.", "success"); openAuthModal(true); }
-                } else { showToast(result.message, "error"); }
-            } catch (error) { showToast("Authentication failed. Please try again.", "error"); }
+                    if (isLoginMode) { currentUser = result.data; localStorage.setItem('user', JSON.stringify(currentUser)); updateNavbar(); closeModal('authModal'); loadEvents(); showToast(`Welcome back, ${currentUser.name.split(' ')[0]}!`, "success"); startNotificationPolling(); } 
+                    else { showToast("Account created successfully! Please log in.", "success"); openAuthModal(true); }
+                } else showToast(result.message, "error");
+            } catch (error) { showToast("Authentication failed.", "error"); }
         }
 
         function openProfileModal() {
             if(!currentUser) return;
             document.getElementById('profileAvatarImg').src = currentUser.avatar_url || `https://ui-avatars.com/api/?name=${currentUser.name}&background=111&color=fff`;
-            document.getElementById('profilePrimaryEmail').value = currentUser.email || ''; 
-            document.getElementById('profileSecondaryEmail').value = currentUser.secondary_email || ''; 
-            document.getElementById('profileActiveEmail').value = currentUser.active_email || 'primary';
-            document.getElementById('profilePrimaryPhone').value = currentUser.phone || ''; 
-            document.getElementById('profileSecondaryPhone').value = currentUser.secondary_phone || ''; 
-            document.getElementById('profileActivePhone').value = currentUser.active_phone || 'primary';
+            document.getElementById('profilePrimaryEmail').value = currentUser.email || ''; document.getElementById('profileSecondaryEmail').value = currentUser.secondary_email || ''; document.getElementById('profileActiveEmail').value = currentUser.active_email || 'primary';
+            document.getElementById('profilePrimaryPhone').value = currentUser.phone || ''; document.getElementById('profileSecondaryPhone').value = currentUser.secondary_phone || ''; document.getElementById('profileActivePhone').value = currentUser.active_phone || 'primary';
             document.getElementById('profileModal').classList.add('active');
         }
 
-        function previewAvatar(event) {
-            const file = event.target.files[0];
-            if (file) { 
-                const reader = new FileReader(); 
-                reader.onload = function(e) { document.getElementById('profileAvatarImg').src = e.target.result; }; 
-                reader.readAsDataURL(file); 
-            }
-        }
-
-        function viewFullAvatar() {
-            const avatarSrc = document.getElementById('profileAvatarImg').src;
-            if (avatarSrc && avatarSrc !== window.location.href) {
-                document.getElementById('fullSizeAvatar').src = avatarSrc;
-                document.getElementById('avatarViewerModal').classList.add('active');
-            }
-        }
-
-        function viewAttendeeFullAvatar() {
-            const avatarSrc = document.getElementById('viewAttendeeAvatar').src;
-            if (avatarSrc && avatarSrc !== window.location.href) {
-                document.getElementById('fullSizeAvatar').src = avatarSrc;
-                document.getElementById('avatarViewerModal').classList.add('active');
-            }
-        }
+        function previewAvatar(event) { const file = event.target.files[0]; if (file) { const reader = new FileReader(); reader.onload = function(e) { document.getElementById('profileAvatarImg').src = e.target.result; }; reader.readAsDataURL(file); } }
+        function viewFullAvatar() { const avatarSrc = document.getElementById('profileAvatarImg').src; if (avatarSrc && avatarSrc !== window.location.href) { document.getElementById('fullSizeAvatar').src = avatarSrc; document.getElementById('avatarViewerModal').classList.add('active'); } }
+        function viewAttendeeFullAvatar() { const avatarSrc = document.getElementById('viewAttendeeAvatar').src; if (avatarSrc && avatarSrc !== window.location.href) { document.getElementById('fullSizeAvatar').src = avatarSrc; document.getElementById('avatarViewerModal').classList.add('active'); } }
 
         async function submitProfile(e) {
-            e.preventDefault(); 
-            
-            const formData = new FormData();
-            formData.append('email', currentUser.email); 
-            formData.append('secondary_email', document.getElementById('profileSecondaryEmail').value); 
-            formData.append('secondary_phone', document.getElementById('profileSecondaryPhone').value); 
-            const fileInput = document.getElementById('profileAvatarFile'); 
-            if (fileInput.files.length > 0) formData.append('avatar', fileInput.files[0]);
-
-            // 1. Optimistic UI: تغييرات البروفايل محلياً فوراً
-            currentUser.secondary_email = document.getElementById('profileSecondaryEmail').value;
-            currentUser.secondary_phone = document.getElementById('profileSecondaryPhone').value;
-            currentUser.active_email = document.getElementById('profileActiveEmail').value;
-            currentUser.active_phone = document.getElementById('profileActivePhone').value;
-            
-            if (fileInput.files.length > 0) {
-                const reader = new FileReader();
-                reader.onload = function(ev) {
-                    currentUser.avatar_url = ev.target.result;
-                    localStorage.setItem('user', JSON.stringify(currentUser));
-                    updateNavbar();
-                };
-                reader.readAsDataURL(fileInput.files[0]);
-            } else {
-                localStorage.setItem('user', JSON.stringify(currentUser));
-                updateNavbar();
-            }
-
-            closeModal('profileModal'); 
-            showToast("Profile updating in background... ⏳", "success"); 
-
-            // 2. التنفيذ في الخلفية
-            try {
-                const response = await fetch(API_BASE + '/update', { method: 'POST', body: formData });
-                if(response.ok) { 
-                    showToast("Profile updated successfully! ✅", "success"); 
-                } else { showToast("Failed to update on server.", "error"); }
-            } catch(error) { showToast("Failed to connect to server.", "error"); } 
+            e.preventDefault(); const formData = new FormData();
+            formData.append('email', currentUser.email); formData.append('secondary_email', document.getElementById('profileSecondaryEmail').value); formData.append('secondary_phone', document.getElementById('profileSecondaryPhone').value); 
+            const fileInput = document.getElementById('profileAvatarFile'); if (fileInput.files.length > 0) formData.append('avatar', fileInput.files[0]);
+            currentUser.secondary_email = document.getElementById('profileSecondaryEmail').value; currentUser.secondary_phone = document.getElementById('profileSecondaryPhone').value; currentUser.active_email = document.getElementById('profileActiveEmail').value; currentUser.active_phone = document.getElementById('profileActivePhone').value;
+            if (fileInput.files.length > 0) { const reader = new FileReader(); reader.onload = function(ev) { currentUser.avatar_url = ev.target.result; localStorage.setItem('user', JSON.stringify(currentUser)); updateNavbar(); }; reader.readAsDataURL(fileInput.files[0]); } else { localStorage.setItem('user', JSON.stringify(currentUser)); updateNavbar(); }
+            closeModal('profileModal'); showToast("Profile updating in background... ⏳", "success"); 
+            try { await fetch(API_BASE + '/update', { method: 'POST', body: formData }); showToast("Profile updated successfully! ✅", "success"); } catch(error) { showToast("Failed to connect.", "error"); } 
         }
         
-        function populateAdminEventsDropdown() {
-            fetch(API_BASE + '/events').then(res => res.json()).then(result => {
-                const select = document.getElementById('adminEventSelect');
-                select.innerHTML = '<option value="">-- Select --</option>';
-                result.data.forEach(evt => select.innerHTML += `<option value="${evt.id}">${evt.title}</option>`);
-            });
-        }
+        function populateAdminEventsDropdown() { fetch(API_BASE + '/events').then(res => res.json()).then(result => { const select = document.getElementById('adminEventSelect'); select.innerHTML = '<option value="">-- Select --</option>'; result.data.forEach(evt => select.innerHTML += `<option value="${evt.id}">${evt.title}</option>`); }); }
 
         function renderAttendeesTable(data) {
-            const tbody = document.getElementById('attendeesTable');
-            const countBadge = document.getElementById('attendeeCount');
-            const exportBtn = document.getElementById('exportBtn');
-            countBadge.innerText = data.length; 
-            
-            if(data.length === 0) { 
-                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color: var(--text-muted); padding: 30px;">No RSVPs yet.</td></tr>'; 
-                exportBtn.style.display = 'none';
-            } else { 
-                tbody.innerHTML = data.map((person, index) => {
-                    const displayName = person.full_name || person.name || 'User';
-                    const avatar = person.avatar_url || `https://ui-avatars.com/api/?name=${displayName}&background=111&color=fff`;
-                    return `<tr>
-                        <td style="display:flex; align-items:center; gap:10px;">
-                            <img src="${avatar}" style="width:32px; height:32px; border-radius:50%; object-fit:cover; border: 1px solid var(--border);">
-                            <span style="font-weight: 500;">${displayName}</span>
-                        </td>
-                        <td style="color: var(--text-muted);">${person.email}</td>
-                        <td style="color: var(--text-muted);">${person.phone_number || person.phone || '-'}</td>
-                        <td>
-                            <div style="display: flex; gap: 8px;">
-                                <button class="btn btn-outline" style="padding: 6px 12px; font-size: 11px;" onclick="viewAttendeeProfile(${index})">View Profile</button>
-                                <button class="btn btn-outline" style="padding: 6px 12px; font-size: 11px; color: #ef4444; border-color: rgba(239, 68, 68, 0.4);" onclick="removeAttendee(${index})">Remove</button>
-                            </div>
-                        </td>
-                    </tr>`;
-                }).join(''); 
-                exportBtn.style.display = 'flex'; 
-            }
+            const tbody = document.getElementById('attendeesTable'); document.getElementById('attendeeCount').innerText = data.length; const exportBtn = document.getElementById('exportBtn');
+            if(data.length === 0) { tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color: var(--text-muted); padding: 30px;">No RSVPs yet.</td></tr>'; exportBtn.style.display = 'none'; } 
+            else { tbody.innerHTML = data.map((person, index) => {
+                    const displayName = person.full_name || person.name || 'User'; const avatar = person.avatar_url || `https://ui-avatars.com/api/?name=${displayName}&background=111&color=fff`;
+                    return `<tr><td style="display:flex; align-items:center; gap:10px;"><img src="${avatar}" style="width:32px; height:32px; border-radius:50%; object-fit:cover; border: 1px solid var(--border);"><span style="font-weight: 500;">${displayName}</span></td><td style="color: var(--text-muted);">${person.email}</td><td style="color: var(--text-muted);">${person.phone_number || person.phone || '-'}</td><td><div style="display: flex; gap: 8px;"><button class="btn btn-outline" style="padding: 6px 12px; font-size: 11px;" onclick="viewAttendeeProfile(${index})">View Profile</button><button class="btn btn-outline" style="padding: 6px 12px; font-size: 11px; color: #ef4444; border-color: rgba(239, 68, 68, 0.4);" onclick="removeAttendee(${index})">Remove</button></div></td></tr>`;
+                }).join(''); exportBtn.style.display = 'flex'; }
         }
         
         async function loadRSVPs() {
-            const eventId = document.getElementById('adminEventSelect').value;
-            const tbody = document.getElementById('attendeesTable');
-            const exportBtn = document.getElementById('exportBtn');
-            tbody.innerHTML = ''; document.getElementById('attendeeCount').innerText = '0'; exportBtn.style.display = 'none'; 
+            const eventId = document.getElementById('adminEventSelect').value; const tbody = document.getElementById('attendeesTable'); document.getElementById('exportBtn').style.display = 'none'; tbody.innerHTML = ''; document.getElementById('attendeeCount').innerText = '0'; 
             if(!eventId) return;
-            
-            try {
-                const response = await fetch(API_BASE + `/admin/rsvps/${eventId}`);
-                const result = await response.json();
-                if(result.status === 'success') {
-                    currentAttendeesData = result.data; 
-                    renderAttendeesTable(currentAttendeesData);
-                }
-            } catch (error) { 
-                tbody.innerHTML = '<tr><td colspan="4" style="color:#ef4444; text-align:center;">Error loading data</td></tr>'; 
-            }
+            try { const response = await fetch(API_BASE + `/admin/rsvps/${eventId}`); const result = await response.json(); if(result.status === 'success') { currentAttendeesData = result.data; renderAttendeesTable(currentAttendeesData); } } catch (error) { tbody.innerHTML = '<tr><td colspan="4" style="color:#ef4444; text-align:center;">Error loading data</td></tr>'; }
         }
 
         function viewAttendeeProfile(index) {
-            const person = currentAttendeesData[index];
-            if (!person) return;
-            const displayName = person.full_name || person.name || 'User';
-            const avatar = person.avatar_url || `https://ui-avatars.com/api/?name=${displayName}&background=111&color=fff`;
-            
-            document.getElementById('viewAttendeeAvatar').src = avatar;
-            document.getElementById('viewAttendeeName').innerText = displayName;
-            document.getElementById('viewAttendeeEmail').innerText = person.email || 'N/A';
-            document.getElementById('viewAttendeePhone').innerText = person.phone_number || person.phone || 'Not provided';
-            document.getElementById('viewAttendeeSecEmail').innerText = person.secondary_email || 'Not provided';
-            document.getElementById('viewAttendeeSecPhone').innerText = person.secondary_phone || 'Not provided';
-            
-            document.getElementById('attendeeProfileModal').classList.add('active');
+            const person = currentAttendeesData[index]; if (!person) return;
+            const displayName = person.full_name || person.name || 'User'; const avatar = person.avatar_url || `https://ui-avatars.com/api/?name=${displayName}&background=111&color=fff`;
+            document.getElementById('viewAttendeeAvatar').src = avatar; document.getElementById('viewAttendeeName').innerText = displayName; document.getElementById('viewAttendeeEmail').innerText = person.email || 'N/A'; document.getElementById('viewAttendeePhone').innerText = person.phone_number || person.phone || 'Not provided'; document.getElementById('viewAttendeeSecEmail').innerText = person.secondary_email || 'Not provided'; document.getElementById('viewAttendeeSecPhone').innerText = person.secondary_phone || 'Not provided'; document.getElementById('attendeeProfileModal').classList.add('active');
         }
 
         function removeAttendee(index) {
-            attendeeToRemoveIndex = index;
-            const person = currentAttendeesData[index];
-            const displayName = person.full_name || person.name || 'this user';
-            document.getElementById('removeAttendeeName').innerText = displayName;
-            document.getElementById('removeAttendeeConfirmModal').classList.add('active');
+            attendeeToRemoveIndex = index; const person = currentAttendeesData[index]; document.getElementById('removeAttendeeName').innerText = person.full_name || person.name || 'this user'; document.getElementById('removeReason').value = ''; document.getElementById('removeAttendeeConfirmModal').classList.add('active');
         }
 
         async function executeRemoveAttendee() {
             if (attendeeToRemoveIndex === null) return;
-            const index = attendeeToRemoveIndex;
-            const person = currentAttendeesData[index];
-            const eventId = document.getElementById('adminEventSelect').value;
+            const index = attendeeToRemoveIndex; const person = currentAttendeesData[index]; const eventId = document.getElementById('adminEventSelect').value;
+            const reason = document.getElementById('removeReason').value || "Admin discretion";
             
-            // 1. Optimistic UI: مسح من جدول الأدمن سريعاً
-            closeModal('removeAttendeeConfirmModal');
-            const originalAttendees = [...currentAttendeesData];
-            currentAttendeesData.splice(index, 1);
-            renderAttendeesTable(currentAttendeesData);
-            showToast("Attendee removed successfully", "success");
-
-            // 2. التنفيذ في الخلفية
+            closeModal('removeAttendeeConfirmModal'); const originalAttendees = [...currentAttendeesData]; currentAttendeesData.splice(index, 1); renderAttendeesTable(currentAttendeesData); showToast("Attendee removed successfully", "success");
             try {
-                const response = await fetch(API_BASE + '/rsvp', {
-                    method: 'DELETE', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email: person.email, event_id: eventId })
-                });
-
+                const response = await fetch(API_BASE + '/rsvp', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: person.email, event_id: eventId, reason: reason, admin_name: currentUser.name }) });
                 if (!response.ok) throw new Error("Failed");
-            } catch (error) {
-                currentAttendeesData = originalAttendees;
-                renderAttendeesTable(currentAttendeesData);
-                showToast("Connection error. Attendee not removed.", "error");
-            } finally {
-                attendeeToRemoveIndex = null;
-            }
+            } catch (error) { currentAttendeesData = originalAttendees; renderAttendeesTable(currentAttendeesData); showToast("Connection error. Attendee not removed.", "error"); } finally { attendeeToRemoveIndex = null; }
         }
 
         function exportToCSV() {
-            const eventSelect = document.getElementById('adminEventSelect');
-            const eventName = eventSelect.options[eventSelect.selectedIndex].text;
-            const rows = document.getElementById('attendeesTable').querySelectorAll('tr');
-            let csvContent = "data:text/csv;charset=utf-8,Name,Email,Phone\n"; 
-            rows.forEach(row => { const cols = row.querySelectorAll('td'); if (cols.length >= 3) { csvContent += `"${cols[0].innerText}","${cols[1].innerText}","${cols[2].innerText}"\n`; } });
-            const link = document.createElement("a"); link.setAttribute("href", encodeURI(csvContent)); link.setAttribute("download", `Attendees_${eventName.replace(/\s+/g, '_')}.csv`);
-            document.body.appendChild(link); link.click(); document.body.removeChild(link); showToast("Exported successfully!", "success");
+            const eventSelect = document.getElementById('adminEventSelect'); const eventName = eventSelect.options[eventSelect.selectedIndex].text; const rows = document.getElementById('attendeesTable').querySelectorAll('tr'); let csvContent = "data:text/csv;charset=utf-8,Name,Email,Phone\n"; rows.forEach(row => { const cols = row.querySelectorAll('td'); if (cols.length >= 3) { csvContent += `"${cols[0].innerText}","${cols[1].innerText}","${cols[2].innerText}"\n`; } });
+            const link = document.createElement("a"); link.setAttribute("href", encodeURI(csvContent)); link.setAttribute("download", `Attendees_${eventName.replace(/\s+/g, '_')}.csv`); document.body.appendChild(link); link.click(); document.body.removeChild(link); showToast("Exported successfully!", "success");
         }
     </script>
 </body>

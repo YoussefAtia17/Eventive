@@ -1,3 +1,5 @@
+import email
+
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from supabase import create_client, Client
@@ -81,6 +83,22 @@ def create_event():
             "image_urls": json.dumps(image_urls),
             "created_by": created_by
         }).execute()
+
+        # (ده الكود اللي المفروض تضيفه جوه دالة إضافة الإيفنت بعد ما الإيفنت يتسجل بنجاح)
+        try:
+            users_res = supabase.table("users").select("email").execute()
+            notifs = []
+            for u in users_res.data:
+                if u.get('email'):
+                    notifs.append({
+                        "user_email": u['email'],
+                        "title": "✨ New Experience Available!",
+                        "message": f"A new event '{title}' has been published. Check it out!"
+                    })
+            if notifs:
+                supabase.table("notifications").insert(notifs).execute()
+        except Exception as e:
+            pass # لو الإشعارات فشلت، متبوظش إنشاء الإيفنت
 
         return jsonify({"status": "success", "message": "Event Created!"}), 201
     except Exception as e:
@@ -187,6 +205,15 @@ def rsvp():
             "phone_number": data.get('phone', ''),
             "event_id": data['event_id']
         }).execute()
+        # إشعار تأكيد الحجز
+        event_res = supabase.table("events").select("title").eq("id", event_id).execute()
+        event_title = event_res.data[0]['title'] if event_res.data else "an event"
+        supabase.table("notifications").insert({
+            "user_email": email, 
+            "title": "✅ RSVP Confirmed", 
+            "message": f"You successfully registered for '{event_title}'."
+        }).execute()
+        
         return jsonify({"status": "success", "message": "Spot Booked Successfully!"}), 201
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
@@ -314,16 +341,52 @@ def cancel_rsvp():
     data = request.json
     email = data.get('email')
     event_id = data.get('event_id')
+    reason = data.get('reason')
+    admin_name = data.get('admin_name')
     
     if not email or not event_id:
         return jsonify({"status": "error", "message": "Missing data"}), 400
         
     try:
-        # مسح بيانات اليوزر من الإيفنت ده بس
         supabase.table("attendees").delete().match({"email": email, "event_id": event_id}).execute()
+        
+        # جلب اسم الإيفنت للإشعار
+        event_res = supabase.table("events").select("title").eq("id", event_id).execute()
+        event_title = event_res.data[0]['title'] if event_res.data else "an event"
+        
+        # تحديد نوع الإشعار بناءً على مين اللي مسح
+        if reason and admin_name:
+            title = "⚠️ Removed from Event"
+            msg = f"Admin {admin_name} removed you from '{event_title}'. Reason: {reason}"
+        else:
+            title = "❌ Reservation Canceled"
+            msg = f"You successfully canceled your reservation for '{event_title}'."
+            
+        supabase.table("notifications").insert({"user_email": email, "title": title, "message": msg}).execute()
+        
         return jsonify({"status": "success", "message": "Reservation canceled successfully"}), 200
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
+
+@app.route('/api/notifications', methods=['GET'])
+def get_notifications():
+    email = request.args.get('email')
+    if not email:
+        return jsonify({"status": "error"}), 400
+    try:
+        res = supabase.table("notifications").select("*").eq("user_email", email).order("created_at", desc=True).execute()
+        return jsonify({"status": "success", "data": res.data}), 200
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+@app.route('/api/notifications/read_all', methods=['POST'])
+def read_all_notifications():
+    email = request.json.get('email')
+    try:
+        supabase.table("notifications").update({"is_read": True}).eq("user_email", email).execute()
+        return jsonify({"status": "success"}), 200
+    except:
+        return jsonify({"status": "error"}), 500
     
 if __name__ == '__main__':
     app.run(debug=True)
