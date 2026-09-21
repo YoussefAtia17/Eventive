@@ -368,6 +368,13 @@
         </div>
     </div>
 
+    <!-- Full Size Avatar Viewer Modal -->
+    <div class="modal-overlay" id="avatarViewerModal" style="z-index: 1050; cursor: zoom-out;" onclick="closeModal('avatarViewerModal')">
+        <div style="max-width: 90vw; max-height: 90vh; display: flex; justify-content: center; align-items: center;">
+            <img id="fullSizeAvatar" src="" style="max-width: 100%; max-height: 90vh; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.5);">
+        </div>
+    </div>
+
     <!-- Remove Attendee Confirmation Modal (Admin) -->
     <div class="modal-overlay" id="removeAttendeeConfirmModal" style="z-index: 1100;">
         <div class="modal-content" style="max-width: 400px; text-align: center;">
@@ -380,13 +387,6 @@
                 <button class="btn btn-outline" style="flex: 1;" onclick="closeModal('removeAttendeeConfirmModal')">Cancel</button>
                 <button class="btn btn-primary" style="flex: 1; background: #ef4444; border-color: #ef4444;" onclick="executeRemoveAttendee()">Yes, Remove</button>
             </div>
-        </div>
-    </div>
-
-    <!-- Full Size Avatar Viewer Modal -->
-    <div class="modal-overlay" id="avatarViewerModal" style="z-index: 1050; cursor: zoom-out;" onclick="closeModal('avatarViewerModal')">
-        <div style="max-width: 90vw; max-height: 90vh; display: flex; justify-content: center; align-items: center;">
-            <img id="fullSizeAvatar" src="" style="max-width: 100%; max-height: 90vh; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.5);">
         </div>
     </div>
 
@@ -428,6 +428,7 @@
         let eventToDeleteId = null; 
         let currentAttendeesData = []; 
         let rsvpToCancelEventId = null;
+        let attendeeToRemoveIndex = null;
         const API_BASE = 'https://eventive-steel.vercel.app/api';
         let toastTimeout;
 
@@ -617,29 +618,30 @@
 
         async function executeDeleteEvent() {
             if (!eventToDeleteId) return;
+            const eventId = eventToDeleteId;
             
-            const btn = document.querySelector('#deleteConfirmModal .btn-primary');
-            btn.innerText = "Deleting..."; btn.disabled = true;
+            // 1. Optimistic UI: مسح سريع من الواجهة
+            closeModal('deleteConfirmModal');
+            const originalEvents = [...allEvents];
+            allEvents = allEvents.filter(e => e.id !== eventId);
+            renderEventsUI();
+            if (!document.getElementById('my-events-view').classList.contains('hidden')) renderMyEvents();
+            showToast("Event removed successfully!", "success"); 
 
+            // 2. التنفيذ في الخلفية
             try {
-                const response = await fetch(API_BASE + '/events/' + eventToDeleteId, { 
-                    method: 'DELETE', 
-                    headers: { 'Content-Type': 'application/json' }, 
-                    body: JSON.stringify({ role: currentUser.role }) 
+                const response = await fetch(API_BASE + '/events/' + eventId, { 
+                    method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ role: currentUser.role }) 
                 });
-                
                 if (response.ok) { 
-                    showToast("Event removed successfully!", "success"); 
-                    loadEvents(); 
                     if(currentUser.role === 'admin') populateAdminEventsDropdown(); 
-                } else { 
-                    showToast("Error deleting event.", "error"); 
-                }
+                } else { throw new Error("Delete failed"); }
             } catch (error) { 
-                showToast("Connection error.", "error"); 
+                // لو فشل، نرجع الإيفنت ونقوله في مشكلة
+                allEvents = originalEvents;
+                renderEventsUI();
+                showToast("Connection error. Failed to delete.", "error"); 
             } finally {
-                closeModal('deleteConfirmModal');
-                btn.innerText = "Yes, Delete"; btn.disabled = false;
                 eventToDeleteId = null;
             }
         }
@@ -661,9 +663,7 @@
 
         async function submitEditEvent(e) {
             e.preventDefault();
-            const btn = document.querySelector('#editEventForm button');
-            btn.innerText = "Saving..."; btn.disabled = true;
-
+            
             const coverInput = document.getElementById('editEventCover');
             const galleryInput = document.getElementById('editEventImages');
             
@@ -673,12 +673,8 @@
                 for (let i = 0; i < galleryInput.files.length; i++) totalSize += galleryInput.files[i].size;
             }
 
-            const maxSizeBytes = 4 * 1024 * 1024;
-            if (totalSize > maxSizeBytes) {
-                showToast("Total images size exceeds the 4MB limit. Please choose smaller images.", "error");
-                btn.innerText = "Save Changes"; btn.disabled = false; return;
-            }
-            if (galleryInput.files.length > 5) { showToast("Maximum 5 gallery images allowed!", "error"); btn.innerText = "Save Changes"; btn.disabled = false; return; }
+            if (totalSize > 4 * 1024 * 1024) { showToast("Total images size exceeds the 4MB limit.", "error"); return; }
+            if (galleryInput.files.length > 5) { showToast("Maximum 5 gallery images allowed!", "error"); return; }
             
             const eventId = document.getElementById('editEventId').value;
             const formData = new FormData();
@@ -690,13 +686,19 @@
             if(coverInput.files.length > 0) { formData.append('cover', coverInput.files[0]); }
             for (let i = 0; i < galleryInput.files.length; i++) { formData.append('images', galleryInput.files[i]); }
 
+            // 1. Optimistic UI: القفل السريع
+            closeModal('editEventModal');
+            showToast("Updating experience in background... ⏳", "success"); 
+
+            // 2. التنفيذ في الخلفية
             try {
                 const response = await fetch(API_BASE + '/admin/events/' + eventId, { method: 'PUT', body: formData });
                 if (response.ok) { 
-                    document.getElementById('editEventForm').reset(); loadEvents(); closeModal('editEventModal'); showToast("Experience Updated Successfully!", "success"); 
+                    document.getElementById('editEventForm').reset(); 
+                    loadEvents(); // ريفرش للداتا الجديدة
+                    showToast("Experience Updated Successfully! 🚀", "success"); 
                 } else { showToast("Failed to update event.", "error"); }
             } catch (error) { showToast("Error connecting to server.", "error"); } 
-            finally { btn.innerText = "Save Changes"; btn.disabled = false; }
         }
 
         function updateCountdowns() {
@@ -784,18 +786,30 @@
 
         async function submitRSVP(e) {
             e.preventDefault();
-            const btn = e.target.querySelector('button[type="submit"]');
-            btn.innerText = 'Processing...'; btn.disabled = true;
+            const eventId = selectedEventIdForRSVP;
+            
+            // 1. Optimistic UI: حجز سريع
+            myBookedEventIds.push(eventId);
+            closeModal('rsvpModal');
+            renderEventsUI();
+            showToast("Spot Booked Successfully! 🎉", "success");
+
+            const payload = { 
+                name: document.getElementById('rsvpName').value, 
+                email: document.getElementById('rsvpEmail').value, 
+                phone: document.getElementById('rsvpPhone').value, 
+                event_id: eventId 
+            };
+
+            // 2. التنفيذ في الخلفية
             try {
-                const response = await fetch(API_BASE + '/rsvp', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: document.getElementById('rsvpName').value, email: document.getElementById('rsvpEmail').value, phone: document.getElementById('rsvpPhone').value, event_id: selectedEventIdForRSVP }) });
-                const result = await response.json();
-                if (response.ok) { 
-                    showToast("Spot Booked Successfully! 🎉", "success"); 
-                    closeModal('rsvpModal');
-                    myBookedEventIds.push(selectedEventIdForRSVP);
-                    renderEventsUI();
-                } else { showToast(result.message, "error"); }
-            } catch (error) { showToast("Connection error. Please try again.", "error"); } finally { btn.innerText = 'Confirm Attendance'; btn.disabled = false; }
+                const response = await fetch(API_BASE + '/rsvp', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                if (!response.ok) throw new Error("Booking failed");
+            } catch (error) { 
+                myBookedEventIds = myBookedEventIds.filter(id => id !== eventId);
+                renderEventsUI();
+                showToast("Connection error. Booking failed.", "error"); 
+            }
         }
 
         function cancelRSVP(eventId) {
@@ -805,48 +819,36 @@
 
         async function executeCancelRSVP() {
             if (!rsvpToCancelEventId) return;
-            
-            const btn = document.querySelector('#cancelRsvpConfirmModal .btn-primary');
-            btn.innerText = 'Canceling...'; btn.disabled = true;
-
+            const eventId = rsvpToCancelEventId;
             const activeEmail = (currentUser.active_email === 'secondary' && currentUser.secondary_email) ? currentUser.secondary_email : currentUser.email;
 
+            // 1. Optimistic UI: إلغاء سريع
+            closeModal('cancelRsvpConfirmModal'); 
+            closeModal('eventDetailsModal'); 
+            myBookedEventIds = myBookedEventIds.filter(id => id !== eventId);
+            renderEventsUI();
+            if (!document.getElementById('my-events-view').classList.contains('hidden')) { renderMyEvents(); }
+            showToast("Reservation canceled successfully", "success");
+
+            // 2. التنفيذ في الخلفية
             try {
                 const response = await fetch(API_BASE + '/rsvp', {
-                    method: 'DELETE',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email: activeEmail, event_id: rsvpToCancelEventId })
+                    method: 'DELETE', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: activeEmail, event_id: eventId })
                 });
-                
-                if (response.ok) {
-                    showToast("Reservation canceled successfully", "success");
-                    closeModal('cancelRsvpConfirmModal'); 
-                    closeModal('eventDetailsModal'); 
-                    
-                    myBookedEventIds = myBookedEventIds.filter(id => id !== rsvpToCancelEventId);
-                    renderEventsUI();
-                    
-                    if (!document.getElementById('my-events-view').classList.contains('hidden')) {
-                        renderMyEvents();
-                    }
-                } else {
-                    showToast("Failed to cancel reservation", "error");
-                    closeModal('cancelRsvpConfirmModal');
-                }
+                if (!response.ok) throw new Error("Cancel failed");
             } catch (error) {
-                showToast("Connection error", "error");
-                closeModal('cancelRsvpConfirmModal');
+                myBookedEventIds.push(eventId);
+                renderEventsUI();
+                if (!document.getElementById('my-events-view').classList.contains('hidden')) { renderMyEvents(); }
+                showToast("Failed to cancel reservation", "error");
             } finally {
-                btn.innerText = 'Yes, Cancel'; btn.disabled = false;
                 rsvpToCancelEventId = null;
             }
         }
 
         async function submitNewEvent(e) {
             e.preventDefault();
-            const btn = document.querySelector('#createEventForm button');
-            btn.innerText = "Publishing..."; btn.disabled = true;
-
             const coverInput = document.getElementById('newEventCover');
             const galleryInput = document.getElementById('newEventImages');
 
@@ -856,13 +858,8 @@
                 for (let i = 0; i < galleryInput.files.length; i++) totalSize += galleryInput.files[i].size;
             }
 
-            const maxSizeBytes = 4 * 1024 * 1024;
-            if (totalSize > maxSizeBytes) {
-                showToast("Total images size exceeds the 4MB limit. Please choose smaller images.", "error");
-                btn.innerText = "Create Experience"; btn.disabled = false; return;
-            }
-
-            if (galleryInput.files.length > 5) { showToast("Maximum 5 gallery images allowed!", "error"); btn.innerText = "Create Experience"; btn.disabled = false; return; }
+            if (totalSize > 4 * 1024 * 1024) { showToast("Total images size exceeds the 4MB limit.", "error"); return; }
+            if (galleryInput.files.length > 5) { showToast("Maximum 5 gallery images allowed!", "error"); return; }
             
             const formData = new FormData();
             formData.append('title', document.getElementById('newEventTitle').value);
@@ -874,11 +871,18 @@
             if(coverInput.files.length > 0) { formData.append('cover', coverInput.files[0]); }
             for (let i = 0; i < galleryInput.files.length; i++) { formData.append('images', galleryInput.files[i]); }
 
+            // 1. Optimistic UI: القفل السريع والرفع في الخلفية
+            closeModal('createEventModal');
+            showToast("Publishing in background... please wait ⏳", "success");
+            
             try {
                 const response = await fetch(API_BASE + '/admin/events', { method: 'POST', body: formData });
-                if (response.ok) { document.getElementById('createEventForm').reset(); loadEvents(); closeModal('createEventModal'); showToast("Experience Published Successfully!", "success"); } 
-                else { showToast("Failed to publish event.", "error"); }
-            } catch (error) { showToast("Error connecting to server.", "error"); } finally { btn.innerText = "Create Experience"; btn.disabled = false; }
+                if (response.ok) { 
+                    document.getElementById('createEventForm').reset(); 
+                    loadEvents(); 
+                    showToast("Experience Published Successfully! 🚀", "success"); 
+                } else { showToast("Failed to publish event.", "error"); }
+            } catch (error) { showToast("Error connecting to server.", "error"); } 
         }
 
         function toggleAuthMode() { openAuthModal(!isLoginMode); }
@@ -949,44 +953,43 @@
 
         async function submitProfile(e) {
             e.preventDefault(); 
-            const btn = document.querySelector('#profileForm button[type="submit"]');
-            btn.innerText = "Saving..."; btn.disabled = true;
-
+            
             const formData = new FormData();
             formData.append('email', currentUser.email); 
             formData.append('secondary_email', document.getElementById('profileSecondaryEmail').value); 
             formData.append('secondary_phone', document.getElementById('profileSecondaryPhone').value); 
-            
             const fileInput = document.getElementById('profileAvatarFile'); 
             if (fileInput.files.length > 0) formData.append('avatar', fileInput.files[0]);
 
+            // 1. Optimistic UI: تغييرات البروفايل محلياً فوراً
+            currentUser.secondary_email = document.getElementById('profileSecondaryEmail').value;
+            currentUser.secondary_phone = document.getElementById('profileSecondaryPhone').value;
+            currentUser.active_email = document.getElementById('profileActiveEmail').value;
+            currentUser.active_phone = document.getElementById('profileActivePhone').value;
+            
+            if (fileInput.files.length > 0) {
+                const reader = new FileReader();
+                reader.onload = function(ev) {
+                    currentUser.avatar_url = ev.target.result;
+                    localStorage.setItem('user', JSON.stringify(currentUser));
+                    updateNavbar();
+                };
+                reader.readAsDataURL(fileInput.files[0]);
+            } else {
+                localStorage.setItem('user', JSON.stringify(currentUser));
+                updateNavbar();
+            }
+
+            closeModal('profileModal'); 
+            showToast("Profile updating in background... ⏳", "success"); 
+
+            // 2. التنفيذ في الخلفية
             try {
                 const response = await fetch(API_BASE + '/update', { method: 'POST', body: formData });
-                const result = await response.json();
-                
                 if(response.ok) { 
-                    currentUser.secondary_email = document.getElementById('profileSecondaryEmail').value;
-                    currentUser.secondary_phone = document.getElementById('profileSecondaryPhone').value;
-                    currentUser.active_email = document.getElementById('profileActiveEmail').value;
-                    currentUser.active_phone = document.getElementById('profileActivePhone').value;
-                    
-                    if (fileInput.files.length > 0) {
-                        const reader = new FileReader();
-                        reader.onload = function(e) {
-                            currentUser.avatar_url = e.target.result;
-                            localStorage.setItem('user', JSON.stringify(currentUser));
-                            updateNavbar();
-                        };
-                        reader.readAsDataURL(fileInput.files[0]);
-                    } else {
-                        localStorage.setItem('user', JSON.stringify(currentUser));
-                        updateNavbar();
-                    }
-
-                    closeModal('profileModal'); 
-                    showToast("Profile updated successfully!", "success"); 
-                } else { showToast(result.message || "Failed to update.", "error"); }
-            } catch(error) { showToast("Failed to connect to server.", "error"); } finally { btn.innerText = "Save"; btn.disabled = false; }
+                    showToast("Profile updated successfully! ✅", "success"); 
+                } else { showToast("Failed to update on server.", "error"); }
+            } catch(error) { showToast("Failed to connect to server.", "error"); } 
         }
         
         function populateAdminEventsDropdown() {
@@ -996,47 +999,52 @@
                 result.data.forEach(evt => select.innerHTML += `<option value="${evt.id}">${evt.title}</option>`);
             });
         }
+
+        function renderAttendeesTable(data) {
+            const tbody = document.getElementById('attendeesTable');
+            const countBadge = document.getElementById('attendeeCount');
+            const exportBtn = document.getElementById('exportBtn');
+            countBadge.innerText = data.length; 
+            
+            if(data.length === 0) { 
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color: var(--text-muted); padding: 30px;">No RSVPs yet.</td></tr>'; 
+                exportBtn.style.display = 'none';
+            } else { 
+                tbody.innerHTML = data.map((person, index) => {
+                    const displayName = person.full_name || person.name || 'User';
+                    const avatar = person.avatar_url || `https://ui-avatars.com/api/?name=${displayName}&background=111&color=fff`;
+                    return `<tr>
+                        <td style="display:flex; align-items:center; gap:10px;">
+                            <img src="${avatar}" style="width:32px; height:32px; border-radius:50%; object-fit:cover; border: 1px solid var(--border);">
+                            <span style="font-weight: 500;">${displayName}</span>
+                        </td>
+                        <td style="color: var(--text-muted);">${person.email}</td>
+                        <td style="color: var(--text-muted);">${person.phone_number || person.phone || '-'}</td>
+                        <td>
+                            <div style="display: flex; gap: 8px;">
+                                <button class="btn btn-outline" style="padding: 6px 12px; font-size: 11px;" onclick="viewAttendeeProfile(${index})">View Profile</button>
+                                <button class="btn btn-outline" style="padding: 6px 12px; font-size: 11px; color: #ef4444; border-color: rgba(239, 68, 68, 0.4);" onclick="removeAttendee(${index})">Remove</button>
+                            </div>
+                        </td>
+                    </tr>`;
+                }).join(''); 
+                exportBtn.style.display = 'flex'; 
+            }
+        }
         
         async function loadRSVPs() {
             const eventId = document.getElementById('adminEventSelect').value;
             const tbody = document.getElementById('attendeesTable');
-            const countBadge = document.getElementById('attendeeCount');
             const exportBtn = document.getElementById('exportBtn');
-            tbody.innerHTML = ''; countBadge.innerText = '0'; exportBtn.style.display = 'none'; 
+            tbody.innerHTML = ''; document.getElementById('attendeeCount').innerText = '0'; exportBtn.style.display = 'none'; 
             if(!eventId) return;
             
             try {
                 const response = await fetch(API_BASE + `/admin/rsvps/${eventId}`);
                 const result = await response.json();
-                
                 if(result.status === 'success') {
                     currentAttendeesData = result.data; 
-                    countBadge.innerText = result.data.length; 
-                    
-                    if(result.data.length === 0) { 
-                        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color: var(--text-muted); padding: 30px;">No RSVPs yet.</td></tr>'; 
-                    } else { 
-                        tbody.innerHTML = result.data.map((person, index) => {
-                            const displayName = person.full_name || person.name || 'User';
-                            const avatar = person.avatar_url || `https://ui-avatars.com/api/?name=${displayName}&background=111&color=fff`;
-                            
-                            return `<tr>
-                                <td style="display:flex; align-items:center; gap:10px;">
-                                    <img src="${avatar}" style="width:32px; height:32px; border-radius:50%; object-fit:cover; border: 1px solid var(--border);">
-                                    <span style="font-weight: 500;">${displayName}</span>
-                                </td>
-                                <td style="color: var(--text-muted);">${person.email}</td>
-                                <td style="color: var(--text-muted);">${person.phone_number || person.phone || '-'}</td>
-                                <td>
-                                    <div style="display: flex; gap: 8px;">
-                                        <button class="btn btn-outline" style="padding: 6px 12px; font-size: 11px;" onclick="viewAttendeeProfile(${index})">View Profile</button>
-                                        <button class="btn btn-outline" style="padding: 6px 12px; font-size: 11px; color: #ef4444; border-color: rgba(239, 68, 68, 0.4);" onclick="removeAttendee(${index})">Remove</button>
-                                    </div>
-                                </td>
-                            </tr>`;
-                        }).join(''); 
-                        exportBtn.style.display = 'flex'; 
-                    }
+                    renderAttendeesTable(currentAttendeesData);
                 }
             } catch (error) { 
                 tbody.innerHTML = '<tr><td colspan="4" style="color:#ef4444; text-align:center;">Error loading data</td></tr>'; 
@@ -1046,19 +1054,55 @@
         function viewAttendeeProfile(index) {
             const person = currentAttendeesData[index];
             if (!person) return;
-            
             const displayName = person.full_name || person.name || 'User';
             const avatar = person.avatar_url || `https://ui-avatars.com/api/?name=${displayName}&background=111&color=fff`;
             
             document.getElementById('viewAttendeeAvatar').src = avatar;
             document.getElementById('viewAttendeeName').innerText = displayName;
             document.getElementById('viewAttendeeEmail').innerText = person.email || 'N/A';
-            
             document.getElementById('viewAttendeePhone').innerText = person.phone_number || person.phone || 'Not provided';
             document.getElementById('viewAttendeeSecEmail').innerText = person.secondary_email || 'Not provided';
             document.getElementById('viewAttendeeSecPhone').innerText = person.secondary_phone || 'Not provided';
             
             document.getElementById('attendeeProfileModal').classList.add('active');
+        }
+
+        function removeAttendee(index) {
+            attendeeToRemoveIndex = index;
+            const person = currentAttendeesData[index];
+            const displayName = person.full_name || person.name || 'this user';
+            document.getElementById('removeAttendeeName').innerText = displayName;
+            document.getElementById('removeAttendeeConfirmModal').classList.add('active');
+        }
+
+        async function executeRemoveAttendee() {
+            if (attendeeToRemoveIndex === null) return;
+            const index = attendeeToRemoveIndex;
+            const person = currentAttendeesData[index];
+            const eventId = document.getElementById('adminEventSelect').value;
+            
+            // 1. Optimistic UI: مسح من جدول الأدمن سريعاً
+            closeModal('removeAttendeeConfirmModal');
+            const originalAttendees = [...currentAttendeesData];
+            currentAttendeesData.splice(index, 1);
+            renderAttendeesTable(currentAttendeesData);
+            showToast("Attendee removed successfully", "success");
+
+            // 2. التنفيذ في الخلفية
+            try {
+                const response = await fetch(API_BASE + '/rsvp', {
+                    method: 'DELETE', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: person.email, event_id: eventId })
+                });
+
+                if (!response.ok) throw new Error("Failed");
+            } catch (error) {
+                currentAttendeesData = originalAttendees;
+                renderAttendeesTable(currentAttendeesData);
+                showToast("Connection error. Attendee not removed.", "error");
+            } finally {
+                attendeeToRemoveIndex = null;
+            }
         }
 
         function exportToCSV() {
@@ -1070,52 +1114,6 @@
             const link = document.createElement("a"); link.setAttribute("href", encodeURI(csvContent)); link.setAttribute("download", `Attendees_${eventName.replace(/\s+/g, '_')}.csv`);
             document.body.appendChild(link); link.click(); document.body.removeChild(link); showToast("Exported successfully!", "success");
         }
-
-        let attendeeToRemoveIndex = null;
-
-        // الدالة اللي بتفتح المودال وتحط اسم الشخص فيه
-        function removeAttendee(index) {
-            attendeeToRemoveIndex = index;
-            const person = currentAttendeesData[index];
-            const displayName = person.full_name || person.name || 'this user';
-            document.getElementById('removeAttendeeName').innerText = displayName;
-            document.getElementById('removeAttendeeConfirmModal').classList.add('active');
-        }
-
-        // الدالة اللي بتنفذ المسح الفعلي
-        async function executeRemoveAttendee() {
-            if (attendeeToRemoveIndex === null) return;
-            const person = currentAttendeesData[attendeeToRemoveIndex];
-            const eventId = document.getElementById('adminEventSelect').value;
-            
-            const btn = document.querySelector('#removeAttendeeConfirmModal .btn-primary');
-            btn.innerText = 'Removing...'; btn.disabled = true;
-
-            try {
-                const response = await fetch(API_BASE + '/rsvp', {
-                    method: 'DELETE',
-                    headers: { 'Content-Type': 'application/json' },
-                    // بنبعت إيميل الشخص اللي الأدمن عايز يمسحه
-                    body: JSON.stringify({ email: person.email, event_id: eventId })
-                });
-
-                if (response.ok) {
-                    showToast("Attendee removed successfully", "success");
-                    closeModal('removeAttendeeConfirmModal');
-                    loadRSVPs(); // بنعمل ريفرش لجدول الأدمن فوراً
-                } else {
-                    showToast("Failed to remove attendee", "error");
-                    closeModal('removeAttendeeConfirmModal');
-                }
-            } catch (error) {
-                showToast("Connection error", "error");
-                closeModal('removeAttendeeConfirmModal');
-            } finally {
-                btn.innerText = 'Yes, Remove'; btn.disabled = false;
-                attendeeToRemoveIndex = null;
-            }
-        }
-        
     </script>
 </body>
 </html>
