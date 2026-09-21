@@ -16,24 +16,49 @@
         body { background-color: var(--bg-body); color: var(--text-main); font-family: 'Inter', sans-serif; line-height: 1.6; min-height: 100vh; overflow-x: hidden; }
         h1, h2, h3, .logo { font-family: 'Playfair Display', serif; font-weight: 700; }
         
+        /* Custom Cursor Styles (Disabled on Touch Devices) */
+        @media (pointer: fine) {
+            body, button, a, input, textarea, select, .event-card, .profile-badge, .logo, .close-btn, .slider-btn { cursor: none !important; }
+            .custom-cursor {
+                position: fixed; top: 0; left: 0; width: 24px; height: 24px; 
+                border: 1px solid var(--primary); border-radius: 50%;
+                pointer-events: none; z-index: 999999;
+                transform: translate(-50%, -50%);
+                transition: width 0.3s ease, height 0.3s ease, background-color 0.3s ease, border-color 0.3s ease;
+                mix-blend-mode: difference; /* Makes it visible on any background */
+                display: block;
+            }
+            .custom-cursor.hover {
+                width: 50px; height: 50px; background-color: rgba(255, 255, 255, 0.2);
+            }
+        }
+        @media (pointer: coarse) { .custom-cursor { display: none !important; } }
+
+        /* Interactive Background Glow */
+        .interactive-bg {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; pointer-events: none;
+            background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.04) 0%, transparent 40%);
+            transition: background 0.1s ease;
+        }
+
         .navbar {
             background: rgba(17, 17, 17, 0.7); backdrop-filter: blur(16px); padding: 12px 30px; margin: 20px auto;
             max-width: 1200px; border-radius: var(--radius-pill); display: flex; justify-content: space-between; 
             align-items: center; border: 1px solid var(--border); position: sticky; top: 20px; z-index: 100;
         }
-        .logo { font-size: 24px; color: var(--primary); cursor: pointer; }
+        .logo { font-size: 24px; color: var(--primary); }
         .nav-links { display: flex; gap: 10px; align-items: center; }
         
         .profile-badge {
             display: flex; align-items: center; gap: 10px; background: transparent; padding: 4px 12px 4px 4px; 
-            border-radius: var(--radius-pill); border: 1px solid var(--border); cursor: pointer; transition: var(--transition);
+            border-radius: var(--radius-pill); border: 1px solid var(--border); transition: var(--transition);
         }
         .profile-badge:hover { background: rgba(255,255,255,0.05); }
 
         .notif-btn {
             background: transparent; border: 1px solid var(--border); color: var(--text-main);
             width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            cursor: pointer; position: relative; transition: var(--transition);
+            position: relative; transition: var(--transition);
         }
         .notif-btn:hover { background: rgba(255,255,255,0.05); }
         .notif-badge {
@@ -44,7 +69,7 @@
         
         .btn {
             padding: 12px 20px; border-radius: var(--radius-pill); border: none; font-weight: 500;
-            cursor: pointer; transition: var(--transition); font-size: 13px; font-family: 'Inter', sans-serif;
+            transition: var(--transition); font-size: 13px; font-family: 'Inter', sans-serif;
         }
         .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-main); }
         .btn-outline:hover { background: var(--text-main); color: var(--primary-invert); }
@@ -57,14 +82,15 @@
         .view-section { animation: fadeView 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         @keyframes fadeView { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
 
-        .hero-section { padding: 80px 20px; text-align: center; }
+        .hero-section { padding: 80px 20px; text-align: center; perspective: 1000px; }
+        .parallax-target { display: inline-block; transition: transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
         .hero-section h1 { font-size: clamp(3rem, 6vw, 5.5rem); margin-bottom: 20px; }
         .hero-section p { color: var(--text-muted); font-size: 1.1rem; max-width: 500px; margin: 0 auto; }
 
         #events-container, #my-events-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 25px; }
         
         .card { background: var(--bg-surface); border-radius: var(--radius-card); padding: 30px; border: 1px solid var(--border); overflow: hidden; }
-        .event-card { position: relative; cursor: pointer; transition: transform 0.3s ease, border-color 0.3s; }
+        .event-card { position: relative; transition: transform 0.3s ease, border-color 0.3s; }
         .event-card:hover { transform: translateY(-5px); border-color: rgba(255,255,255,0.3); }
         
         .card-cover { height: 180px; width: calc(100% + 60px); margin: -30px -30px 20px -30px; background-size: cover; background-position: center; border-bottom: 1px solid var(--border); position: relative; }
@@ -75,32 +101,19 @@
         .event-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 15px; }
         .tag { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; color: var(--text-muted); border: 1px solid var(--border); padding: 6px 12px; border-radius: 20px; text-transform: uppercase; background: rgba(255,255,255,0.03); }
         
-        .desc-box {
-            background: rgba(255,255,255,0.03);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 12px 16px;
-            margin-bottom: 20px;
-        }
-
-        .desc-fade { 
-            color: var(--text-muted); font-size: 13px; margin: 0; line-height: 1.5;
-            display: -webkit-box; -webkit-line-clamp: 3; line-clamp: 3; -webkit-box-orient: vertical; 
-            overflow: hidden; text-overflow: ellipsis; word-break: break-word; 
-            -webkit-mask-image: linear-gradient(180deg, rgba(0,0,0,1) 60%, rgba(0,0,0,0) 100%);
-            mask-image: linear-gradient(180deg, rgba(0,0,0,1) 60%, rgba(0,0,0,0) 100%);
-        }
+        .desc-box { background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 12px; padding: 12px 16px; margin-bottom: 20px; }
+        .desc-fade { color: var(--text-muted); font-size: 13px; margin: 0; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 3; line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis; word-break: break-word; -webkit-mask-image: linear-gradient(180deg, rgba(0,0,0,1) 60%, rgba(0,0,0,0) 100%); mask-image: linear-gradient(180deg, rgba(0,0,0,1) 60%, rgba(0,0,0,0) 100%); }
 
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(8px); display: flex; justify-content: center; align-items: center; z-index: 1000; opacity: 0; pointer-events: none; transition: var(--transition); }
         .modal-overlay.active { opacity: 1; pointer-events: auto; }
         .modal-content { background: var(--bg-surface); padding: 35px; border-radius: var(--radius-card); width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; border: 1px solid var(--border); transform: scale(0.95); transition: var(--transition); }
         .modal-overlay.active .modal-content { transform: scale(1); }
         .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
-        .close-btn { background: transparent; border: none; font-size: 24px; color: var(--text-muted); cursor: pointer; }
+        .close-btn { background: transparent; border: none; font-size: 24px; color: var(--text-muted); }
 
         .slider-container { position: relative; width: 100%; height: 250px; border-radius: 12px; overflow: hidden; margin-bottom: 20px; background: #000; border: 1px solid var(--border); }
         .slider-img { width: 100%; height: 100%; object-fit: contain; }
-        .slider-btn { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); width: 34px; height: 34px; border-radius: 50%; cursor: pointer; }
+        .slider-btn { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); width: 34px; height: 34px; border-radius: 50%; }
         .slider-btn.prev { left: 10px; } .slider-btn.next { right: 10px; }
         
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
@@ -125,6 +138,9 @@
 </head>
 <body>
 
+    <div id="interactiveBg" class="interactive-bg"></div>
+    <div id="customCursor" class="custom-cursor"></div>
+
     <div id="appToast" class="toast-container"><span id="toastIcon"></span><span id="toastMessage"></span></div>
     <div id="pushNotifContainer" class="push-notif-container"></div>
 
@@ -134,11 +150,12 @@
     </nav>
 
     <div class="container">
-        <!-- All Events View -->
         <div id="events-view" class="view-section">
             <div class="hero-section">
-                <h1>Crafting <i>digital</i><br>experiences.</h1>
-                <p>Curated events for the ambitious and creative.</p>
+                <div class="parallax-target" id="heroParallax">
+                    <h1>Crafting <i>digital</i><br>experiences.</h1>
+                    <p>Curated events for the ambitious and creative.</p>
+                </div>
             </div>
             <div id="adminActionContainer" style="display: none; justify-content: flex-end; margin-bottom: 20px;">
                 <button class="btn btn-primary" style="box-shadow: 0 4px 15px rgba(255,255,255,0.1);" onclick="openCreateModal()">+ Publish New Event</button>
@@ -146,7 +163,6 @@
             <div id="events-container"><div style="text-align:center; padding: 50px; grid-column: 1 / -1; color: var(--text-muted);">Loading...</div></div>
         </div>
 
-        <!-- My Events View -->
         <div id="my-events-view" class="view-section hidden">
             <div style="margin-bottom: 40px; margin-top: 20px;">
                 <h1 style="font-size: 2.5rem;">My Events</h1>
@@ -155,7 +171,6 @@
             <div id="my-events-container"><div style="text-align:center; padding: 50px; grid-column: 1 / -1; color: var(--text-muted);">Loading...</div></div>
         </div>
 
-        <!-- Admin Dashboard View -->
         <div id="admin-view" class="view-section hidden">
             <div style="margin-bottom: 40px; margin-top: 20px;">
                 <h1 style="font-size: 2.5rem;">Dashboard</h1>
@@ -164,7 +179,7 @@
             <div class="card" style="margin-top: 30px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
                     <h2 style="font-size: 20px; margin: 0; display: flex; align-items: center;">Attendees Database <span id="attendeeCount" class="badge">0</span></h2>
-                    <button class="export-btn" id="exportBtn" onclick="exportToCSV()" style="display: none;">📥 Download CSV</button>
+                    <button class="export-btn btn btn-outline" id="exportBtn" onclick="exportToCSV()" style="display: none; padding: 6px 12px;">📥 Download CSV</button>
                 </div>
                 <select id="adminEventSelect" class="form-input" onchange="loadRSVPs()"><option value="">-- Select an event --</option></select>
                 <div style="overflow-x: auto;">
@@ -177,7 +192,6 @@
         </div>
     </div>
 
-    <!-- Notifications Modal -->
     <div class="modal-overlay" id="notificationsModal">
         <div class="modal-content" style="max-width: 500px; padding: 0; overflow: hidden; display: flex; flex-direction: column; max-height: 80vh;">
             <div class="modal-header" style="padding: 25px 25px 15px 25px; margin: 0; border-bottom: 1px solid var(--border);"><h2 style="font-size: 20px;">Notifications</h2><button class="close-btn" onclick="closeModal('notificationsModal')">✕</button></div>
@@ -185,7 +199,6 @@
         </div>
     </div>
 
-    <!-- Create Event Modal -->
     <div class="modal-overlay" id="createEventModal">
         <div class="modal-content" style="max-width: 550px;">
             <div class="modal-header"><h2 style="font-size: 22px;">Publish Experience</h2><button class="close-btn" onclick="closeModal('createEventModal')">✕</button></div>
@@ -204,7 +217,6 @@
         </div>
     </div>
 
-    <!-- Edit Event Modal -->
     <div class="modal-overlay" id="editEventModal">
         <div class="modal-content" style="max-width: 550px;">
             <div class="modal-header"><h2 style="font-size: 22px;">Edit Experience</h2><button class="close-btn" onclick="closeModal('editEventModal')">✕</button></div>
@@ -221,7 +233,6 @@
         </div>
     </div>
 
-    <!-- Full Event Details Modal -->
     <div class="modal-overlay" id="eventDetailsModal">
         <div class="modal-content">
             <div class="modal-header"><h2 id="detailsTitle" style="font-size: 22px;">Event Details</h2><button class="close-btn" onclick="closeModal('eventDetailsModal')">✕</button></div>
@@ -241,7 +252,6 @@
         </div>
     </div>
 
-    <!-- RSVP Modal -->
     <div class="modal-overlay" id="rsvpModal">
         <div class="modal-content" style="max-width: 400px;">
             <div class="modal-header"><h2>RSVP</h2><button class="close-btn" onclick="closeModal('rsvpModal')">✕</button></div>
@@ -254,7 +264,6 @@
         </div>
     </div>
 
-    <!-- Auth Modal -->
     <div class="modal-overlay" id="authModal">
         <div class="modal-content" style="max-width: 400px;">
             <div class="modal-header"><h2 id="authTitle">Welcome</h2><button class="close-btn" onclick="closeModal('authModal')">✕</button></div>
@@ -271,7 +280,6 @@
         </div>
     </div>
 
-    <!-- Profile Modal -->
     <div class="modal-overlay" id="profileModal">
         <div class="modal-content">
             <div class="modal-header"><h2>Identity</h2><button class="close-btn" onclick="closeModal('profileModal')">✕</button></div>
@@ -294,7 +302,6 @@
         </div>
     </div>
 
-    <!-- Delete Event Confirm Modal -->
     <div class="modal-overlay" id="deleteConfirmModal">
         <div class="modal-content" style="max-width: 400px; text-align: center;">
             <div style="font-size: 48px; margin-bottom: 15px;">⚠️</div><h2 style="font-size: 22px; margin-bottom: 10px;">Are you sure?</h2>
@@ -305,7 +312,6 @@
         </div>
     </div>
     
-    <!-- Cancel RSVP Confirm Modal -->
     <div class="modal-overlay" id="cancelRsvpConfirmModal">
         <div class="modal-content" style="max-width: 400px; text-align: center;">
             <div style="font-size: 48px; margin-bottom: 15px;">🎫</div><h2 style="font-size: 22px; margin-bottom: 10px;">Cancel Reservation?</h2>
@@ -316,7 +322,6 @@
         </div>
     </div>
 
-    <!-- Remove Attendee Confirmation Modal (Admin) -->
     <div class="modal-overlay" id="removeAttendeeConfirmModal">
         <div class="modal-content" style="max-width: 400px; text-align: center;">
             <div style="font-size: 48px; margin-bottom: 15px;">🚫</div><h2 style="font-size: 22px; margin-bottom: 10px;">Remove Attendee?</h2>
@@ -329,12 +334,10 @@
         </div>
     </div>
 
-    <!-- Full Size Avatar Viewer Modal -->
     <div class="modal-overlay" id="avatarViewerModal" onclick="closeModal('avatarViewerModal')">
         <div style="max-width: 90vw; max-height: 90vh; display: flex; justify-content: center; align-items: center;"><img id="fullSizeAvatar" src="" style="max-width: 100%; max-height: 90vh; border-radius: 12px;"></div>
     </div>
 
-    <!-- Attendee Full Profile Modal -->
     <div class="modal-overlay" id="attendeeProfileModal">
         <div class="modal-content" style="max-width: 450px; text-align: center;">
             <div class="modal-header" style="margin-bottom: 10px;"><h2 style="font-size: 20px;">Attendee Profile</h2><button class="close-btn" onclick="closeModal('attendeeProfileModal')">✕</button></div>
@@ -370,6 +373,38 @@
         let notifPollInterval;
 
         const bannerGradients = ['linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%)', 'linear-gradient(135deg, rgba(79,70,229,0.1) 0%, rgba(0,0,0,0) 100%)'];
+
+        // --- Custom Cursor & Interactive Background Logic ---
+        document.addEventListener('mousemove', (e) => {
+            const cursor = document.getElementById('customCursor');
+            const bg = document.getElementById('interactiveBg');
+            const heroParallax = document.getElementById('heroParallax');
+            
+            if (!cursor || !bg) return;
+            const { clientX: x, clientY: y } = e;
+
+            // 1. Move Custom Cursor
+            cursor.style.transform = `translate(${x}px, ${y}px) translate(-50%, -50%)`;
+
+            // Dynamic hover detection for cursor growth
+            const isHoverable = e.target.closest('button, a, input, textarea, select, .event-card, .profile-badge, .logo, .close-btn, .slider-btn');
+            if (isHoverable) cursor.classList.add('hover');
+            else cursor.classList.remove('hover');
+
+            // 2. Move Background Glow
+            bg.style.background = `radial-gradient(circle at ${x}px ${y}px, rgba(255, 255, 255, 0.04) 0%, transparent 40%)`;
+
+            // 3. Parallax Effect on Hero Text
+            if (heroParallax && !document.getElementById('events-view').classList.contains('hidden')) {
+                const centerX = window.innerWidth / 2;
+                const centerY = window.innerHeight / 2;
+                const deltaX = (x - centerX) / centerX;
+                const deltaY = (y - centerY) / centerY;
+                // Reverse movement for parallax feel
+                heroParallax.style.transform = `translate(${deltaX * -15}px, ${deltaY * -15}px)`;
+            }
+        });
+        // --------------------------------------------------
 
         document.addEventListener("DOMContentLoaded", () => { 
             updateNavbar(); loadEvents(); setInterval(updateCountdowns, 60000); 
