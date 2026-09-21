@@ -205,12 +205,17 @@ def rsvp():
             "phone_number": data.get('phone', ''),
             "event_id": data['event_id']
         }).execute()
+        # تعريف المتغيرات الأول من الداتا اللي مبعوتة
+        event_id = data.get('event_id')
+        email = data.get('email')
+
         # إشعار تأكيد الحجز
         event_res = supabase.table("events").select("title").eq("id", event_id).execute()
         event_title = event_res.data[0]['title'] if event_res.data else "an event"
+        
         supabase.table("notifications").insert({
-            "user_email": email, 
-            "title": "✅ RSVP Confirmed", 
+            "user_email": email,
+            "title": "✅ RSVP Confirmed",
             "message": f"You successfully registered for '{event_title}'."
         }).execute()
         
