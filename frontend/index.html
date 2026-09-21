@@ -77,8 +77,8 @@
         
         /* Fixed CSS for long descriptions to prevent overflow */
         .desc-fade { 
-            position: relative; max-height: 48px; overflow: hidden; color: var(--text-muted); font-size: 14px; margin-bottom: 25px; 
-            word-break: break-word; white-space: pre-wrap; 
+            position: relative; height: 48px; overflow: hidden; color: var(--text-muted); font-size: 14px; margin-bottom: 25px; 
+            word-break: break-all; overflow-wrap: anywhere; white-space: normal; 
         }
         .desc-fade::after { content: ""; position: absolute; bottom: 0; left: 0; right: 0; height: 30px; background: linear-gradient(transparent, var(--bg-surface)); }
 
@@ -237,7 +237,7 @@
             </div>
             <div class="event-tags" id="detailsTags"></div>
             <!-- Fixed Description Container: Allows scrolling if text is too long and prevents overflow -->
-            <p id="detailsDesc" style="color: var(--text-muted); font-size: 14px; margin-bottom: 25px; white-space: pre-wrap; word-break: break-word; max-height: 40vh; overflow-y: auto; padding-right: 5px;"></p>
+            <p id="detailsDesc" style="color: var(--text-muted); font-size: 14px; margin-bottom: 25px; white-space: pre-wrap; word-break: break-all; overflow-wrap: anywhere; max-height: 40vh; overflow-y: auto; padding-right: 5px;"></p>
             <button id="mainRsvpBtn" class="btn btn-primary" style="width: 100%;"></button>
         </div>
     </div>
