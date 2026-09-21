@@ -75,13 +75,21 @@
         .event-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 15px; }
         .tag { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; color: var(--text-muted); border: 1px solid var(--border); padding: 6px 12px; border-radius: 20px; text-transform: uppercase; background: rgba(255,255,255,0.03); }
         
-        /* Updated desc-fade for soft gradient masking */
+        /* New Box for Description outside */
+        .desc-box {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 12px 16px;
+            margin-bottom: 20px;
+        }
+
         .desc-fade { 
-            color: var(--text-muted); font-size: 14px; margin-bottom: 25px; 
+            color: var(--text-muted); font-size: 13px; margin: 0; line-height: 1.5;
             display: -webkit-box; -webkit-line-clamp: 3; line-clamp: 3; -webkit-box-orient: vertical; 
             overflow: hidden; text-overflow: ellipsis; word-break: break-word; 
-            -webkit-mask-image: linear-gradient(180deg, rgba(0,0,0,1) 50%, rgba(0,0,0,0) 100%);
-            mask-image: linear-gradient(180deg, rgba(0,0,0,1) 50%, rgba(0,0,0,0) 100%);
+            -webkit-mask-image: linear-gradient(180deg, rgba(0,0,0,1) 60%, rgba(0,0,0,0) 100%);
+            mask-image: linear-gradient(180deg, rgba(0,0,0,1) 60%, rgba(0,0,0,0) 100%);
         }
 
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(8px); display: flex; justify-content: center; align-items: center; z-index: 1000; opacity: 0; pointer-events: none; transition: var(--transition); }
@@ -127,6 +135,7 @@
     </nav>
 
     <div class="container">
+        <!-- All Events View -->
         <div id="events-view" class="view-section">
             <div class="hero-section">
                 <h1>Crafting <i>digital</i><br>experiences.</h1>
@@ -138,6 +147,7 @@
             <div id="events-container"><div style="text-align:center; padding: 50px; grid-column: 1 / -1; color: var(--text-muted);">Loading...</div></div>
         </div>
 
+        <!-- My Events View -->
         <div id="my-events-view" class="view-section hidden">
             <div style="margin-bottom: 40px; margin-top: 20px;">
                 <h1 style="font-size: 2.5rem;">My Events</h1>
@@ -146,6 +156,7 @@
             <div id="my-events-container"><div style="text-align:center; padding: 50px; grid-column: 1 / -1; color: var(--text-muted);">Loading...</div></div>
         </div>
 
+        <!-- Admin Dashboard View -->
         <div id="admin-view" class="view-section hidden">
             <div style="margin-bottom: 40px; margin-top: 20px;">
                 <h1 style="font-size: 2.5rem;">Dashboard</h1>
@@ -167,6 +178,7 @@
         </div>
     </div>
 
+    <!-- Notifications Modal -->
     <div class="modal-overlay" id="notificationsModal">
         <div class="modal-content" style="max-width: 500px; padding: 0; overflow: hidden; display: flex; flex-direction: column; max-height: 80vh;">
             <div class="modal-header" style="padding: 25px 25px 15px 25px; margin: 0; border-bottom: 1px solid var(--border);"><h2 style="font-size: 20px;">Notifications</h2><button class="close-btn" onclick="closeModal('notificationsModal')">✕</button></div>
@@ -174,6 +186,7 @@
         </div>
     </div>
 
+    <!-- Create Event Modal -->
     <div class="modal-overlay" id="createEventModal">
         <div class="modal-content" style="max-width: 550px;">
             <div class="modal-header"><h2 style="font-size: 22px;">Publish Experience</h2><button class="close-btn" onclick="closeModal('createEventModal')">✕</button></div>
@@ -192,6 +205,7 @@
         </div>
     </div>
 
+    <!-- Edit Event Modal -->
     <div class="modal-overlay" id="editEventModal">
         <div class="modal-content" style="max-width: 550px;">
             <div class="modal-header"><h2 style="font-size: 22px;">Edit Experience</h2><button class="close-btn" onclick="closeModal('editEventModal')">✕</button></div>
@@ -208,6 +222,7 @@
         </div>
     </div>
 
+    <!-- Full Event Details Modal -->
     <div class="modal-overlay" id="eventDetailsModal">
         <div class="modal-content">
             <div class="modal-header"><h2 id="detailsTitle" style="font-size: 22px;">Event Details</h2><button class="close-btn" onclick="closeModal('eventDetailsModal')">✕</button></div>
@@ -219,7 +234,7 @@
             <div class="event-tags" id="detailsTags"></div>
             
             <div style="background: rgba(255,255,255,0.02); padding: 15px; border-radius: 12px; border: 1px dashed var(--border); margin-bottom: 25px;">
-                <h4 style="font-size: 13px; color: var(--primary); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">About Experience</h4>
+                <h4 style="font-size: 13px; color: var(--primary); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">Description</h4>
                 <p id="detailsDesc" style="color: var(--text-muted); font-size: 14px; margin: 0; white-space: pre-wrap; word-wrap: break-word; overflow-wrap: break-word; max-height: 35vh; overflow-y: auto; padding-right: 5px;"></p>
             </div>
             
@@ -227,6 +242,7 @@
         </div>
     </div>
 
+    <!-- RSVP Modal -->
     <div class="modal-overlay" id="rsvpModal">
         <div class="modal-content" style="max-width: 400px;">
             <div class="modal-header"><h2>RSVP</h2><button class="close-btn" onclick="closeModal('rsvpModal')">✕</button></div>
@@ -239,6 +255,7 @@
         </div>
     </div>
 
+    <!-- Auth Modal -->
     <div class="modal-overlay" id="authModal">
         <div class="modal-content" style="max-width: 400px;">
             <div class="modal-header"><h2 id="authTitle">Welcome</h2><button class="close-btn" onclick="closeModal('authModal')">✕</button></div>
@@ -255,6 +272,7 @@
         </div>
     </div>
 
+    <!-- Profile Modal -->
     <div class="modal-overlay" id="profileModal">
         <div class="modal-content">
             <div class="modal-header"><h2>Identity</h2><button class="close-btn" onclick="closeModal('profileModal')">✕</button></div>
@@ -277,6 +295,7 @@
         </div>
     </div>
 
+    <!-- Delete Event Confirm Modal -->
     <div class="modal-overlay" id="deleteConfirmModal">
         <div class="modal-content" style="max-width: 400px; text-align: center;">
             <div style="font-size: 48px; margin-bottom: 15px;">⚠️</div><h2 style="font-size: 22px; margin-bottom: 10px;">Are you sure?</h2>
@@ -287,6 +306,7 @@
         </div>
     </div>
     
+    <!-- Cancel RSVP Confirm Modal -->
     <div class="modal-overlay" id="cancelRsvpConfirmModal">
         <div class="modal-content" style="max-width: 400px; text-align: center;">
             <div style="font-size: 48px; margin-bottom: 15px;">🎫</div><h2 style="font-size: 22px; margin-bottom: 10px;">Cancel Reservation?</h2>
@@ -297,6 +317,7 @@
         </div>
     </div>
 
+    <!-- Remove Attendee Confirmation Modal (Admin) -->
     <div class="modal-overlay" id="removeAttendeeConfirmModal">
         <div class="modal-content" style="max-width: 400px; text-align: center;">
             <div style="font-size: 48px; margin-bottom: 15px;">🚫</div><h2 style="font-size: 22px; margin-bottom: 10px;">Remove Attendee?</h2>
@@ -309,10 +330,12 @@
         </div>
     </div>
 
+    <!-- Full Size Avatar Viewer Modal -->
     <div class="modal-overlay" id="avatarViewerModal" onclick="closeModal('avatarViewerModal')">
         <div style="max-width: 90vw; max-height: 90vh; display: flex; justify-content: center; align-items: center;"><img id="fullSizeAvatar" src="" style="max-width: 100%; max-height: 90vh; border-radius: 12px;"></div>
     </div>
 
+    <!-- Attendee Full Profile Modal -->
     <div class="modal-overlay" id="attendeeProfileModal">
         <div class="modal-content" style="max-width: 450px; text-align: center;">
             <div class="modal-header" style="margin-bottom: 10px;"><h2 style="font-size: 20px;">Attendee Profile</h2><button class="close-btn" onclick="closeModal('attendeeProfileModal')">✕</button></div>
@@ -353,6 +376,11 @@
             updateNavbar(); loadEvents(); setInterval(updateCountdowns, 60000); 
             if(currentUser) startNotificationPolling();
         });
+
+        function escapeHTML(str) {
+            if (!str) return '';
+            return str.replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag));
+        }
 
         function showToast(message, type = 'success') {
             const toast = document.getElementById('appToast');
@@ -429,7 +457,7 @@
 
         function showPushNotification(notif) {
             const container = document.getElementById('pushNotifContainer'); const el = document.createElement('div'); el.className = 'push-notif';
-            el.innerHTML = `<h4 style="font-size: 15px; margin-bottom: 2px;">${notif.title}</h4><p style="font-size: 13px; color: var(--text-muted); line-height: 1.4;">${notif.message}</p>`;
+            el.innerHTML = `<h4 style="font-size: 15px; margin-bottom: 2px;">${escapeHTML(notif.title)}</h4><p style="font-size: 13px; color: var(--text-muted); line-height: 1.4;">${escapeHTML(notif.message)}</p>`;
             container.appendChild(el); setTimeout(() => { el.style.animation = 'slideOutRight 0.5s forwards'; setTimeout(() => el.remove(), 500); }, 10000);
         }
 
@@ -440,7 +468,7 @@
             if (allNotifications.length === 0) { list.innerHTML = `<div style="padding: 40px; text-align: center; color: var(--text-muted);">No notifications yet.</div>`; return; }
             list.innerHTML = allNotifications.map(n => {
                 const date = new Date(n.created_at).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
-                return `<div class="notif-item ${!n.is_read ? 'unread' : ''}"><div style="display: flex; justify-content: space-between; align-items: baseline;"><strong style="font-size: 15px;">${n.title}</strong><span style="font-size: 11px; color: var(--text-muted);">${date}</span></div><p style="font-size: 13px; color: var(--text-muted); margin-top: 5px; line-height: 1.5;">${n.message}</p></div>`;
+                return `<div class="notif-item ${!n.is_read ? 'unread' : ''}"><div style="display: flex; justify-content: space-between; align-items: baseline;"><strong style="font-size: 15px;">${escapeHTML(n.title)}</strong><span style="font-size: 11px; color: var(--text-muted);">${date}</span></div><p style="font-size: 13px; color: var(--text-muted); margin-top: 5px; line-height: 1.5;">${escapeHTML(n.message)}</p></div>`;
             }).join('');
         }
 
@@ -498,15 +526,19 @@
                 adminButtons = `<div style="position:absolute; top:20px; right: 120px; z-index:20; display:flex; gap:8px;"><button onclick="openEditModal('${evt.id}', event)" title="Edit Event" style="background:rgba(59, 130, 246, 0.9); color:white; border:none; width:34px; height:34px; border-radius:50%; cursor:pointer;">✏️</button><button onclick="deleteEvent('${evt.id}', event)" title="Delete Event" style="background:rgba(239, 68, 68, 0.9); color:white; border:none; width:34px; height:34px; border-radius:50%; cursor:pointer;">🗑️</button></div>`;
             }
             const isBooked = myBookedEventIds.includes(evt.id); const registeredBadge = isBooked ? `<div class="registered-badge">✅ Registered</div>` : ''; const loadingBadge = evt.id.toString().startsWith('temp-') ? `<div class="registered-badge" style="background: rgba(245, 158, 11, 0.9); left: auto; right: 20px;">⏳ Uploading...</div>` : '';
+            
             return `
                 <div class="card event-card" style="background: ${randomGradient};" onclick="openEventDetails('${evt.id}')">
                     ${registeredBadge}${loadingBadge}${adminButtons}${coverHtml}
                     ${!evt.id.toString().startsWith('temp-') ? `<div class="countdown" data-date="${evt.event_date}">Calculating...</div>` : ''}
                     
-                    <h2 style="font-size:24px; margin-bottom:10px; margin-top: ${coverUrl ? '0' : '30px'};">${evt.title}</h2>
-                    <div class="event-tags" style="margin-bottom: 15px;"><span class="tag">📅 ${formattedDate}</span><span class="tag">⏰ ${formattedTime}</span><span class="tag">📍 ${evt.location}</span></div>
+                    <h2 style="font-size:24px; margin-bottom:10px; margin-top: ${coverUrl ? '0' : '30px'};">${escapeHTML(evt.title)}</h2>
+                    <div class="event-tags" style="margin-bottom: 15px;"><span class="tag">📅 ${formattedDate}</span><span class="tag">⏰ ${formattedTime}</span><span class="tag">📍 ${escapeHTML(evt.location)}</span></div>
                     
-                    <div class="desc-fade">${evt.description}</div>
+                    <div class="desc-box">
+                        <div class="desc-fade">${escapeHTML(evt.description)}</div>
+                    </div>
+                    
                     <button class="btn btn-outline" style="width: 100%;" ${evt.id.toString().startsWith('temp-') ? 'disabled' : ''}>${evt.id.toString().startsWith('temp-') ? 'Processing...' : (isBooked ? 'View Details' : 'View Details / RSVP')}</button>
                 </div>`;
         }
@@ -578,7 +610,7 @@
             if(eventId.toString().startsWith('temp-')) return; 
             const event = allEvents.find(e => e.id === eventId); if(!event) return; selectedEventIdForRSVP = eventId;
             document.getElementById('detailsTitle').innerText = event.title; document.getElementById('detailsDesc').innerText = event.description;
-            const dateObj = new Date(event.event_date); document.getElementById('detailsTags').innerHTML = `<span class="tag">📅 ${dateObj.toLocaleDateString('en-US')}</span><span class="tag">⏰ ${dateObj.toLocaleTimeString('en-US', {hour:'numeric', minute:'2-digit'})}</span><span class="tag">📍 ${event.location}</span>`;
+            const dateObj = new Date(event.event_date); document.getElementById('detailsTags').innerHTML = `<span class="tag">📅 ${dateObj.toLocaleDateString('en-US')}</span><span class="tag">⏰ ${dateObj.toLocaleTimeString('en-US', {hour:'numeric', minute:'2-digit'})}</span><span class="tag">📍 ${escapeHTML(event.location)}</span>`;
             try { currentSliderImages = JSON.parse(event.image_urls || '[]').slice(1); } catch(e){ currentSliderImages = []; }
             const sliderWrapper = document.getElementById('sliderWrapper'); if(currentSliderImages.length > 0) { sliderWrapper.classList.remove('hidden'); currentSlideIndex = 0; updateSliderView(); } else { sliderWrapper.classList.add('hidden'); }
             const rsvpBtn = document.getElementById('mainRsvpBtn');
