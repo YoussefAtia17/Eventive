@@ -16,7 +16,7 @@
         body { background-color: var(--bg-body); color: var(--text-main); font-family: 'Inter', sans-serif; line-height: 1.6; min-height: 100vh; overflow-x: hidden; }
         h1, h2, h3, .logo { font-family: 'Playfair Display', serif; font-weight: 700; }
         
-        /* Custom Cursor Styles (Disabled on Touch Devices) */
+        /* Custom Cursor Styles */
         @media (pointer: fine) {
             body, button, a, input, textarea, select, .event-card, .profile-badge, .logo, .close-btn, .slider-btn { cursor: none !important; }
             .custom-cursor {
@@ -25,19 +25,31 @@
                 pointer-events: none; z-index: 999999;
                 transform: translate(-50%, -50%);
                 transition: width 0.3s ease, height 0.3s ease, background-color 0.3s ease, border-color 0.3s ease;
-                mix-blend-mode: difference; /* Makes it visible on any background */
-                display: block;
+                mix-blend-mode: difference; display: block;
             }
-            .custom-cursor.hover {
-                width: 50px; height: 50px; background-color: rgba(255, 255, 255, 0.2);
-            }
+            .custom-cursor.hover { width: 50px; height: 50px; background-color: rgba(255, 255, 255, 0.2); }
         }
         @media (pointer: coarse) { .custom-cursor { display: none !important; } }
+
+        /* Live Wallpaper & Noise */
+        .live-wallpaper {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -3; pointer-events: none;
+            background: linear-gradient(-45deg, #000000, #0a0a0a, #151515, #050505);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+        }
+        @keyframes gradientBG { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+        
+        .noise-overlay {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -2; pointer-events: none;
+            background-image: url('data:image/svg+xml,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noise"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noise)"/%3E%3C/svg%3E');
+            opacity: 0.03;
+        }
 
         /* Interactive Background Glow */
         .interactive-bg {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; pointer-events: none;
-            background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.04) 0%, transparent 40%);
+            background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.03) 0%, transparent 40%);
             transition: background 0.1s ease;
         }
 
@@ -109,11 +121,11 @@
         .modal-content { background: var(--bg-surface); padding: 35px; border-radius: var(--radius-card); width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; border: 1px solid var(--border); transform: scale(0.95); transition: var(--transition); }
         .modal-overlay.active .modal-content { transform: scale(1); }
         .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
-        .close-btn { background: transparent; border: none; font-size: 24px; color: var(--text-muted); }
+        .close-btn { background: transparent; border: none; font-size: 24px; color: var(--text-muted); cursor: pointer; }
 
         .slider-container { position: relative; width: 100%; height: 250px; border-radius: 12px; overflow: hidden; margin-bottom: 20px; background: #000; border: 1px solid var(--border); }
         .slider-img { width: 100%; height: 100%; object-fit: contain; }
-        .slider-btn { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); width: 34px; height: 34px; border-radius: 50%; }
+        .slider-btn { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); width: 34px; height: 34px; border-radius: 50%; cursor: pointer; }
         .slider-btn.prev { left: 10px; } .slider-btn.next { right: 10px; }
         
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
@@ -138,6 +150,8 @@
 </head>
 <body>
 
+    <div class="live-wallpaper"></div>
+    <div class="noise-overlay"></div>
     <div id="interactiveBg" class="interactive-bg"></div>
     <div id="customCursor" class="custom-cursor"></div>
 
@@ -400,7 +414,6 @@
                 const centerY = window.innerHeight / 2;
                 const deltaX = (x - centerX) / centerX;
                 const deltaY = (y - centerY) / centerY;
-                // Reverse movement for parallax feel
                 heroParallax.style.transform = `translate(${deltaX * -15}px, ${deltaY * -15}px)`;
             }
         });
