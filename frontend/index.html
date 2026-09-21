@@ -75,7 +75,6 @@
         .event-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 15px; }
         .tag { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; color: var(--text-muted); border: 1px solid var(--border); padding: 6px 12px; border-radius: 20px; text-transform: uppercase; background: rgba(255,255,255,0.03); }
         
-        /* New Box for Description outside */
         .desc-box {
             background: rgba(255,255,255,0.03);
             border: 1px solid var(--border);
@@ -395,7 +394,23 @@
             if (!currentUser) return;
             const activeEmail = (currentUser.active_email === 'secondary' && currentUser.secondary_email) ? currentUser.secondary_email : currentUser.email;
             try {
-                const rsvpRes = await fetch(API_BASE + '/my-rsvps?email=' + encodeURIComponent(activeEmail));
+                const eventsRes = await fetch(API_BASE + '/events', { cache: 'no-store' });
+                if (eventsRes.ok) {
+                    const eventsResult = await eventsRes.json();
+                    if (eventsResult.status === 'success') {
+                        const serverEvents = eventsResult.data || [];
+                        const currentServerIds = allEvents.filter(e => !e.id.toString().startsWith('temp-')).map(e => e.id).sort().join(',');
+                        const newServerIds = serverEvents.map(e => e.id).sort().join(',');
+                        if (currentServerIds !== newServerIds) {
+                            const localTempEvents = allEvents.filter(e => e.id.toString().startsWith('temp-'));
+                            allEvents = [...localTempEvents, ...serverEvents];
+                            renderEventsUI();
+                            if (!document.getElementById('my-events-view').classList.contains('hidden')) renderMyEvents();
+                        }
+                    }
+                }
+
+                const rsvpRes = await fetch(API_BASE + '/my-rsvps?email=' + encodeURIComponent(activeEmail), { cache: 'no-store' });
                 if (rsvpRes.ok) {
                     const rsvpResult = await rsvpRes.json();
                     if (rsvpResult.status === 'success') {
@@ -412,7 +427,7 @@
                 if (currentUser.role === 'admin' && !adminView.classList.contains('hidden')) {
                     const eventId = document.getElementById('adminEventSelect').value;
                     if (eventId) {
-                        const adminRes = await fetch(API_BASE + `/admin/rsvps/${eventId}`);
+                        const adminRes = await fetch(API_BASE + `/admin/rsvps/${eventId}`, { cache: 'no-store' });
                         if (adminRes.ok) {
                             const adminResult = await adminRes.json();
                             if (adminResult.status === 'success') {
@@ -437,7 +452,7 @@
             silentSync(); 
             const activeEmail = (currentUser.active_email === 'secondary' && currentUser.secondary_email) ? currentUser.secondary_email : currentUser.email;
             try {
-                const response = await fetch(API_BASE + `/notifications?email=${encodeURIComponent(activeEmail)}`);
+                const response = await fetch(API_BASE + `/notifications?email=${encodeURIComponent(activeEmail)}`, { cache: 'no-store' });
                 const result = await response.json();
                 if (result.status === 'success') {
                     allNotifications = result.data;
@@ -506,12 +521,12 @@
         async function fetchMyBookedEventsIds() {
             if (!currentUser) { myBookedEventIds = []; return; }
             const activeEmail = (currentUser.active_email === 'secondary' && currentUser.secondary_email) ? currentUser.secondary_email : currentUser.email;
-            try { const response = await fetch(API_BASE + '/my-rsvps?email=' + encodeURIComponent(activeEmail)); const result = await response.json(); if (result.status === 'success') { myBookedEventIds = result.data; } } catch (error) {}
+            try { const response = await fetch(API_BASE + '/my-rsvps?email=' + encodeURIComponent(activeEmail), { cache: 'no-store' }); const result = await response.json(); if (result.status === 'success') { myBookedEventIds = result.data; } } catch (error) {}
         }
 
         async function loadEvents() {
             try {
-                const response = await fetch(API_BASE + '/events'); const result = await response.json();
+                const response = await fetch(API_BASE + '/events', { cache: 'no-store' }); const result = await response.json();
                 if (result.status === 'success') { const serverEvents = result.data || []; const localTempEvents = allEvents.filter(e => e.id.toString().startsWith('temp-')); allEvents = [...localTempEvents, ...serverEvents]; await fetchMyBookedEventsIds(); renderEventsUI(); } else { renderEmptyState(); }
             } catch (error) { renderEmptyState(); }
         }
@@ -708,7 +723,7 @@
             try { await fetch(API_BASE + '/update', { method: 'POST', body: formData }); showToast("Profile updated successfully! ✅", "success"); silentSync(); } catch(error) { showToast("Failed to connect.", "error"); } 
         }
         
-        function populateAdminEventsDropdown() { fetch(API_BASE + '/events').then(res => res.json()).then(result => { const select = document.getElementById('adminEventSelect'); select.innerHTML = '<option value="">-- Select --</option>'; result.data.forEach(evt => select.innerHTML += `<option value="${evt.id}">${evt.title}</option>`); }); }
+        function populateAdminEventsDropdown() { fetch(API_BASE + '/events', { cache: 'no-store' }).then(res => res.json()).then(result => { const select = document.getElementById('adminEventSelect'); select.innerHTML = '<option value="">-- Select --</option>'; result.data.forEach(evt => select.innerHTML += `<option value="${evt.id}">${evt.title}</option>`); }); }
 
         function renderAttendeesTable(data) {
             const tbody = document.getElementById('attendeesTable'); const exportBtn = document.getElementById('exportBtn'); const countBadge = document.getElementById('attendeeCount'); if (countBadge) countBadge.innerText = data.length; 
@@ -725,7 +740,7 @@
             if(!eventId) { tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color: var(--text-muted); padding: 30px;">Please select an event from the dropdown above to view its attendees.</td></tr>'; return; }
             tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color: var(--text-muted); padding: 30px;">Loading attendees... ⏳</td></tr>';
             try {
-                const response = await fetch(API_BASE + `/admin/rsvps/${eventId}`); if (!response.ok) throw new Error(); const result = await response.json();
+                const response = await fetch(API_BASE + `/admin/rsvps/${eventId}`, { cache: 'no-store' }); if (!response.ok) throw new Error(); const result = await response.json();
                 if(result.status === 'success') { currentAttendeesData = result.data || []; renderAttendeesTable(currentAttendeesData); } else { throw new Error(result.message); }
             } catch (error) { tbody.innerHTML = '<tr><td colspan="4" style="color:#ef4444; text-align:center; padding: 30px;">Error loading data.</td></tr>'; }
         }
