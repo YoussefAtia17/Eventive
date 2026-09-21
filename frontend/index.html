@@ -124,7 +124,6 @@
     </nav>
 
     <div class="container">
-        <!-- All Events View -->
         <div id="events-view" class="view-section">
             <div class="hero-section">
                 <h1>Crafting <i>digital</i><br>experiences.</h1>
@@ -136,7 +135,6 @@
             <div id="events-container"><div style="text-align:center; padding: 50px; grid-column: 1 / -1; color: var(--text-muted);">Loading...</div></div>
         </div>
 
-        <!-- My Events View -->
         <div id="my-events-view" class="view-section hidden">
             <div style="margin-bottom: 40px; margin-top: 20px;">
                 <h1 style="font-size: 2.5rem;">My Events</h1>
@@ -145,7 +143,6 @@
             <div id="my-events-container"><div style="text-align:center; padding: 50px; grid-column: 1 / -1; color: var(--text-muted);">Loading...</div></div>
         </div>
 
-        <!-- Admin Dashboard View -->
         <div id="admin-view" class="view-section hidden">
             <div style="margin-bottom: 40px; margin-top: 20px;">
                 <h1 style="font-size: 2.5rem;">Dashboard</h1>
@@ -167,7 +164,6 @@
         </div>
     </div>
 
-    <!-- Notifications Modal -->
     <div class="modal-overlay" id="notificationsModal">
         <div class="modal-content" style="max-width: 500px; padding: 0; overflow: hidden; display: flex; flex-direction: column; max-height: 80vh;">
             <div class="modal-header" style="padding: 25px 25px 15px 25px; margin: 0; border-bottom: 1px solid var(--border);"><h2 style="font-size: 20px;">Notifications</h2><button class="close-btn" onclick="closeModal('notificationsModal')">✕</button></div>
@@ -175,7 +171,6 @@
         </div>
     </div>
 
-    <!-- Create Event Modal -->
     <div class="modal-overlay" id="createEventModal">
         <div class="modal-content" style="max-width: 550px;">
             <div class="modal-header"><h2 style="font-size: 22px;">Publish Experience</h2><button class="close-btn" onclick="closeModal('createEventModal')">✕</button></div>
@@ -194,7 +189,6 @@
         </div>
     </div>
 
-    <!-- Edit Event Modal -->
     <div class="modal-overlay" id="editEventModal">
         <div class="modal-content" style="max-width: 550px;">
             <div class="modal-header"><h2 style="font-size: 22px;">Edit Experience</h2><button class="close-btn" onclick="closeModal('editEventModal')">✕</button></div>
@@ -211,7 +205,6 @@
         </div>
     </div>
 
-    <!-- Full Event Details Modal -->
     <div class="modal-overlay" id="eventDetailsModal">
         <div class="modal-content">
             <div class="modal-header"><h2 id="detailsTitle" style="font-size: 22px;">Event Details</h2><button class="close-btn" onclick="closeModal('eventDetailsModal')">✕</button></div>
@@ -226,7 +219,6 @@
         </div>
     </div>
 
-    <!-- RSVP Modal -->
     <div class="modal-overlay" id="rsvpModal">
         <div class="modal-content" style="max-width: 400px;">
             <div class="modal-header"><h2>RSVP</h2><button class="close-btn" onclick="closeModal('rsvpModal')">✕</button></div>
@@ -239,7 +231,6 @@
         </div>
     </div>
 
-    <!-- Auth Modal -->
     <div class="modal-overlay" id="authModal">
         <div class="modal-content" style="max-width: 400px;">
             <div class="modal-header"><h2 id="authTitle">Welcome</h2><button class="close-btn" onclick="closeModal('authModal')">✕</button></div>
@@ -256,7 +247,6 @@
         </div>
     </div>
 
-    <!-- Profile Modal -->
     <div class="modal-overlay" id="profileModal">
         <div class="modal-content">
             <div class="modal-header"><h2>Identity</h2><button class="close-btn" onclick="closeModal('profileModal')">✕</button></div>
@@ -279,7 +269,6 @@
         </div>
     </div>
 
-    <!-- Delete Event Confirm Modal -->
     <div class="modal-overlay" id="deleteConfirmModal">
         <div class="modal-content" style="max-width: 400px; text-align: center;">
             <div style="font-size: 48px; margin-bottom: 15px;">⚠️</div><h2 style="font-size: 22px; margin-bottom: 10px;">Are you sure?</h2>
@@ -290,7 +279,6 @@
         </div>
     </div>
     
-    <!-- Cancel RSVP Confirm Modal -->
     <div class="modal-overlay" id="cancelRsvpConfirmModal">
         <div class="modal-content" style="max-width: 400px; text-align: center;">
             <div style="font-size: 48px; margin-bottom: 15px;">🎫</div><h2 style="font-size: 22px; margin-bottom: 10px;">Cancel Reservation?</h2>
@@ -301,7 +289,6 @@
         </div>
     </div>
 
-    <!-- Remove Attendee Confirmation Modal (Admin) -->
     <div class="modal-overlay" id="removeAttendeeConfirmModal">
         <div class="modal-content" style="max-width: 400px; text-align: center;">
             <div style="font-size: 48px; margin-bottom: 15px;">🚫</div><h2 style="font-size: 22px; margin-bottom: 10px;">Remove Attendee?</h2>
@@ -314,12 +301,10 @@
         </div>
     </div>
 
-    <!-- Full Size Avatar Viewer Modal -->
     <div class="modal-overlay" id="avatarViewerModal" onclick="closeModal('avatarViewerModal')">
         <div style="max-width: 90vw; max-height: 90vh; display: flex; justify-content: center; align-items: center;"><img id="fullSizeAvatar" src="" style="max-width: 100%; max-height: 90vh; border-radius: 12px;"></div>
     </div>
 
-    <!-- Attendee Full Profile Modal -->
     <div class="modal-overlay" id="attendeeProfileModal">
         <div class="modal-content" style="max-width: 450px; text-align: center;">
             <div class="modal-header" style="margin-bottom: 10px;"><h2 style="font-size: 20px;">Attendee Profile</h2><button class="close-btn" onclick="closeModal('attendeeProfileModal')">✕</button></div>
@@ -370,7 +355,6 @@
             toastTimeout = setTimeout(() => { toast.classList.remove('show'); }, 3500);
         }
 
-        // --- BACKGROUND SILENT SYNC (NO REFRESH NEEDED) ---
         async function silentSync() {
             if (!currentUser) return;
             const activeEmail = (currentUser.active_email === 'secondary' && currentUser.secondary_email) ? currentUser.secondary_email : currentUser.email;
@@ -553,8 +537,12 @@
         }
 
         async function submitEditEvent(e) {
-            e.preventDefault(); const coverInput = document.getElementById('editEventCover'); const galleryInput = document.getElementById('editEventImages'); const eventId = document.getElementById('editEventId').value;
+            e.preventDefault(); 
+            const coverInput = document.getElementById('editEventCover'); const galleryInput = document.getElementById('editEventImages'); const eventId = document.getElementById('editEventId').value;
             const title = document.getElementById('editEventTitle').value; const date = document.getElementById('editEventDate').value; const location = document.getElementById('editEventLocation').value; const desc = document.getElementById('editEventDesc').value;
+            
+            if (desc.length > 1000) { showToast("⚠️ Description cannot exceed 1000 characters!", "error"); return; }
+            
             const eventIndex = allEvents.findIndex(ev => ev.id === eventId);
             if (eventIndex !== -1) {
                 allEvents[eventIndex].title = title; allEvents[eventIndex].event_date = date; allEvents[eventIndex].location = location; allEvents[eventIndex].description = desc;
@@ -623,7 +611,11 @@
         }
 
         async function submitNewEvent(e) {
-            e.preventDefault(); const title = document.getElementById('newEventTitle').value; const date = document.getElementById('newEventDate').value; const location = document.getElementById('newEventLocation').value; const desc = document.getElementById('newEventDesc').value; const coverInput = document.getElementById('newEventCover'); const galleryInput = document.getElementById('newEventImages');
+            e.preventDefault(); 
+            const title = document.getElementById('newEventTitle').value; const date = document.getElementById('newEventDate').value; const location = document.getElementById('newEventLocation').value; const desc = document.getElementById('newEventDesc').value; const coverInput = document.getElementById('newEventCover'); const galleryInput = document.getElementById('newEventImages');
+            
+            if (desc.length > 1000) { showToast("⚠️ Description cannot exceed 1000 characters!", "error"); return; }
+            
             let totalSize = 0; if (coverInput && coverInput.files.length > 0) totalSize += coverInput.files[0].size; if (galleryInput && galleryInput.files.length > 0) { for (let i = 0; i < galleryInput.files.length; i++) totalSize += galleryInput.files[i].size; }
             if (totalSize > 4 * 1024 * 1024) { showToast("Total images size exceeds the 4MB limit.", "error"); return; } if (galleryInput.files.length > 5) { showToast("Maximum 5 gallery images allowed!", "error"); return; }
             
