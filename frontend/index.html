@@ -847,30 +847,44 @@
         }
         
         async function loadRSVPs() {
-            const eventId = document.getElementById('adminEventSelect').value;
+            const eventId = document.getElementById('adminEventSelect').value; 
             const tbody = document.getElementById('attendeesTable'); 
             const exportBtn = document.getElementById('exportBtn');
             
+            tbody.innerHTML = ''; 
+            document.getElementById('attendeeCount').innerText = '0'; 
+            if(exportBtn) exportBtn.style.display = 'none'; 
+            
             if(!eventId) {
-                // لو مفيش إيفنت متحدد، نظهر رسالة التوجيه ونصفر العداد
                 tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color: var(--text-muted); padding: 30px;">Please select an event from the dropdown above to view its attendees.</td></tr>';
-                document.getElementById('attendeeCount').innerText = '0'; 
-                if(exportBtn) exportBtn.style.display = 'none';
                 return;
             }
-            
-            // رسالة تحميل مؤقتة (بتتشال في فيمتو ثانية أول ما الداتا تيجي)
+
             tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color: var(--text-muted); padding: 30px;">Loading attendees... ⏳</td></tr>';
-            
+
             try {
                 const response = await fetch(API_BASE + `/admin/rsvps/${eventId}`);
-                const result = await response.json();
-                if(result.status === 'success') {
-                    currentAttendeesData = result.data;
-                    renderAttendeesTable(currentAttendeesData);
+                
+                // لو السيرفر رجع إيرور 404 أو 500
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error("Vercel Server Error:", errorText);
+                    throw new Error(`Server returned status ${response.status}`);
                 }
-            } catch (error) {
-                tbody.innerHTML = '<tr><td colspan="4" style="color:#ef4444; text-align:center; padding: 30px;">Error loading data</td></tr>';
+
+                const result = await response.json();
+                
+                if(result.status === 'success') {
+                    // تأمين إضافي لو السيرفر مرجعش داتا
+                    currentAttendeesData = result.data || []; 
+                    renderAttendeesTable(currentAttendeesData);
+                } else {
+                    console.error("Backend Logic Error:", result.message);
+                    tbody.innerHTML = `<tr><td colspan="4" style="color:#ef4444; text-align:center; padding: 30px;">Error: ${result.message}</td></tr>`;
+                }
+            } catch (error) { 
+                console.error("Detailed Fetch Error:", error);
+                tbody.innerHTML = '<tr><td colspan="4" style="color:#ef4444; text-align:center; padding: 30px;">Error loading data. Please check the Console (F12) for details.</td></tr>'; 
             }
         }
 
