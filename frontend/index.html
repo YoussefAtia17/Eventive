@@ -31,11 +31,11 @@
         }
         @media (pointer: coarse) { .custom-cursor { display: none !important; } }
 
-        /* Spotlight Background & Noise */
-        .live-wallpaper {
+        /* Full HD Video Background */
+        .video-bg {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -3; pointer-events: none;
-            background-color: #030303;
-            background-image: radial-gradient(circle at 50% 25%, rgba(255, 255, 255, 0.08) 0%, transparent 60%);
+            object-fit: cover; /* Ensures video covers screen fully in Full HD */
+            background-color: #050505;
         }
         
         .noise-overlay {
@@ -148,8 +148,12 @@
 </head>
 <body>
 
+    <!-- Full HD Video Live Wallpaper -->
+    <video autoplay loop muted playsinline class="video-bg">
+        <source src="bg-video.mp4" type="video/mp4">
+    </video>
+
     <!-- Interactive Background & Custom Cursor -->
-    <div class="live-wallpaper"></div>
     <div class="noise-overlay"></div>
     <div id="interactiveBg" class="interactive-bg"></div>
     <div id="customCursor" class="custom-cursor"></div>
