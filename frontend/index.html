@@ -31,11 +31,11 @@
         }
         @media (pointer: coarse) { .custom-cursor { display: none !important; } }
 
-        /* Spotlight Background & Noise */
-        .live-wallpaper {
+        /* Full HD Video Background */
+        .video-bg {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -3; pointer-events: none;
-            background-color: #030303;
-            background-image: radial-gradient(circle at 50% 25%, rgba(255, 255, 255, 0.08) 0%, transparent 60%);
+            object-fit: cover; 
+            background-color: #050505;
         }
         
         .noise-overlay {
@@ -108,12 +108,10 @@
         .event-card { position: relative; transition: transform 0.3s ease, border-color 0.3s, box-shadow 0.3s; }
         .event-card:hover { transform: translateY(-5px); border-color: rgba(255,255,255,0.3); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         
-        /* Fixed Aspect Ratio Cover (2:1 to match 800x400) */
+        /* Forces the image to stretch perfectly matching the container size without cropping */
         .card-cover { 
-            width: calc(100% + 60px); 
-            aspect-ratio: 2 / 1; /* Automatically scales height to maintain exactly 2:1 ratio */
-            margin: -30px -30px 20px -30px; 
-            background-size: cover; background-repeat: no-repeat; background-position: center; 
+            height: 200px; width: calc(100% + 60px); margin: -30px -30px 20px -30px; 
+            background-size: 100% 100%; background-repeat: no-repeat; background-position: center; 
             border-bottom: 1px solid var(--border); position: relative; 
         }
         
@@ -160,8 +158,10 @@
 </head>
 <body>
 
-    <!-- Full HD Video Live Wallpaper (Uncomment this and add your bg-video.mp4 if you want to use the video) -->
-    <!-- <video autoplay loop muted playsinline class="video-bg"><source src="bg-video.mp4" type="video/mp4"></video> -->
+    <!-- Full HD Video Live Wallpaper -->
+    <video autoplay loop muted playsinline class="video-bg">
+        <source src="bg-video.mp4" type="video/mp4">
+    </video>
 
     <!-- Spotlight Background, Noise Overlay & Interactive Glow -->
     <div class="live-wallpaper"></div>
@@ -240,7 +240,7 @@
                 <div style="display: flex; gap: 15px;"><input type="datetime-local" id="newEventDate" class="form-input" required><input type="text" id="newEventLocation" class="form-input" placeholder="Location" required></div>
                 <textarea id="newEventDesc" class="form-input" placeholder="Event Description (Max 1000 chars)..." rows="4" maxlength="1000" required></textarea>
                 <div style="background: rgba(255,255,255,0.02); padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px dashed var(--border);">
-                    <label style="font-size: 13px; color: var(--primary); display: block; margin-bottom: 5px; font-weight: 600;">Main Cover Image (Required - Best: 800x400px)</label>
+                    <label style="font-size: 13px; color: var(--primary); display: block; margin-bottom: 5px; font-weight: 600;">Main Cover Image (Required)</label>
                     <input type="file" id="newEventCover" class="form-input" accept="image/*" required style="margin-bottom: 10px;">
                     <label style="font-size: 13px; color: var(--text-muted); display: block; margin-bottom: 5px;">Gallery Images (Max 5)</label>
                     <input type="file" id="newEventImages" class="form-input" accept="image/*" multiple style="margin-bottom: 0;">
@@ -259,7 +259,7 @@
                 <div style="display: flex; gap: 15px;"><input type="datetime-local" id="editEventDate" class="form-input" required><input type="text" id="editEventLocation" class="form-input" required></div>
                 <textarea id="editEventDesc" class="form-input" placeholder="Event Description (Max 1000 chars)..." rows="4" maxlength="1000" required></textarea>
                 <div style="background: rgba(255,255,255,0.02); padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px dashed var(--border);">
-                    <label style="font-size: 13px; color: var(--primary); display: block; margin-bottom: 5px; font-weight: 600;">Update Cover Image (Best: 800x400px)</label>
+                    <label style="font-size: 13px; color: var(--primary); display: block; margin-bottom: 5px; font-weight: 600;">Update Cover Image</label>
                     <input type="file" id="editEventCover" class="form-input" accept="image/*" style="margin-bottom: 10px;">
                     <label style="font-size: 13px; color: var(--text-muted); display: block; margin-bottom: 5px;">Update Gallery (Max 5)</label>
                     <input type="file" id="editEventImages" class="form-input" accept="image/*" multiple style="margin-bottom: 0;">
