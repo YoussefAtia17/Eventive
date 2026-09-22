@@ -31,11 +31,11 @@
         }
         @media (pointer: coarse) { .custom-cursor { display: none !important; } }
 
-        /* Full HD Video Background */
-        .video-bg {
+        /* Spotlight Background & Noise */
+        .live-wallpaper {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -3; pointer-events: none;
-            object-fit: cover; 
-            background-color: #050505;
+            background-color: #030303;
+            background-image: radial-gradient(circle at 50% 25%, rgba(255, 255, 255, 0.08) 0%, transparent 60%);
         }
         
         .noise-overlay {
@@ -108,9 +108,11 @@
         .event-card { position: relative; transition: transform 0.3s ease, border-color 0.3s, box-shadow 0.3s; }
         .event-card:hover { transform: translateY(-5px); border-color: rgba(255,255,255,0.3); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         
-        /* Cover fits area perfectly, UI instructs admin on ratio */
+        /* Fixed Aspect Ratio Cover (2:1 to match 800x400) */
         .card-cover { 
-            height: 180px; width: calc(100% + 60px); margin: -30px -30px 20px -30px; 
+            width: calc(100% + 60px); 
+            aspect-ratio: 2 / 1; /* Automatically scales height to maintain exactly 2:1 ratio */
+            margin: -30px -30px 20px -30px; 
             background-size: cover; background-repeat: no-repeat; background-position: center; 
             border-bottom: 1px solid var(--border); position: relative; 
         }
@@ -158,12 +160,11 @@
 </head>
 <body>
 
-    <!-- Full HD Video Live Wallpaper -->
-    <video autoplay loop muted playsinline class="video-bg">
-        <source src="bg-video.mp4" type="video/mp4">
-    </video>
+    <!-- Full HD Video Live Wallpaper (Uncomment this and add your bg-video.mp4 if you want to use the video) -->
+    <!-- <video autoplay loop muted playsinline class="video-bg"><source src="bg-video.mp4" type="video/mp4"></video> -->
 
-    <!-- Interactive Background & Custom Cursor -->
+    <!-- Spotlight Background, Noise Overlay & Interactive Glow -->
+    <div class="live-wallpaper"></div>
     <div class="noise-overlay"></div>
     <div id="interactiveBg" class="interactive-bg"></div>
     <div id="customCursor" class="custom-cursor"></div>
