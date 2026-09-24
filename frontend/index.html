@@ -169,8 +169,7 @@
             width: calc(100% + 60px); 
             aspect-ratio: 2 / 1; 
             margin: -30px -30px 20px -30px; 
-            background-size: 100% 100%; /* Stretch image perfectly inside 2:1 container */
-            background-repeat: no-repeat; background-position: center; 
+            background-size: cover; background-repeat: no-repeat; background-position: center; 
             border-bottom: 1px solid var(--border); position: relative; 
         }
         
@@ -215,7 +214,7 @@
         .badge { background: var(--primary); color: var(--primary-invert); padding: 2px 10px; border-radius: 20px; font-size: 14px; margin-left: 10px; font-weight: 600; }
         .form-input { width: 100%; padding: 14px; margin-bottom: 15px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; background: var(--bg-body); color: var(--text-main); outline: none; transition: background 0.4s, color 0.4s; }
 
-        /* --- MAGIC ANIMATED LOGOUT BUTTON --- */
+        /* --- MAGIC ANIMATED LOGOUT BUTTON (Person Falling) --- */
         .logout-anim-btn {
             display: flex; align-items: center; justify-content: space-between;
             background: var(--bg-surface); color: #ef4444; 
@@ -226,24 +225,48 @@
         }
         .logout-anim-btn:hover { background: #ef4444; color: #ffffff; border-color: #ef4444; }
         
-        .logout-icon-container { position: relative; width: 30px; height: 20px; display: flex; align-items: center; justify-content: flex-end; }
-        
-        .logout-arrow { 
-            position: absolute; right: 18px; width: 16px; height: 16px; opacity: 0; 
-            transform: translateX(-10px); transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); z-index: 1; 
+        .logout-icon-container { 
+            position: relative; width: 36px; height: 24px; 
+            display: flex; align-items: center; overflow: hidden; /* Hides the person when falling */
         }
+        
+        .logout-person { 
+            position: absolute; left: 0; width: 14px; height: 16px; 
+            z-index: 1; /* Behind the door flap */
+        }
+        
         .logout-door { 
-            position: relative; width: 12px; height: 18px; border: 2px solid currentColor; 
-            border-radius: 2px; border-left: none; z-index: 2; display: flex; align-items: center; 
-        }
-        .logout-door-flap { 
-            position: absolute; left: -2px; top: -2px; width: 12px; height: 18px; 
-            background: currentColor; border: 2px solid currentColor; border-radius: 2px; 
-            transform-origin: left; transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
+            position: absolute; right: 2px; width: 14px; height: 18px; 
+            border: 2px solid currentColor; border-radius: 2px; border-left: none; 
+            z-index: 2; display: flex; align-items: center;
         }
         
-        .logout-anim-btn:hover .logout-arrow { opacity: 1; transform: translateX(12px); }
-        .logout-anim-btn:hover .logout-door-flap { transform: perspective(100px) rotateY(-80deg); }
+        .logout-door-flap { 
+            position: absolute; left: -2px; top: -2px; width: 14px; height: 18px; 
+            background: var(--bg-surface); border: 2px solid currentColor; border-radius: 2px; 
+            transform-origin: left; transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), background 0.4s ease; 
+            z-index: 3;
+        }
+
+        /* 3D Door Open */
+        .logout-anim-btn:hover .logout-door-flap { 
+            transform: perspective(100px) rotateY(-80deg); 
+            background: #ef4444; /* Matches red button background perfectly */
+        }
+        
+        /* Person Animation Trigger */
+        .logout-anim-btn:hover .logout-person { 
+            animation: walkAndFall 1.2s forwards; 
+        }
+
+        /* The Walk & Fall Sequence */
+        @keyframes walkAndFall {
+            0% { transform: translate(0, 0) scale(1); opacity: 1; }
+            25% { transform: translate(16px, 0) scale(1); opacity: 1; } /* Walk into door */
+            40% { transform: translate(16px, 0) scale(1); opacity: 1; } /* Pause slightly inside */
+            60% { transform: translate(16px, 20px) scale(0.8) rotate(15deg); opacity: 0; } /* Fall down through the floor */
+            100% { transform: translate(16px, 20px) scale(0.8) rotate(15deg); opacity: 0; } /* Stay hidden */
+        }
 
         /* Media Queries for Mobile Responsiveness */
         @media (max-width: 768px) {
@@ -424,7 +447,7 @@
         </div>
     </div>
 
-    <!-- Profile Modal (Includes Animated Logout Button) -->
+    <!-- Profile Modal (Includes Magical Falling Person Logout Button) -->
     <div class="modal-overlay" id="profileModal">
         <div class="modal-content">
             <div class="modal-header"><h2>Identity</h2><button class="close-btn" onclick="closeModal('profileModal')">✕</button></div>
@@ -445,14 +468,14 @@
                 
                 <button type="submit" class="btn btn-primary" style="width: 100%;">Save Updates</button>
                 
-                <!-- Matching CodePen Animation Logout Button -->
+                <!-- Matching CodePen Animation Logout Button (Person Falling) -->
                 <button type="button" class="logout-anim-btn" onclick="logout()">
                     <span>Log Out</span>
                     <div class="logout-icon-container">
-                        <!-- Sliding Right Arrow -->
-                        <svg class="logout-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                            <line x1="2" y1="12" x2="20" y2="12"></line>
-                            <polyline points="14 6 20 12 14 18"></polyline>
+                        <!-- Walking & Falling Person -->
+                        <svg class="logout-person" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="12" cy="7" r="4"></circle>
                         </svg>
                         <!-- 3D Opening Door -->
                         <div class="logout-door">
