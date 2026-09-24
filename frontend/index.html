@@ -6,30 +6,70 @@
     <title>Eventive - Premium Experiences</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:ital,wght@0,500;0,700;1,500&display=swap" rel="stylesheet">
     <style>
+        /* --- Color Variables for Dark & Light Modes --- */
         :root {
-            --bg-body: #050505; --bg-surface: #111111; --text-main: #F9FAFB;
-            --text-muted: #9CA3AF; --border: rgba(255, 255, 255, 0.1);
-            --primary: #FFFFFF; --primary-invert: #000000;
-            --radius-pill: 50px; --radius-card: 16px; --transition: all 0.3s ease;
+            /* Dark Mode (Default) */
+            --bg-body: #050505; 
+            --bg-surface: #111111; 
+            --text-main: #F9FAFB;
+            --text-muted: #9CA3AF; 
+            --border: rgba(255, 255, 255, 0.1);
+            --primary: #FFFFFF; 
+            --primary-invert: #000000;
+            
+            --glass-bg: rgba(15, 15, 15, 0.85);
+            --nav-bg: rgba(17, 17, 17, 0.7);
+            --box-bg: rgba(255, 255, 255, 0.03);
+            --overlay-bg: rgba(0, 0, 0, 0.85);
+            --badge-bg: rgba(0, 0, 0, 0.75);
+            --badge-text: #ffffff;
+            
+            --video-invert: 0;
+            --wallpaper-bg: #030303;
+            
+            --radius-pill: 50px; 
+            --radius-card: 16px; 
+            --transition: all 0.3s ease;
         }
+
+        body.light-mode {
+            /* Light Mode Overrides */
+            --bg-body: #F3F4F6; 
+            --bg-surface: #FFFFFF; 
+            --text-main: #111827;
+            --text-muted: #4B5563; 
+            --border: rgba(0, 0, 0, 0.1);
+            --primary: #000000; 
+            --primary-invert: #FFFFFF;
+            
+            --glass-bg: rgba(255, 255, 255, 0.85);
+            --nav-bg: rgba(255, 255, 255, 0.7);
+            --box-bg: rgba(0, 0, 0, 0.04);
+            --overlay-bg: rgba(255, 255, 255, 0.85);
+            --badge-bg: rgba(255, 255, 255, 0.9);
+            --badge-text: #111827;
+            
+            --video-invert: 1; /* Inverts the background video for light mode */
+            --wallpaper-bg: #E5E7EB;
+        }
+
         * { box-sizing: border-box; margin: 0; padding: 0; }
         
-        /* Mobile overflow protection with solid background */
         html, body { 
             background-color: var(--bg-body); color: var(--text-main); 
             font-family: 'Inter', sans-serif; line-height: 1.6; 
             min-height: 100vh; width: 100%; max-width: 100vw; overflow-x: hidden; 
+            transition: background-color 0.4s ease, color 0.4s ease;
         }
         h1, h2, h3, .logo { font-family: 'Playfair Display', serif; font-weight: 700; }
         
-        /* Custom Cursor Styles */
+        /* Custom Cursor */
         @media (pointer: fine) {
             body, button, a, input, textarea, select, .event-card, .profile-badge, .logo, .close-btn, .slider-btn { cursor: none !important; }
             .custom-cursor {
                 position: fixed; top: 0; left: 0; width: 24px; height: 24px; 
                 border: 1px solid var(--primary); border-radius: 50%;
-                pointer-events: none; z-index: 999999;
-                transform: translate(-50%, -50%);
+                pointer-events: none; z-index: 999999; transform: translate(-50%, -50%);
                 transition: width 0.3s ease, height 0.3s ease, background-color 0.3s ease, border-color 0.3s ease;
                 mix-blend-mode: difference; display: block;
             }
@@ -37,66 +77,63 @@
         }
         @media (pointer: coarse) { .custom-cursor { display: none !important; } }
 
-        /* Full HD Video Background (Positive z-index to avoid hiding behind body) */
+        /* Full HD Video Background */
         .video-bg {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1; pointer-events: none;
-            object-fit: cover; 
-            background-color: #050505;
+            object-fit: cover; background-color: var(--bg-body);
+            filter: invert(var(--video-invert)) hue-rotate(calc(var(--video-invert) * 180deg));
+            transition: filter 0.4s ease;
         }
         
         .noise-overlay {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 2; pointer-events: none;
             background-image: url('data:image/svg+xml,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noise"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noise)"/%3E%3C/svg%3E');
-            opacity: 0.03;
+            opacity: 0.03; mix-blend-mode: overlay;
         }
 
-        /* Interactive Background Glow */
         .interactive-bg {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 3; pointer-events: none;
-            background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.03) 0%, transparent 40%);
             transition: background 0.1s ease;
         }
 
         .navbar {
-            background: rgba(17, 17, 17, 0.7); backdrop-filter: blur(16px); padding: 12px 30px; margin: 20px auto;
+            background: var(--nav-bg); backdrop-filter: blur(16px); padding: 12px 30px; margin: 20px auto;
             max-width: 1200px; width: calc(100% - 40px); border-radius: var(--radius-pill); display: flex; justify-content: space-between; 
             align-items: center; border: 1px solid var(--border); position: sticky; top: 20px; z-index: 100;
+            transition: background 0.4s ease, border-color 0.4s ease;
         }
-        .logo { font-size: 24px; color: var(--primary); }
+        .logo { font-size: 24px; color: var(--primary); transition: color 0.4s ease; }
         .nav-links { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
         
         .profile-badge {
             display: flex; align-items: center; gap: 10px; background: transparent; padding: 4px 12px 4px 4px; 
             border-radius: var(--radius-pill); border: 1px solid var(--border); transition: var(--transition);
         }
-        .profile-badge:hover { background: rgba(255,255,255,0.05); }
+        .profile-badge:hover { background: var(--box-bg); }
 
         .notif-btn {
             background: transparent; border: 1px solid var(--border); color: var(--text-main);
             width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
             position: relative; transition: var(--transition); flex-shrink: 0;
         }
-        .notif-btn:hover { background: rgba(255,255,255,0.05); }
+        .notif-btn:hover { background: var(--box-bg); }
         .notif-badge {
             position: absolute; top: -2px; right: -2px; background: #ef4444; color: white;
             font-size: 10px; font-weight: 700; width: 18px; height: 18px; border-radius: 50%;
             display: flex; align-items: center; justify-content: center; border: 2px solid var(--bg-body);
+            transition: border-color 0.4s ease;
         }
         
         .btn {
             padding: 12px 20px; border-radius: var(--radius-pill); border: none; font-weight: 500;
-            transition: var(--transition); font-size: 13px; font-family: 'Inter', sans-serif; white-space: nowrap;
+            transition: var(--transition); font-size: 13px; font-family: 'Inter', sans-serif; white-space: nowrap; cursor: pointer;
         }
         .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-main); }
         .btn-outline:hover { background: var(--text-main); color: var(--primary-invert); }
         .btn-primary { background: var(--primary); color: var(--primary-invert); }
         .btn-danger { border-color: rgba(239, 68, 68, 0.5); color: #ef4444; }
 
-        /* Container positioned above backgrounds */
-        .container { 
-            max-width: 1200px; margin: 0 auto 80px; padding: 0 20px; width: 100%; 
-            position: relative; z-index: 10; 
-        }
+        .container { max-width: 1200px; margin: 0 auto 80px; padding: 0 20px; width: 100%; position: relative; z-index: 10; }
         .hidden { display: none !important; }
         
         .view-section { animation: fadeView 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
@@ -107,71 +144,94 @@
         .hero-section h1 { font-size: clamp(2.5rem, 6vw, 5.5rem); margin-bottom: 20px; line-height: 1.1; }
         .hero-section p { color: var(--text-muted); font-size: 1.1rem; max-width: 500px; margin: 0 auto; padding: 0 10px; }
 
-        /* Responsive Grid */
-        #events-container, #my-events-container { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr)); 
-            gap: 25px; 
-            width: 100%;
-        }
+        #events-container, #my-events-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr)); gap: 25px; width: 100%; }
         
         .card { 
-            background: rgba(15, 15, 15, 0.85);
-            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            background: var(--glass-bg); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
             border-radius: var(--radius-card); padding: 30px; border: 1px solid var(--border); 
-            overflow: hidden; width: 100%;
+            overflow: hidden; width: 100%; transition: transform 0.3s ease, border-color 0.3s, box-shadow 0.3s, background 0.4s ease; 
         }
-        .event-card { position: relative; transition: transform 0.3s ease, border-color 0.3s, box-shadow 0.3s; }
-        .event-card:hover { transform: translateY(-5px); border-color: rgba(255,255,255,0.3); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .event-card { position: relative; }
+        .event-card:hover { transform: translateY(-5px); border-color: var(--text-muted); box-shadow: 0 10px 30px rgba(0,0,0,0.15); }
         
         .card-cover { 
-            width: calc(100% + 60px); 
-            aspect-ratio: 2 / 1; 
-            margin: -30px -30px 20px -30px; 
+            width: calc(100% + 60px); aspect-ratio: 2 / 1; margin: -30px -30px 20px -30px; 
             background-size: cover; background-repeat: no-repeat; background-position: center; 
             border-bottom: 1px solid var(--border); position: relative; 
         }
         
-        .countdown { position: absolute; top: 20px; right: 20px; background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(8px); padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 600; color: #fff; border: 1px solid rgba(255,255,255,0.1); z-index: 10; }
+        .countdown { position: absolute; top: 20px; right: 20px; background: var(--badge-bg); color: var(--badge-text); backdrop-filter: blur(8px); padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 600; border: 1px solid var(--border); z-index: 10; transition: all 0.4s ease; }
         .registered-badge { position: absolute; top: 20px; left: 20px; background: rgba(16, 185, 129, 0.9); backdrop-filter: blur(8px); padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 700; color: #fff; z-index: 10; }
 
         .event-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 15px; }
-        .tag { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; color: var(--text-muted); border: 1px solid var(--border); padding: 6px 12px; border-radius: 20px; text-transform: uppercase; background: rgba(255,255,255,0.03); }
+        .tag { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; color: var(--text-muted); border: 1px solid var(--border); padding: 6px 12px; border-radius: 20px; text-transform: uppercase; background: var(--box-bg); transition: background 0.4s ease; }
         
-        .desc-box { background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 12px; padding: 12px 16px; margin-bottom: 20px; }
+        .desc-box { background: var(--box-bg); border: 1px solid var(--border); border-radius: 12px; padding: 12px 16px; margin-bottom: 20px; transition: background 0.4s ease; }
         .desc-fade { color: var(--text-muted); font-size: 13px; margin: 0; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 3; line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis; word-break: break-word; -webkit-mask-image: linear-gradient(180deg, rgba(0,0,0,1) 60%, rgba(0,0,0,0) 100%); mask-image: linear-gradient(180deg, rgba(0,0,0,1) 60%, rgba(0,0,0,0) 100%); }
 
-        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(8px); display: flex; justify-content: center; align-items: center; z-index: 1000; opacity: 0; pointer-events: none; transition: var(--transition); padding: 15px; }
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: var(--overlay-bg); backdrop-filter: blur(8px); display: flex; justify-content: center; align-items: center; z-index: 1000; opacity: 0; pointer-events: none; transition: var(--transition); padding: 15px; }
         .modal-overlay.active { opacity: 1; pointer-events: auto; }
         .modal-content { background: var(--bg-surface); padding: 35px; border-radius: var(--radius-card); width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; border: 1px solid var(--border); transform: scale(0.95); transition: var(--transition); }
         .modal-overlay.active .modal-content { transform: scale(1); }
         .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
         .close-btn { background: transparent; border: none; font-size: 24px; color: var(--text-muted); cursor: pointer; }
 
-        .slider-container { position: relative; width: 100%; height: 250px; border-radius: 12px; overflow: hidden; margin-bottom: 20px; background: #000; border: 1px solid var(--border); }
+        .slider-container { position: relative; width: 100%; height: 250px; border-radius: 12px; overflow: hidden; margin-bottom: 20px; background: var(--bg-body); border: 1px solid var(--border); transition: background 0.4s ease; }
         .slider-img { width: 100%; height: 100%; object-fit: contain; }
-        .slider-btn { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); width: 34px; height: 34px; border-radius: 50%; cursor: pointer; }
+        .slider-btn { position: absolute; top: 50%; transform: translateY(-50%); background: var(--box-bg); color: var(--text-main); border: 1px solid var(--border); width: 34px; height: 34px; border-radius: 50%; cursor: pointer; transition: all 0.3s; }
         .slider-btn.prev { left: 10px; } .slider-btn.next { right: 10px; }
+        .slider-btn:hover { background: var(--text-main); color: var(--bg-surface); }
         
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
         th, td { text-align: left; padding: 15px; border-bottom: 1px solid var(--border); font-size: 14px; }
         
-        .empty-state-box { grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 80px 20px; border: 1px dashed var(--border); border-radius: var(--radius-card); background: rgba(255,255,255,0.02); text-align: center; }
+        .empty-state-box { grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 80px 20px; border: 1px dashed var(--border); border-radius: var(--radius-card); background: var(--box-bg); text-align: center; }
 
-        .toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px); background: rgba(17, 17, 17, 0.95); color: var(--text-main); padding: 14px 24px; border-radius: var(--radius-pill); border: 1px solid var(--border); z-index: 9999; display: flex; align-items: center; gap: 10px; opacity: 0; pointer-events: none; transition: transform 0.4s; width: max-content; max-width: 90vw; }
+        .toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px); background: var(--bg-surface); color: var(--text-main); padding: 14px 24px; border-radius: var(--radius-pill); border: 1px solid var(--border); z-index: 9999; display: flex; align-items: center; gap: 10px; opacity: 0; pointer-events: none; transition: transform 0.4s, background 0.4s; width: max-content; max-width: 90vw; }
         .toast-container.show { transform: translateX(-50%) translateY(0); opacity: 1; }
         
         .push-notif-container { position: fixed; bottom: 20px; right: 20px; z-index: 10000; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
-        .push-notif { background: var(--bg-surface); border: 1px solid var(--border); border-left: 4px solid var(--primary); padding: 16px 20px; border-radius: 12px; width: 320px; max-width: calc(100vw - 40px); box-shadow: 0 10px 40px rgba(0,0,0,0.6); pointer-events: auto; animation: slideInRight 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; display: flex; flex-direction: column; gap: 5px; }
+        .push-notif { background: var(--bg-surface); border: 1px solid var(--border); border-left: 4px solid var(--primary); padding: 16px 20px; border-radius: 12px; width: 320px; max-width: calc(100vw - 40px); box-shadow: 0 10px 40px rgba(0,0,0,0.1); pointer-events: auto; animation: slideInRight 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; display: flex; flex-direction: column; gap: 5px; }
         
         @keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-        @keyframes slideOutRight { from { transform: translateX(0); opacity: 1; } to { transform: translateX(100%); opacity: 0; } }
-
+        
         .notif-item { padding: 15px; border-bottom: 1px solid var(--border); display: flex; flex-direction: column; gap: 5px; }
-        .notif-item.unread { background: rgba(255,255,255,0.02); border-left: 3px solid var(--primary); }
+        .notif-item.unread { background: var(--box-bg); border-left: 3px solid var(--primary); }
 
         .badge { background: var(--primary); color: var(--primary-invert); padding: 2px 10px; border-radius: 20px; font-size: 14px; margin-left: 10px; font-weight: 600; }
-        .form-input { width: 100%; padding: 14px; margin-bottom: 15px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; background: var(--bg-body); color: var(--text-main); outline: none; }
+        .form-input { width: 100%; padding: 14px; margin-bottom: 15px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; background: var(--bg-body); color: var(--text-main); outline: none; transition: background 0.4s, color 0.4s; }
+
+        /* --- Animated Logout Button (Matches Video) --- */
+        .logout-anim-btn {
+            display: flex; align-items: center; justify-content: space-between;
+            background: var(--bg-surface); color: #ef4444; 
+            border: 1px solid var(--border); border-radius: 12px;
+            padding: 14px 20px; width: 100%; cursor: pointer;
+            transition: all 0.3s ease; margin-top: 15px;
+        }
+        .logout-anim-btn:hover {
+            background: #ef4444; color: #fff; border-color: #ef4444;
+        }
+        .logout-anim-wrap {
+            position: relative; width: 24px; height: 24px;
+            display: flex; align-items: center; overflow: hidden;
+        }
+        .logout-anim-person {
+            position: absolute; left: 0px; width: 18px; height: 18px;
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+        }
+        .logout-anim-door {
+            position: absolute; right: 0; width: 12px; height: 18px;
+            border: 2px solid currentColor; border-radius: 2px;
+            border-left: none; transition: transform 0.3s ease;
+        }
+        .logout-anim-door::before {
+            content: ''; position: absolute; left: -2px; top: -2px; bottom: -2px; width: 2px;
+            background: currentColor; transition: transform 0.4s ease; transform-origin: left;
+        }
+        /* The Magic Animation triggers on Hover */
+        .logout-anim-btn:hover .logout-anim-person { transform: translateX(10px); opacity: 0; }
+        .logout-anim-btn:hover .logout-anim-door::before { transform: perspective(50px) rotateY(-70deg); }
 
         /* Media Queries for Mobile Responsiveness */
         @media (max-width: 768px) {
@@ -187,6 +247,10 @@
     </style>
 </head>
 <body>
+    <!-- Script to immediately apply theme before page renders to avoid flickering -->
+    <script>
+        if (localStorage.getItem('theme') === 'light') { document.body.classList.add('light-mode'); }
+    </script>
 
     <!-- Full HD Video Live Wallpaper -->
     <video autoplay loop muted playsinline class="video-bg">
@@ -268,7 +332,7 @@
                 <input type="text" id="newEventTitle" class="form-input" placeholder="Event Title" required>
                 <div style="display: flex; gap: 15px; flex-wrap: wrap;"><input type="datetime-local" id="newEventDate" class="form-input" style="flex: 1; min-width: 200px;" required><input type="text" id="newEventLocation" class="form-input" style="flex: 1; min-width: 200px;" placeholder="Location" required></div>
                 <textarea id="newEventDesc" class="form-input" placeholder="Event Description (Max 1000 chars)..." rows="4" maxlength="1000" required></textarea>
-                <div style="background: rgba(255,255,255,0.02); padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px dashed var(--border);">
+                <div style="background: var(--box-bg); padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px dashed var(--border);">
                     <label style="font-size: 13px; color: var(--primary); display: block; margin-bottom: 5px; font-weight: 600;">Main Cover Image (Required - Best: 800x400px)</label>
                     <input type="file" id="newEventCover" class="form-input" accept="image/*" required style="margin-bottom: 10px;">
                     <label style="font-size: 13px; color: var(--text-muted); display: block; margin-bottom: 5px;">Gallery Images (Max 5)</label>
@@ -287,7 +351,7 @@
                 <input type="hidden" id="editEventId"><input type="text" id="editEventTitle" class="form-input" required>
                 <div style="display: flex; gap: 15px; flex-wrap: wrap;"><input type="datetime-local" id="editEventDate" class="form-input" style="flex: 1; min-width: 200px;" required><input type="text" id="editEventLocation" class="form-input" style="flex: 1; min-width: 200px;" required></div>
                 <textarea id="editEventDesc" class="form-input" placeholder="Event Description (Max 1000 chars)..." rows="4" maxlength="1000" required></textarea>
-                <div style="background: rgba(255,255,255,0.02); padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px dashed var(--border);">
+                <div style="background: var(--box-bg); padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px dashed var(--border);">
                     <label style="font-size: 13px; color: var(--primary); display: block; margin-bottom: 5px; font-weight: 600;">Update Cover Image (Best: 800x400px)</label>
                     <input type="file" id="editEventCover" class="form-input" accept="image/*" style="margin-bottom: 10px;">
                     <label style="font-size: 13px; color: var(--text-muted); display: block; margin-bottom: 5px;">Update Gallery (Max 5)</label>
@@ -309,7 +373,7 @@
             </div>
             <div class="event-tags" id="detailsTags"></div>
             
-            <div style="background: rgba(255,255,255,0.02); padding: 15px; border-radius: 12px; border: 1px dashed var(--border); margin-bottom: 25px;">
+            <div style="background: var(--box-bg); padding: 15px; border-radius: 12px; border: 1px dashed var(--border); margin-bottom: 25px;">
                 <h4 style="font-size: 13px; color: var(--primary); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">Description</h4>
                 <p id="detailsDesc" style="color: var(--text-muted); font-size: 14px; margin: 0; white-space: pre-wrap; word-wrap: break-word; overflow-wrap: break-word; max-height: 35vh; overflow-y: auto; padding-right: 5px;"></p>
             </div>
@@ -348,7 +412,7 @@
         </div>
     </div>
 
-    <!-- Profile Modal -->
+    <!-- Profile Modal (Now includes Animated Logout Button) -->
     <div class="modal-overlay" id="profileModal">
         <div class="modal-content">
             <div class="modal-header"><h2>Identity</h2><button class="close-btn" onclick="closeModal('profileModal')">✕</button></div>
@@ -366,7 +430,21 @@
                 <input type="tel" id="profilePrimaryPhone" class="form-input" disabled style="opacity: 0.6;">
                 <input type="tel" id="profileSecondaryPhone" class="form-input" placeholder="Secondary Phone">
                 <select id="profileActivePhone" class="form-input"><option value="primary">Active: Primary Phone</option><option value="secondary">Active: Secondary Phone</option></select>
-                <button type="submit" class="btn btn-primary" style="width: 100%;">Save</button>
+                
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Save Updates</button>
+                
+                <!-- Magic Animated Logout Button -->
+                <button type="button" class="logout-anim-btn" onclick="logout()">
+                    <span style="font-weight: 600;">Log Out</span>
+                    <div class="logout-anim-wrap">
+                        <svg class="logout-anim-person" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="7" r="2.5" fill="currentColor"></circle>
+                            <path d="M12 10.5v4m-2.5 4l2.5-4 2.5 4m-4-8h4"></path>
+                        </svg>
+                        <div class="logout-anim-door"></div>
+                    </div>
+                </button>
+
             </form>
         </div>
     </div>
@@ -419,7 +497,7 @@
                 <div style="position: relative; cursor: pointer; width: 96px; height: 96px; margin-bottom: 15px;" onclick="viewAttendeeFullAvatar()"><img id="viewAttendeeAvatar" src="" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 2px solid var(--border); padding: 3px;"></div>
                 <h3 id="viewAttendeeName" style="font-size: 22px; margin-bottom: 5px;"></h3><p id="viewAttendeeEmail" style="color: var(--text-muted); font-size: 14px;"></p>
             </div>
-            <div style="background: rgba(255,255,255,0.02); padding: 20px; border-radius: 12px; border: 1px dashed var(--border); text-align: left;">
+            <div style="background: var(--box-bg); padding: 20px; border-radius: 12px; border: 1px dashed var(--border); text-align: left;">
                 <p style="margin-bottom: 12px; font-size: 14px;"><strong style="color: var(--primary); display: inline-block; width: 130px;">Primary Phone:</strong> <span id="viewAttendeePhone" style="color: var(--text-muted);"></span></p>
                 <p style="margin-bottom: 12px; font-size: 14px;"><strong style="color: var(--primary); display: inline-block; width: 130px;">Secondary Email:</strong> <span id="viewAttendeeSecEmail" style="color: var(--text-muted);"></span></p>
                 <p style="margin-bottom: 0; font-size: 14px;"><strong style="color: var(--primary); display: inline-block; width: 130px;">Secondary Phone:</strong> <span id="viewAttendeeSecPhone" style="color: var(--text-muted);"></span></p>
@@ -451,6 +529,19 @@
             'linear-gradient(180deg, rgba(25,20,30,0.8) 0%, rgba(5,5,5,0.95) 100%)'
         ];
 
+        // --- Theme Toggle Logic ---
+        function toggleTheme() {
+            document.body.classList.toggle('light-mode');
+            const isLight = document.body.classList.contains('light-mode');
+            localStorage.setItem('theme', isLight ? 'light' : 'dark');
+            updateThemeIcon();
+        }
+        function updateThemeIcon() {
+            const isLight = document.body.classList.contains('light-mode');
+            const icon = document.getElementById('themeIcon');
+            if (icon) icon.innerText = isLight ? '🌙' : '☀️';
+        }
+
         // --- Custom Cursor & Interactive Background Logic ---
         document.addEventListener('mousemove', (e) => {
             const cursor = document.getElementById('customCursor');
@@ -460,18 +551,17 @@
             if (!cursor || !bg) return;
             const { clientX: x, clientY: y } = e;
 
-            // 1. Move Custom Cursor
             cursor.style.transform = `translate(${x}px, ${y}px) translate(-50%, -50%)`;
 
-            // Dynamic hover detection for cursor growth
             const isHoverable = e.target.closest('button, a, input, textarea, select, .event-card, .profile-badge, .logo, .close-btn, .slider-btn');
             if (isHoverable) cursor.classList.add('hover');
             else cursor.classList.remove('hover');
 
-            // 2. Move Background Glow
-            bg.style.background = `radial-gradient(circle at ${x}px ${y}px, rgba(255, 255, 255, 0.04) 0%, transparent 40%)`;
+            // Adapt glow color based on theme
+            const isLight = document.body.classList.contains('light-mode');
+            const glowColor = isLight ? 'rgba(0, 0, 0, 0.04)' : 'rgba(255, 255, 255, 0.04)';
+            bg.style.background = `radial-gradient(circle at ${x}px ${y}px, ${glowColor} 0%, transparent 40%)`;
 
-            // 3. Parallax Effect on Hero Text
             if (heroParallax && !document.getElementById('events-view').classList.contains('hidden')) {
                 const centerX = window.innerWidth / 2;
                 const centerY = window.innerHeight / 2;
@@ -480,9 +570,9 @@
                 heroParallax.style.transform = `translate(${deltaX * -15}px, ${deltaY * -15}px)`;
             }
         });
-        // --------------------------------------------------
 
         document.addEventListener("DOMContentLoaded", () => { 
+            updateThemeIcon(); // Ensure icon matches loaded theme
             updateNavbar(); loadEvents(); setInterval(updateCountdowns, 60000); 
             if(currentUser) startNotificationPolling();
         });
@@ -606,13 +696,21 @@
 
         function updateNavbar() {
             const nav = document.getElementById('authNav'); const adminBar = document.getElementById('adminActionContainer');
+            // Theme toggle button is ALWAYS shown
+            const themeBtnHtml = `<button class="notif-btn" onclick="toggleTheme()" title="Toggle Theme"><span id="themeIcon">${document.body.classList.contains('light-mode') ? '🌙' : '☀️'}</span></button>`;
+            
             if (currentUser) {
                 const avatarSrc = currentUser.avatar_url || `https://ui-avatars.com/api/?name=${currentUser.name}&background=111&color=fff`;
-                let html = `<button class="notif-btn" onclick="openNotificationsModal()">🔔<span id="notifBadge" class="notif-badge" style="display:none;">0</span></button><button class="btn btn-outline" onclick="switchView('my-events-view')" style="border-color: rgba(16, 185, 129, 0.4); color: #10b981;">🎟️ My Events</button>`;
+                let html = themeBtnHtml;
+                html += `<button class="notif-btn" onclick="openNotificationsModal()">🔔<span id="notifBadge" class="notif-badge" style="display:none;">0</span></button><button class="btn btn-outline" onclick="switchView('my-events-view')" style="border-color: rgba(16, 185, 129, 0.4); color: #10b981;">🎟️ My Events</button>`;
                 if (currentUser.role === 'admin') html += `<button class="btn btn-outline" onclick="switchView('admin-view')">Dashboard</button>`;
-                html += `<div class="profile-badge" onclick="openProfileModal()"><img src="${avatarSrc}" style="width:32px; height:32px; border-radius:50%; object-fit:cover;"><span class="greeting-text">${currentUser.name.split(' ')[0]}</span></div><button class="btn btn-outline btn-danger" onclick="logout()">Logout</button>`;
+                // Logout removed from here, added to profile modal
+                html += `<div class="profile-badge" onclick="openProfileModal()"><img src="${avatarSrc}" style="width:32px; height:32px; border-radius:50%; object-fit:cover;"><span class="greeting-text">${currentUser.name.split(' ')[0]}</span></div>`;
                 nav.innerHTML = html;
-            } else { nav.innerHTML = `<button class="btn btn-outline" onclick="openAuthModal(true)">Log in</button><button class="btn btn-primary" onclick="openAuthModal(false)">Join</button>`; if(adminBar) adminBar.style.display = 'none'; }
+            } else { 
+                nav.innerHTML = themeBtnHtml + `<button class="btn btn-outline" onclick="openAuthModal(true)">Log in</button><button class="btn btn-primary" onclick="openAuthModal(false)">Join</button>`; 
+                if(adminBar) adminBar.style.display = 'none'; 
+            }
         }
         
         function switchView(viewId) { 
@@ -627,7 +725,12 @@
         function closeModal(id) { document.getElementById(id).classList.remove('active'); }
         function openCreateModal() { document.getElementById('createEventModal').classList.add('active'); }
         
-        function logout() { localStorage.removeItem('user'); currentUser = null; myBookedEventIds = []; clearInterval(notifPollInterval); allNotifications = []; updateNavbar(); switchView('events-view'); renderEventsUI(); showToast('Logged out successfully', 'success'); }
+        function logout() { 
+            localStorage.removeItem('user'); currentUser = null; myBookedEventIds = []; 
+            clearInterval(notifPollInterval); allNotifications = []; updateNavbar(); 
+            switchView('events-view'); renderEventsUI(); closeModal('profileModal');
+            showToast('Logged out successfully', 'success'); 
+        }
 
         async function fetchMyBookedEventsIds() {
             if (!currentUser) { myBookedEventIds = []; return; }
