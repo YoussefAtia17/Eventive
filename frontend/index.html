@@ -14,7 +14,7 @@
         }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         
-        /* Mobile overflow protection */
+        /* Mobile overflow protection with solid background */
         html, body { 
             background-color: var(--bg-body); color: var(--text-main); 
             font-family: 'Inter', sans-serif; line-height: 1.6; 
@@ -37,22 +37,22 @@
         }
         @media (pointer: coarse) { .custom-cursor { display: none !important; } }
 
-        /* Full HD Video Background */
+        /* Full HD Video Background (Positive z-index to avoid hiding behind body) */
         .video-bg {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -3; pointer-events: none;
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1; pointer-events: none;
             object-fit: cover; 
             background-color: #050505;
         }
         
         .noise-overlay {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -2; pointer-events: none;
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 2; pointer-events: none;
             background-image: url('data:image/svg+xml,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noise"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noise)"/%3E%3C/svg%3E');
             opacity: 0.03;
         }
 
         /* Interactive Background Glow */
         .interactive-bg {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; pointer-events: none;
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 3; pointer-events: none;
             background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.03) 0%, transparent 40%);
             transition: background 0.1s ease;
         }
@@ -92,7 +92,11 @@
         .btn-primary { background: var(--primary); color: var(--primary-invert); }
         .btn-danger { border-color: rgba(239, 68, 68, 0.5); color: #ef4444; }
 
-        .container { max-width: 1200px; margin: 0 auto 80px; padding: 0 20px; width: 100%; }
+        /* Container positioned above backgrounds */
+        .container { 
+            max-width: 1200px; margin: 0 auto 80px; padding: 0 20px; width: 100%; 
+            position: relative; z-index: 10; 
+        }
         .hidden { display: none !important; }
         
         .view-section { animation: fadeView 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
@@ -103,7 +107,7 @@
         .hero-section h1 { font-size: clamp(2.5rem, 6vw, 5.5rem); margin-bottom: 20px; line-height: 1.1; }
         .hero-section p { color: var(--text-muted); font-size: 1.1rem; max-width: 500px; margin: 0 auto; padding: 0 10px; }
 
-        /* Responsive Grid: Uses min(100%, 340px) to prevent mobile overflow */
+        /* Responsive Grid */
         #events-container, #my-events-container { 
             display: grid; 
             grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr)); 
@@ -174,7 +178,7 @@
             .navbar { flex-direction: column; gap: 15px; padding: 15px; border-radius: var(--radius-card); }
             .nav-links { justify-content: center; width: 100%; }
             .profile-badge { padding: 4px 8px; }
-            .greeting-text { display: none; } /* Saves space on mobile */
+            .greeting-text { display: none; }
             .hero-section { padding: 40px 10px; }
             .card { padding: 20px; }
             .card-cover { width: calc(100% + 40px); margin: -20px -20px 15px -20px; }
@@ -189,7 +193,7 @@
         <source src="bg-video.mp4" type="video/mp4">
     </video>
 
-    <!-- Spotlight Background, Noise Overlay & Interactive Glow -->
+    <!-- Noise Overlay & Interactive Glow -->
     <div class="noise-overlay"></div>
     <div id="interactiveBg" class="interactive-bg"></div>
     <div id="customCursor" class="custom-cursor"></div>
