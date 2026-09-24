@@ -212,9 +212,82 @@
         .notif-item.unread { background: var(--box-bg); border-left: 3px solid var(--primary); }
 
         .badge { background: var(--primary); color: var(--primary-invert); padding: 2px 10px; border-radius: 20px; font-size: 14px; margin-left: 10px; font-weight: 600; }
-        .form-input { width: 100%; padding: 14px; margin-bottom: 15px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; background: var(--bg-body); color: var(--text-main); outline: none; transition: background 0.4s, color 0.4s; }
+        
+        /* --- GLOBAL FLOATING LABELS SYSTEM --- */
+        .floating-group { position: relative; margin-bottom: 15px; width: 100%; }
+        .floating-group.hidden { display: none !important; }
+        
+        .form-input { 
+            width: 100%; padding: 14px; border: 2px solid var(--border); 
+            border-radius: 8px; font-size: 14px; background: var(--bg-body); 
+            color: var(--text-main); outline: none; transition: border-color 0.3s, background 0.4s, color 0.4s; 
+        }
+        .form-input:focus { border-color: var(--primary); }
+        .floating-group .form-input { margin-bottom: 0; } /* Remove bottom margin if inside a group */
+        
+        .floating-label { 
+            position: absolute; left: 14px; top: 14px; color: var(--text-muted); 
+            font-size: 14px; pointer-events: none; transition: 0.2s ease all; 
+            background: transparent; padding: 0 4px; border-radius: 4px; z-index: 5;
+        }
+        
+        /* Trigger floating state when focused or when text exists (placeholder hidden) */
+        .form-input:focus ~ .floating-label, 
+        .form-input:not(:placeholder-shown) ~ .floating-label,
+        .form-input:disabled ~ .floating-label,
+        select.form-input ~ .floating-label,
+        input[type="datetime-local"] ~ .floating-label { 
+            top: -10px; left: 10px; font-size: 12px; font-weight: 600; 
+            background: var(--bg-surface); /* Matches Modal Background Perfectly */
+        }
+        .form-input:focus ~ .floating-label,
+        select.form-input:focus ~ .floating-label,
+        input[type="datetime-local"]:focus ~ .floating-label {
+            color: var(--primary);
+        }
 
-        /* --- MAGIC ANIMATED LOGOUT BUTTON (Person Falling) --- */
+        /* Specific states for password strength borders & labels */
+        .form-input.weak { border-color: #ef4444 !important; }
+        .form-input.medium { border-color: #f59e0b !important; }
+        .form-input.strong { border-color: #10b981 !important; }
+        .form-input.weak:focus ~ .floating-label, .form-input.weak:not(:placeholder-shown) ~ .floating-label { color: #ef4444; }
+        .form-input.medium:focus ~ .floating-label, .form-input.medium:not(:placeholder-shown) ~ .floating-label { color: #f59e0b; }
+        .form-input.strong:focus ~ .floating-label, .form-input.strong:not(:placeholder-shown) ~ .floating-label { color: #10b981; }
+
+        /* Eye Icon Toggle */
+        .pwd-toggle { 
+            position: absolute; right: 12px; top: 50%; transform: translateY(-50%); 
+            background: none; border: none; color: var(--text-muted); padding: 4px; cursor: pointer; display: flex; z-index: 10;
+        }
+        .pwd-toggle:hover { color: var(--text-main); }
+
+        /* Strength Checklist Container */
+        .pwd-strength-container { 
+            background: var(--box-bg); padding: 15px; border-radius: 12px; 
+            border: 1px solid var(--border); margin-bottom: 15px; transition: all 0.3s ease;
+        }
+        .pwd-strength-header { display: flex; justify-content: space-between; font-size: 13px; font-weight: 600; margin-bottom: 12px; }
+        .pwd-weak-text { color: #ef4444; } 
+        .pwd-medium-text { color: #f59e0b; } 
+        .pwd-strong-text { color: #10b981; }
+
+        /* Perfect SVG Checkmarks */
+        .pwd-checklist { display: flex; flex-wrap: wrap; gap: 12px; font-size: 12px; color: var(--text-muted); font-weight: 500; }
+        .pwd-req { display: flex; align-items: center; gap: 6px; transition: color 0.3s; }
+        .pwd-req.valid { color: #10b981; }
+        
+        .req-icon { 
+            width: 14px; height: 14px; border-radius: 50%; border: 2px solid currentColor; 
+            display: inline-block; position: relative; transition: all 0.3s ease; box-sizing: border-box;
+        }
+        .pwd-req.valid .req-icon { 
+            border-color: #10b981; background-color: #10b981; 
+            /* Pixel Perfect SVG Checkmark embedded directly */
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E");
+            background-size: 8px; background-position: center; background-repeat: no-repeat;
+        }
+
+        /* --- MAGIC ANIMATED LOGOUT BUTTON --- */
         .logout-anim-btn {
             display: flex; align-items: center; justify-content: space-between;
             background: var(--bg-surface); color: #ef4444; 
@@ -225,34 +298,11 @@
         }
         .logout-anim-btn:hover { background: #ef4444; color: #ffffff; border-color: #ef4444; }
         
-        .logout-icon-container { 
-            position: relative; width: 36px; height: 24px; 
-            display: flex; align-items: center; overflow: hidden;
-        }
-        
-        .logout-person { 
-            position: absolute; left: 0; width: 14px; height: 16px; 
-            z-index: 1; 
-        }
-        
-        .logout-door { 
-            position: absolute; right: 2px; width: 14px; height: 18px; 
-            border: 2px solid currentColor; border-radius: 2px; border-left: none; 
-            z-index: 2; display: flex; align-items: center;
-        }
-        
-        .logout-door-flap { 
-            position: absolute; left: -2px; top: -2px; width: 14px; height: 18px; 
-            background: var(--bg-surface); border: 2px solid currentColor; border-radius: 2px; 
-            transform-origin: left; transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), background 0.4s ease; 
-            z-index: 3;
-        }
-
-        .logout-anim-btn:hover .logout-door-flap { 
-            transform: perspective(100px) rotateY(-80deg); 
-            background: #ef4444; 
-        }
-        
+        .logout-icon-container { position: relative; width: 36px; height: 24px; display: flex; align-items: center; overflow: hidden; }
+        .logout-person { position: absolute; left: 0; width: 14px; height: 16px; z-index: 1; }
+        .logout-door { position: absolute; right: 2px; width: 14px; height: 18px; border: 2px solid currentColor; border-radius: 2px; border-left: none; z-index: 2; display: flex; align-items: center; }
+        .logout-door-flap { position: absolute; left: -2px; top: -2px; width: 14px; height: 18px; background: var(--bg-surface); border: 2px solid currentColor; border-radius: 2px; transform-origin: left; transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), background 0.4s ease; z-index: 3; }
+        .logout-anim-btn:hover .logout-door-flap { transform: perspective(100px) rotateY(-80deg); background: #ef4444; }
         .logout-anim-btn:hover .logout-person { animation: walkAndFall 1.2s forwards; }
 
         @keyframes walkAndFall {
@@ -261,68 +311,6 @@
             40% { transform: translate(16px, 0) scale(1); opacity: 1; }
             60% { transform: translate(16px, 20px) scale(0.8) rotate(15deg); opacity: 0; }
             100% { transform: translate(16px, 20px) scale(0.8) rotate(15deg); opacity: 0; }
-        }
-
-        /* --- PREMIUM PASSWORD UI --- */
-        .password-wrapper { position: relative; margin-bottom: 15px; }
-        .pwd-input { 
-            width: 100%; padding: 14px 40px 14px 14px; border: 2px solid var(--border); 
-            border-radius: 8px; font-size: 14px; background: var(--bg-body); color: var(--text-main); 
-            outline: none; transition: border-color 0.3s ease; 
-        }
-        
-        /* Dynamic Borders based on strength */
-        .pwd-input:focus { border-color: var(--primary); }
-        .pwd-input.weak { border-color: #ef4444 !important; }
-        .pwd-input.medium { border-color: #f59e0b !important; }
-        .pwd-input.strong { border-color: #10b981 !important; }
-
-        /* Floating Label */
-        .pwd-label { 
-            position: absolute; left: 14px; top: 14px; color: var(--text-muted); font-size: 14px; 
-            pointer-events: none; transition: 0.2s ease all; background: var(--bg-surface); padding: 0 4px; 
-        }
-        .pwd-input:focus ~ .pwd-label, .pwd-input:not(:placeholder-shown) ~ .pwd-label { 
-            top: -10px; font-size: 12px; color: var(--primary); font-weight: 600; 
-        }
-        .pwd-input.weak:focus ~ .pwd-label, .pwd-input.weak:not(:placeholder-shown) ~ .pwd-label { color: #ef4444; }
-        .pwd-input.medium:focus ~ .pwd-label, .pwd-input.medium:not(:placeholder-shown) ~ .pwd-label { color: #f59e0b; }
-        .pwd-input.strong:focus ~ .pwd-label, .pwd-input.strong:not(:placeholder-shown) ~ .pwd-label { color: #10b981; }
-
-        /* Eye Icon Toggle */
-        .pwd-toggle { 
-            position: absolute; right: 12px; top: 50%; transform: translateY(-50%); 
-            background: none; border: none; color: var(--text-muted); padding: 4px; cursor: pointer; display: flex; 
-        }
-        .pwd-toggle:hover { color: var(--text-main); }
-
-        /* Strength Checklist Container */
-        .pwd-strength-container { 
-            background: var(--box-bg); padding: 15px; border-radius: 12px; 
-            border: 1px solid var(--border); margin-bottom: 15px; 
-            transition: all 0.3s ease;
-        }
-        .pwd-strength-header { 
-            display: flex; justify-content: space-between; font-size: 13px; font-weight: 600; margin-bottom: 12px; 
-        }
-        .pwd-weak-text { color: #ef4444; } 
-        .pwd-medium-text { color: #f59e0b; } 
-        .pwd-strong-text { color: #10b981; }
-
-        /* Checklist Items */
-        .pwd-checklist { display: flex; flex-wrap: wrap; gap: 12px; font-size: 12px; color: var(--text-muted); font-weight: 500; }
-        .pwd-req { display: flex; align-items: center; gap: 6px; transition: color 0.3s; }
-        .pwd-req.valid { color: #10b981; }
-        
-        /* Hollow Circle / Checkmark */
-        .req-icon { 
-            width: 12px; height: 12px; border-radius: 50%; border: 2px solid currentColor; 
-            display: inline-block; position: relative; transition: all 0.3s;
-        }
-        .pwd-req.valid .req-icon { border-color: #10b981; background: #10b981; }
-        .pwd-req.valid .req-icon::after { 
-            content: ''; position: absolute; left: 3px; top: 1.5px; width: 3px; height: 5px; 
-            border: solid white; border-width: 0 2px 2px 0; transform: rotate(45deg); 
         }
 
         /* Media Queries for Mobile Responsiveness */
@@ -340,7 +328,6 @@
     </style>
 </head>
 <body>
-    <!-- Script to immediately apply theme before page renders to avoid flickering -->
     <script>
         if (localStorage.getItem('theme') === 'light') { document.body.classList.add('light-mode'); }
     </script>
@@ -350,7 +337,6 @@
         <source src="bg-video.mp4" type="video/mp4">
     </video>
 
-    <!-- Noise Overlay & Interactive Glow -->
     <div class="noise-overlay"></div>
     <div id="interactiveBg" class="interactive-bg"></div>
     <div id="customCursor" class="custom-cursor"></div>
@@ -398,7 +384,10 @@
                     <h2 style="font-size: 20px; margin: 0; display: flex; align-items: center;">Attendees Database <span id="attendeeCount" class="badge">0</span></h2>
                     <button class="export-btn btn btn-outline" id="exportBtn" onclick="exportToCSV()" style="display: none; padding: 6px 12px;">📥 Download CSV</button>
                 </div>
-                <select id="adminEventSelect" class="form-input" onchange="loadRSVPs()"><option value="">-- Select an event --</option></select>
+                <div class="floating-group">
+                    <select id="adminEventSelect" class="form-input" onchange="loadRSVPs()"><option value=""></option></select>
+                    <label class="floating-label">Select an Event to Manage</label>
+                </div>
                 <div style="overflow-x: auto;">
                     <table>
                         <thead><tr><th>User</th><th>Email</th><th>Phone</th><th>Actions</th></tr></thead>
@@ -422,9 +411,24 @@
         <div class="modal-content" style="max-width: 550px;">
             <div class="modal-header"><h2 style="font-size: 22px;">Publish Experience</h2><button class="close-btn" onclick="closeModal('createEventModal')">✕</button></div>
             <form id="createEventForm" onsubmit="submitNewEvent(event)">
-                <input type="text" id="newEventTitle" class="form-input" placeholder="Event Title" required>
-                <div style="display: flex; gap: 15px; flex-wrap: wrap;"><input type="datetime-local" id="newEventDate" class="form-input" style="flex: 1; min-width: 200px;" required><input type="text" id="newEventLocation" class="form-input" style="flex: 1; min-width: 200px;" placeholder="Location" required></div>
-                <textarea id="newEventDesc" class="form-input" placeholder="Event Description (Max 1000 chars)..." rows="4" maxlength="1000" required></textarea>
+                <div class="floating-group">
+                    <input type="text" id="newEventTitle" class="form-input" placeholder=" " required>
+                    <label class="floating-label">Event Title</label>
+                </div>
+                <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 15px;">
+                    <div class="floating-group" style="flex: 1; min-width: 200px; margin-bottom: 0;">
+                        <input type="datetime-local" id="newEventDate" class="form-input" required>
+                        <label class="floating-label">Event Date & Time</label>
+                    </div>
+                    <div class="floating-group" style="flex: 1; min-width: 200px; margin-bottom: 0;">
+                        <input type="text" id="newEventLocation" class="form-input" placeholder=" " required>
+                        <label class="floating-label">Location</label>
+                    </div>
+                </div>
+                <div class="floating-group">
+                    <textarea id="newEventDesc" class="form-input" placeholder=" " rows="4" maxlength="1000" required></textarea>
+                    <label class="floating-label">Event Description (Max 1000 chars)</label>
+                </div>
                 <div style="background: var(--box-bg); padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px dashed var(--border);">
                     <label style="font-size: 13px; color: var(--primary); display: block; margin-bottom: 5px; font-weight: 600;">Main Cover Image (Required - Best: 800x400px)</label>
                     <input type="file" id="newEventCover" class="form-input" accept="image/*" required style="margin-bottom: 10px;">
@@ -441,9 +445,25 @@
         <div class="modal-content" style="max-width: 550px;">
             <div class="modal-header"><h2 style="font-size: 22px;">Edit Experience</h2><button class="close-btn" onclick="closeModal('editEventModal')">✕</button></div>
             <form id="editEventForm" onsubmit="submitEditEvent(event)">
-                <input type="hidden" id="editEventId"><input type="text" id="editEventTitle" class="form-input" required>
-                <div style="display: flex; gap: 15px; flex-wrap: wrap;"><input type="datetime-local" id="editEventDate" class="form-input" style="flex: 1; min-width: 200px;" required><input type="text" id="editEventLocation" class="form-input" style="flex: 1; min-width: 200px;" required></div>
-                <textarea id="editEventDesc" class="form-input" placeholder="Event Description (Max 1000 chars)..." rows="4" maxlength="1000" required></textarea>
+                <input type="hidden" id="editEventId">
+                <div class="floating-group">
+                    <input type="text" id="editEventTitle" class="form-input" placeholder=" " required>
+                    <label class="floating-label">Event Title</label>
+                </div>
+                <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 15px;">
+                    <div class="floating-group" style="flex: 1; min-width: 200px; margin-bottom: 0;">
+                        <input type="datetime-local" id="editEventDate" class="form-input" required>
+                        <label class="floating-label">Event Date & Time</label>
+                    </div>
+                    <div class="floating-group" style="flex: 1; min-width: 200px; margin-bottom: 0;">
+                        <input type="text" id="editEventLocation" class="form-input" placeholder=" " required>
+                        <label class="floating-label">Location</label>
+                    </div>
+                </div>
+                <div class="floating-group">
+                    <textarea id="editEventDesc" class="form-input" placeholder=" " rows="4" maxlength="1000" required></textarea>
+                    <label class="floating-label">Event Description (Max 1000 chars)</label>
+                </div>
                 <div style="background: var(--box-bg); padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px dashed var(--border);">
                     <label style="font-size: 13px; color: var(--primary); display: block; margin-bottom: 5px; font-weight: 600;">Update Cover Image (Best: 800x400px)</label>
                     <input type="file" id="editEventCover" class="form-input" accept="image/*" style="margin-bottom: 10px;">
@@ -480,28 +500,44 @@
         <div class="modal-content" style="max-width: 400px;">
             <div class="modal-header"><h2>RSVP</h2><button class="close-btn" onclick="closeModal('rsvpModal')">✕</button></div>
             <form id="rsvpForm" onsubmit="submitRSVP(event)">
-                <input type="text" id="rsvpName" class="form-input" disabled style="opacity: 0.6;">
-                <input type="email" id="rsvpEmail" class="form-input" disabled style="opacity: 0.6;">
-                <input type="tel" id="rsvpPhone" class="form-input" disabled style="opacity: 0.6;">
+                <div class="floating-group">
+                    <input type="text" id="rsvpName" class="form-input" placeholder=" " disabled style="opacity: 0.6;">
+                    <label class="floating-label">Full Name</label>
+                </div>
+                <div class="floating-group">
+                    <input type="email" id="rsvpEmail" class="form-input" placeholder=" " disabled style="opacity: 0.6;">
+                    <label class="floating-label">Email Address</label>
+                </div>
+                <div class="floating-group">
+                    <input type="tel" id="rsvpPhone" class="form-input" placeholder=" " disabled style="opacity: 0.6;">
+                    <label class="floating-label">Phone Number</label>
+                </div>
                 <button type="submit" class="btn btn-primary" style="width: 100%;">Confirm Attendance</button>
             </form>
         </div>
     </div>
 
-    <!-- Auth Modal (Updated with Premium Password UI for Sign Up) -->
+    <!-- Auth Modal (with Global Floating Labels) -->
     <div class="modal-overlay" id="authModal">
         <div class="modal-content" style="max-width: 400px;">
             <div class="modal-header"><h2 id="authTitle">Welcome</h2><button class="close-btn" onclick="closeModal('authModal')">✕</button></div>
             <form id="authForm" onsubmit="handleAuth(event)">
-                <input type="text" id="authName" class="form-input hidden" placeholder="Full Name">
-                <input type="tel" id="authPhone" class="form-input hidden" placeholder="Phone Number">
-                <input type="email" id="authEmail" class="form-input" placeholder="Email" required>
+                <div class="floating-group hidden" id="groupAuthName">
+                    <input type="text" id="authName" class="form-input" placeholder=" ">
+                    <label class="floating-label">Full Name</label>
+                </div>
+                <div class="floating-group hidden" id="groupAuthPhone">
+                    <input type="tel" id="authPhone" class="form-input" placeholder=" ">
+                    <label class="floating-label">Phone Number</label>
+                </div>
+                <div class="floating-group" id="groupAuthEmail">
+                    <input type="email" id="authEmail" class="form-input" placeholder=" " required>
+                    <label class="floating-label">Email Address</label>
+                </div>
                 
-                <!-- Premium Password Wrapper -->
-                <div class="password-wrapper" id="passwordWrapper">
-                    <!-- Placeholder must be a space ' ' for the CSS :placeholder-shown hack to work -->
-                    <input type="password" id="authPassword" class="pwd-input" placeholder=" " required oninput="checkPasswordStrength()">
-                    <label for="authPassword" class="pwd-label">Password</label>
+                <div class="floating-group" id="passwordWrapper">
+                    <input type="password" id="authPassword" class="form-input pwd-input" placeholder=" " required oninput="checkPasswordStrength()">
+                    <label for="authPassword" class="floating-label">Password</label>
                     <button type="button" class="pwd-toggle" onclick="togglePasswordVisibility()">
                         <svg id="eyeIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
@@ -510,7 +546,6 @@
                     </button>
                 </div>
 
-                <!-- Premium Password Strength Checklist (Hidden in Login Mode) -->
                 <div id="pwdStrengthContainer" class="pwd-strength-container hidden">
                     <div class="pwd-strength-header">
                         <span>Password Strength</span>
@@ -543,18 +578,39 @@
                         <img id="profileAvatarImg" src="" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 1px solid var(--border);">
                         <div style="position: absolute; inset: 0; background: rgba(0,0,0,0.6); border-radius: 50%; display: flex; align-items: center; justify-content: center; opacity: 0; transition: var(--transition);" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0"><span style="font-size: 20px;">👁️</span></div>
                     </div>
-                    <input type="file" id="profileAvatarFile" class="form-input" accept="image/*" onchange="previewAvatar(event)" style="margin-bottom: 0;">
+                    <div class="floating-group" style="margin-bottom: 0;">
+                        <input type="file" id="profileAvatarFile" class="form-input" accept="image/*" onchange="previewAvatar(event)">
+                    </div>
                 </div>
-                <input type="email" id="profilePrimaryEmail" class="form-input" disabled style="opacity: 0.6;">
-                <input type="email" id="profileSecondaryEmail" class="form-input" placeholder="Secondary Email">
-                <select id="profileActiveEmail" class="form-input"><option value="primary">Active: Primary Email</option><option value="secondary">Active: Secondary Email</option></select>
-                <input type="tel" id="profilePrimaryPhone" class="form-input" disabled style="opacity: 0.6;">
-                <input type="tel" id="profileSecondaryPhone" class="form-input" placeholder="Secondary Phone">
-                <select id="profileActivePhone" class="form-input"><option value="primary">Active: Primary Phone</option><option value="secondary">Active: Secondary Phone</option></select>
+                
+                <div class="floating-group">
+                    <input type="email" id="profilePrimaryEmail" class="form-input" placeholder=" " disabled style="opacity: 0.6;">
+                    <label class="floating-label">Primary Email</label>
+                </div>
+                <div class="floating-group">
+                    <input type="email" id="profileSecondaryEmail" class="form-input" placeholder=" ">
+                    <label class="floating-label">Secondary Email</label>
+                </div>
+                <div class="floating-group">
+                    <select id="profileActiveEmail" class="form-input"><option value="primary">Primary Email</option><option value="secondary">Secondary Email</option></select>
+                    <label class="floating-label">Active Email for RSVPs</label>
+                </div>
+                <div class="floating-group">
+                    <input type="tel" id="profilePrimaryPhone" class="form-input" placeholder=" " disabled style="opacity: 0.6;">
+                    <label class="floating-label">Primary Phone</label>
+                </div>
+                <div class="floating-group">
+                    <input type="tel" id="profileSecondaryPhone" class="form-input" placeholder=" ">
+                    <label class="floating-label">Secondary Phone</label>
+                </div>
+                <div class="floating-group">
+                    <select id="profileActivePhone" class="form-input"><option value="primary">Primary Phone</option><option value="secondary">Secondary Phone</option></select>
+                    <label class="floating-label">Active Phone for RSVPs</label>
+                </div>
                 
                 <button type="submit" class="btn btn-primary" style="width: 100%;">Save Updates</button>
                 
-                <!-- Matching CodePen Animation Logout Button (Person Falling) -->
+                <!-- Matching CodePen Animation Logout Button -->
                 <button type="button" class="logout-anim-btn" onclick="logout()">
                     <span>Log Out</span>
                     <div class="logout-icon-container">
@@ -599,7 +655,10 @@
         <div class="modal-content" style="max-width: 400px; text-align: center;">
             <div style="font-size: 48px; margin-bottom: 15px;">🚫</div><h2 style="font-size: 22px; margin-bottom: 10px;">Remove Attendee?</h2>
             <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 15px;">Remove <strong id="removeAttendeeName" style="color: var(--primary);"></strong> from event?</p>
-            <input type="text" id="removeReason" class="form-input" placeholder="Reason for removal (will be sent to user)" required>
+            <div class="floating-group">
+                <input type="text" id="removeReason" class="form-input" placeholder=" " required>
+                <label class="floating-label">Reason for removal</label>
+            </div>
             <div style="display: flex; gap: 10px; justify-content: center;">
                 <button class="btn btn-outline" style="flex: 1;" onclick="closeModal('removeAttendeeConfirmModal')">Cancel</button>
                 <button class="btn btn-primary" style="flex: 1; background: #ef4444; border-color: #ef4444;" onclick="executeRemoveAttendee()">Yes, Remove</button>
@@ -1037,15 +1096,15 @@
             const pwdInput = document.getElementById('authPassword');
             
             if(isLogin) { 
-                document.getElementById('authName').classList.add('hidden'); document.getElementById('authName').removeAttribute('required'); 
-                document.getElementById('authPhone').classList.add('hidden'); 
+                document.getElementById('groupAuthName').classList.add('hidden'); document.getElementById('authName').removeAttribute('required'); 
+                document.getElementById('groupAuthPhone').classList.add('hidden'); 
                 pwdContainer.classList.add('hidden');
-                pwdInput.classList.remove('weak', 'medium', 'strong'); // Reset border colors for login
+                pwdInput.classList.remove('weak', 'medium', 'strong'); 
             } else { 
-                document.getElementById('authName').classList.remove('hidden'); document.getElementById('authName').setAttribute('required', 'true'); 
-                document.getElementById('authPhone').classList.remove('hidden'); 
+                document.getElementById('groupAuthName').classList.remove('hidden'); document.getElementById('authName').setAttribute('required', 'true'); 
+                document.getElementById('groupAuthPhone').classList.remove('hidden'); 
                 pwdContainer.classList.remove('hidden');
-                checkPasswordStrength(); // Trigger validation on open
+                checkPasswordStrength(); 
             }
             document.getElementById('authModal').classList.add('active');
         }
@@ -1055,11 +1114,9 @@
             const icon = document.getElementById('eyeIcon');
             if (input.type === 'password') {
                 input.type = 'text';
-                // Eye Off Icon
                 icon.innerHTML = `<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>`;
             } else {
                 input.type = 'password';
-                // Eye On Icon
                 icon.innerHTML = `<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>`;
             }
         }
@@ -1102,7 +1159,6 @@
             e.preventDefault(); 
             const pwd = document.getElementById('authPassword').value;
             
-            // Validate Password Strength on Sign Up
             if(!isLoginMode) {
                 const score = [/.{8,}/, /[A-Z]/, /[a-z]/, /[0-9]/, /[^A-Za-z0-9]/].filter(r => r.test(pwd)).length;
                 if (score < 5) { showToast("Please meet all password requirements to create an account.", "error"); return; }
@@ -1134,7 +1190,7 @@
             try { await fetch(API_BASE + '/update', { method: 'POST', body: formData }); showToast("Profile updated successfully! ✅", "success"); silentSync(); } catch(error) { showToast("Failed to connect.", "error"); } 
         }
         
-        function populateAdminEventsDropdown() { fetch(API_BASE + '/events', { cache: 'no-store' }).then(res => res.json()).then(result => { const select = document.getElementById('adminEventSelect'); select.innerHTML = '<option value="">-- Select --</option>'; result.data.forEach(evt => select.innerHTML += `<option value="${evt.id}">${evt.title}</option>`); }); }
+        function populateAdminEventsDropdown() { fetch(API_BASE + '/events', { cache: 'no-store' }).then(res => res.json()).then(result => { const select = document.getElementById('adminEventSelect'); select.innerHTML = '<option value=""></option>'; result.data.forEach(evt => select.innerHTML += `<option value="${evt.id}">${evt.title}</option>`); }); }
 
         function renderAttendeesTable(data) {
             const tbody = document.getElementById('attendeesTable'); const exportBtn = document.getElementById('exportBtn'); const countBadge = document.getElementById('attendeeCount'); if (countBadge) countBadge.innerText = data.length; 
