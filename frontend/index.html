@@ -64,7 +64,7 @@
         
         /* Custom Cursor */
         @media (pointer: fine) {
-            body, button, a, input, textarea, select, .event-card, .profile-badge, .logo, .close-btn, .slider-btn { cursor: none !important; }
+            body, button, a, input, textarea, select, .event-card, .profile-badge, .logo, .close-btn, .slider-btn, .pwd-toggle { cursor: none !important; }
             .custom-cursor {
                 position: fixed; top: 0; left: 0; width: 24px; height: 24px; 
                 border: 1px solid #FFFFFF; /* MUST BE WHITE FOR MIX-BLEND-MODE */
@@ -227,12 +227,12 @@
         
         .logout-icon-container { 
             position: relative; width: 36px; height: 24px; 
-            display: flex; align-items: center; overflow: hidden; /* Hides the person when falling */
+            display: flex; align-items: center; overflow: hidden;
         }
         
         .logout-person { 
             position: absolute; left: 0; width: 14px; height: 16px; 
-            z-index: 1; /* Behind the door flap */
+            z-index: 1; 
         }
         
         .logout-door { 
@@ -248,24 +248,81 @@
             z-index: 3;
         }
 
-        /* 3D Door Open */
         .logout-anim-btn:hover .logout-door-flap { 
             transform: perspective(100px) rotateY(-80deg); 
-            background: #ef4444; /* Matches red button background perfectly */
+            background: #ef4444; 
         }
         
-        /* Person Animation Trigger */
-        .logout-anim-btn:hover .logout-person { 
-            animation: walkAndFall 1.2s forwards; 
-        }
+        .logout-anim-btn:hover .logout-person { animation: walkAndFall 1.2s forwards; }
 
-        /* The Walk & Fall Sequence */
         @keyframes walkAndFall {
             0% { transform: translate(0, 0) scale(1); opacity: 1; }
-            25% { transform: translate(16px, 0) scale(1); opacity: 1; } /* Walk into door */
-            40% { transform: translate(16px, 0) scale(1); opacity: 1; } /* Pause slightly inside */
-            60% { transform: translate(16px, 20px) scale(0.8) rotate(15deg); opacity: 0; } /* Fall down through the floor */
-            100% { transform: translate(16px, 20px) scale(0.8) rotate(15deg); opacity: 0; } /* Stay hidden */
+            25% { transform: translate(16px, 0) scale(1); opacity: 1; }
+            40% { transform: translate(16px, 0) scale(1); opacity: 1; }
+            60% { transform: translate(16px, 20px) scale(0.8) rotate(15deg); opacity: 0; }
+            100% { transform: translate(16px, 20px) scale(0.8) rotate(15deg); opacity: 0; }
+        }
+
+        /* --- PREMIUM PASSWORD UI --- */
+        .password-wrapper { position: relative; margin-bottom: 15px; }
+        .pwd-input { 
+            width: 100%; padding: 14px 40px 14px 14px; border: 2px solid var(--border); 
+            border-radius: 8px; font-size: 14px; background: var(--bg-body); color: var(--text-main); 
+            outline: none; transition: border-color 0.3s ease; 
+        }
+        
+        /* Dynamic Borders based on strength */
+        .pwd-input:focus { border-color: var(--primary); }
+        .pwd-input.weak { border-color: #ef4444 !important; }
+        .pwd-input.medium { border-color: #f59e0b !important; }
+        .pwd-input.strong { border-color: #10b981 !important; }
+
+        /* Floating Label */
+        .pwd-label { 
+            position: absolute; left: 14px; top: 14px; color: var(--text-muted); font-size: 14px; 
+            pointer-events: none; transition: 0.2s ease all; background: var(--bg-surface); padding: 0 4px; 
+        }
+        .pwd-input:focus ~ .pwd-label, .pwd-input:not(:placeholder-shown) ~ .pwd-label { 
+            top: -10px; font-size: 12px; color: var(--primary); font-weight: 600; 
+        }
+        .pwd-input.weak:focus ~ .pwd-label, .pwd-input.weak:not(:placeholder-shown) ~ .pwd-label { color: #ef4444; }
+        .pwd-input.medium:focus ~ .pwd-label, .pwd-input.medium:not(:placeholder-shown) ~ .pwd-label { color: #f59e0b; }
+        .pwd-input.strong:focus ~ .pwd-label, .pwd-input.strong:not(:placeholder-shown) ~ .pwd-label { color: #10b981; }
+
+        /* Eye Icon Toggle */
+        .pwd-toggle { 
+            position: absolute; right: 12px; top: 50%; transform: translateY(-50%); 
+            background: none; border: none; color: var(--text-muted); padding: 4px; cursor: pointer; display: flex; 
+        }
+        .pwd-toggle:hover { color: var(--text-main); }
+
+        /* Strength Checklist Container */
+        .pwd-strength-container { 
+            background: var(--box-bg); padding: 15px; border-radius: 12px; 
+            border: 1px solid var(--border); margin-bottom: 15px; 
+            transition: all 0.3s ease;
+        }
+        .pwd-strength-header { 
+            display: flex; justify-content: space-between; font-size: 13px; font-weight: 600; margin-bottom: 12px; 
+        }
+        .pwd-weak-text { color: #ef4444; } 
+        .pwd-medium-text { color: #f59e0b; } 
+        .pwd-strong-text { color: #10b981; }
+
+        /* Checklist Items */
+        .pwd-checklist { display: flex; flex-wrap: wrap; gap: 12px; font-size: 12px; color: var(--text-muted); font-weight: 500; }
+        .pwd-req { display: flex; align-items: center; gap: 6px; transition: color 0.3s; }
+        .pwd-req.valid { color: #10b981; }
+        
+        /* Hollow Circle / Checkmark */
+        .req-icon { 
+            width: 12px; height: 12px; border-radius: 50%; border: 2px solid currentColor; 
+            display: inline-block; position: relative; transition: all 0.3s;
+        }
+        .pwd-req.valid .req-icon { border-color: #10b981; background: #10b981; }
+        .pwd-req.valid .req-icon::after { 
+            content: ''; position: absolute; left: 3px; top: 1.5px; width: 3px; height: 5px; 
+            border: solid white; border-width: 0 2px 2px 0; transform: rotate(45deg); 
         }
 
         /* Media Queries for Mobile Responsiveness */
@@ -278,6 +335,7 @@
             .card { padding: 20px; }
             .card-cover { width: calc(100% + 40px); margin: -20px -20px 15px -20px; }
             .adminActionContainer { justify-content: center !important; }
+            .pwd-checklist { gap: 8px; }
         }
     </style>
 </head>
@@ -430,7 +488,7 @@
         </div>
     </div>
 
-    <!-- Auth Modal -->
+    <!-- Auth Modal (Updated with Premium Password UI for Sign Up) -->
     <div class="modal-overlay" id="authModal">
         <div class="modal-content" style="max-width: 400px;">
             <div class="modal-header"><h2 id="authTitle">Welcome</h2><button class="close-btn" onclick="closeModal('authModal')">✕</button></div>
@@ -438,10 +496,38 @@
                 <input type="text" id="authName" class="form-input hidden" placeholder="Full Name">
                 <input type="tel" id="authPhone" class="form-input hidden" placeholder="Phone Number">
                 <input type="email" id="authEmail" class="form-input" placeholder="Email" required>
-                <input type="password" id="authPassword" class="form-input" placeholder="Password" required>
+                
+                <!-- Premium Password Wrapper -->
+                <div class="password-wrapper" id="passwordWrapper">
+                    <!-- Placeholder must be a space ' ' for the CSS :placeholder-shown hack to work -->
+                    <input type="password" id="authPassword" class="pwd-input" placeholder=" " required oninput="checkPasswordStrength()">
+                    <label for="authPassword" class="pwd-label">Password</label>
+                    <button type="button" class="pwd-toggle" onclick="togglePasswordVisibility()">
+                        <svg id="eyeIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                            <circle cx="12" cy="12" r="3"></circle>
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Premium Password Strength Checklist (Hidden in Login Mode) -->
+                <div id="pwdStrengthContainer" class="pwd-strength-container hidden">
+                    <div class="pwd-strength-header">
+                        <span>Password Strength</span>
+                        <span id="pwdStrengthText" class="pwd-weak-text">Weak</span>
+                    </div>
+                    <div class="pwd-checklist">
+                        <div class="pwd-req" id="req-len"><span class="req-icon"></span> 8 Chars</div>
+                        <div class="pwd-req" id="req-upper"><span class="req-icon"></span> A-Z</div>
+                        <div class="pwd-req" id="req-lower"><span class="req-icon"></span> a-z</div>
+                        <div class="pwd-req" id="req-num"><span class="req-icon"></span> 123</div>
+                        <div class="pwd-req" id="req-sym"><span class="req-icon"></span> @#$</div>
+                    </div>
+                </div>
+
                 <button type="submit" class="btn btn-primary" style="width: 100%;" id="authSubmitBtn">Continue</button>
                 <p style="text-align: center; margin-top: 15px; font-size: 13px; color: var(--text-muted);">
-                    <span id="authToggleText">Don't have an account?</span> <a href="#" onclick="toggleAuthMode()" style="color: white;">Click here</a>
+                    <span id="authToggleText">Don't have an account?</span> <a href="#" onclick="toggleAuthMode()" style="color: var(--primary);">Click here</a>
                 </p>
             </form>
         </div>
@@ -472,12 +558,10 @@
                 <button type="button" class="logout-anim-btn" onclick="logout()">
                     <span>Log Out</span>
                     <div class="logout-icon-container">
-                        <!-- Walking & Falling Person -->
                         <svg class="logout-person" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                             <circle cx="12" cy="7" r="4"></circle>
                         </svg>
-                        <!-- 3D Opening Door -->
                         <div class="logout-door">
                             <div class="logout-door-flap"></div>
                         </div>
@@ -592,7 +676,7 @@
 
             cursor.style.transform = `translate(${x}px, ${y}px) translate(-50%, -50%)`;
 
-            const isHoverable = e.target.closest('button, a, input, textarea, select, .event-card, .profile-badge, .logo, .close-btn, .slider-btn');
+            const isHoverable = e.target.closest('button, a, input, textarea, select, .event-card, .profile-badge, .logo, .close-btn, .slider-btn, .pwd-toggle');
             if (isHoverable) cursor.classList.add('hover');
             else cursor.classList.remove('hover');
 
@@ -940,16 +1024,93 @@
             } catch (error) { allEvents = allEvents.filter(e => e.id !== tempId); renderEventsUI(); showToast("Error connecting. Event not published.", "error"); } 
         }
 
+        // --- Auth Mode & Password Logic ---
         function toggleAuthMode() { openAuthModal(!isLoginMode); }
+        
         function openAuthModal(isLogin) {
-            isLoginMode = isLogin; document.getElementById('authTitle').innerText = isLogin ? 'Sign In' : 'Register'; document.getElementById('authSubmitBtn').innerText = isLogin ? 'Continue' : 'Create Account'; document.getElementById('authToggleText').innerText = isLogin ? "No account?" : "Already registered?";
-            if(isLogin) { document.getElementById('authName').classList.add('hidden'); document.getElementById('authName').removeAttribute('required'); document.getElementById('authPhone').classList.add('hidden'); } else { document.getElementById('authName').classList.remove('hidden'); document.getElementById('authName').setAttribute('required', 'true'); document.getElementById('authPhone').classList.remove('hidden'); }
+            isLoginMode = isLogin; 
+            document.getElementById('authTitle').innerText = isLogin ? 'Sign In' : 'Create Account'; 
+            document.getElementById('authSubmitBtn').innerText = isLogin ? 'Continue' : 'Create Account'; 
+            document.getElementById('authToggleText').innerText = isLogin ? "No account?" : "Already registered?";
+            
+            const pwdContainer = document.getElementById('pwdStrengthContainer');
+            const pwdInput = document.getElementById('authPassword');
+            
+            if(isLogin) { 
+                document.getElementById('authName').classList.add('hidden'); document.getElementById('authName').removeAttribute('required'); 
+                document.getElementById('authPhone').classList.add('hidden'); 
+                pwdContainer.classList.add('hidden');
+                pwdInput.classList.remove('weak', 'medium', 'strong'); // Reset border colors for login
+            } else { 
+                document.getElementById('authName').classList.remove('hidden'); document.getElementById('authName').setAttribute('required', 'true'); 
+                document.getElementById('authPhone').classList.remove('hidden'); 
+                pwdContainer.classList.remove('hidden');
+                checkPasswordStrength(); // Trigger validation on open
+            }
             document.getElementById('authModal').classList.add('active');
+        }
+
+        function togglePasswordVisibility() {
+            const input = document.getElementById('authPassword');
+            const icon = document.getElementById('eyeIcon');
+            if (input.type === 'password') {
+                input.type = 'text';
+                // Eye Off Icon
+                icon.innerHTML = `<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>`;
+            } else {
+                input.type = 'password';
+                // Eye On Icon
+                icon.innerHTML = `<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>`;
+            }
+        }
+
+        function checkPasswordStrength() {
+            if (isLoginMode) return; 
+            const pwd = document.getElementById('authPassword').value;
+            
+            const validators = [
+                { regex: /.{8,}/, el: document.getElementById('req-len') },
+                { regex: /[A-Z]/, el: document.getElementById('req-upper') },
+                { regex: /[a-z]/, el: document.getElementById('req-lower') },
+                { regex: /[0-9]/, el: document.getElementById('req-num') },
+                { regex: /[^A-Za-z0-9]/, el: document.getElementById('req-sym') }
+            ];
+            
+            let score = 0;
+            validators.forEach(v => {
+                if (v.regex.test(pwd)) { v.el.classList.add('valid'); score++; } 
+                else { v.el.classList.remove('valid'); }
+            });
+            
+            const input = document.getElementById('authPassword');
+            const text = document.getElementById('pwdStrengthText');
+            
+            input.classList.remove('weak', 'medium', 'strong');
+            
+            if (pwd.length === 0) {
+                text.innerText = 'Weak'; text.className = 'pwd-weak-text';
+            } else if (score <= 2) {
+                input.classList.add('weak'); text.innerText = 'Weak'; text.className = 'pwd-weak-text';
+            } else if (score <= 4) {
+                input.classList.add('medium'); text.innerText = 'Medium'; text.className = 'pwd-medium-text';
+            } else {
+                input.classList.add('strong'); text.innerText = 'Strong'; text.className = 'pwd-strong-text';
+            }
         }
         
         async function handleAuth(e) {
-            e.preventDefault(); const payload = { email: document.getElementById('authEmail').value, password: document.getElementById('authPassword').value };
+            e.preventDefault(); 
+            const pwd = document.getElementById('authPassword').value;
+            
+            // Validate Password Strength on Sign Up
+            if(!isLoginMode) {
+                const score = [/.{8,}/, /[A-Z]/, /[a-z]/, /[0-9]/, /[^A-Za-z0-9]/].filter(r => r.test(pwd)).length;
+                if (score < 5) { showToast("Please meet all password requirements to create an account.", "error"); return; }
+            }
+
+            const payload = { email: document.getElementById('authEmail').value, password: pwd };
             if(!isLoginMode) { payload.name = document.getElementById('authName').value; payload.phone = document.getElementById('authPhone').value; }
+            
             try {
                 const response = await fetch(API_BASE + (isLoginMode ? '/login' : '/signup'), { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }); const result = await response.json();
                 if (response.ok) { if (isLoginMode) { currentUser = result.data; localStorage.setItem('user', JSON.stringify(currentUser)); updateNavbar(); closeModal('authModal'); loadEvents(); showToast(`Welcome back, ${currentUser.name.split(' ')[0]}!`, "success"); startNotificationPolling(); } else { showToast("Account created successfully! Please log in.", "success"); openAuthModal(true); } } else showToast(result.message, "error");
