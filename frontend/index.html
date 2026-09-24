@@ -25,7 +25,6 @@
             --badge-text: #ffffff;
             
             --video-invert: 0;
-            --wallpaper-bg: #030303;
             
             --radius-pill: 50px; 
             --radius-card: 16px; 
@@ -50,11 +49,11 @@
             --badge-text: #111827;
             
             --video-invert: 1; /* Inverts the background video for light mode */
-            --wallpaper-bg: #E5E7EB;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
         
+        /* Mobile overflow protection with solid background */
         html, body { 
             background-color: var(--bg-body); color: var(--text-main); 
             font-family: 'Inter', sans-serif; line-height: 1.6; 
@@ -68,7 +67,7 @@
             body, button, a, input, textarea, select, .event-card, .profile-badge, .logo, .close-btn, .slider-btn { cursor: none !important; }
             .custom-cursor {
                 position: fixed; top: 0; left: 0; width: 24px; height: 24px; 
-                border: 1px solid #FFFFFF; /* MUST ALWAYS BE WHITE FOR MIX-BLEND-MODE TO WORK */
+                border: 1px solid #FFFFFF; /* MUST BE WHITE FOR MIX-BLEND-MODE */
                 border-radius: 50%;
                 pointer-events: none; z-index: 999999;
                 transform: translate(-50%, -50%);
@@ -135,7 +134,11 @@
         .btn-primary { background: var(--primary); color: var(--primary-invert); }
         .btn-danger { border-color: rgba(239, 68, 68, 0.5); color: #ef4444; }
 
-        .container { max-width: 1200px; margin: 0 auto 80px; padding: 0 20px; width: 100%; position: relative; z-index: 10; }
+        /* Container positioned above backgrounds */
+        .container { 
+            max-width: 1200px; margin: 0 auto 80px; padding: 0 20px; width: 100%; 
+            position: relative; z-index: 10; 
+        }
         .hidden { display: none !important; }
         
         .view-section { animation: fadeView 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
@@ -146,7 +149,13 @@
         .hero-section h1 { font-size: clamp(2.5rem, 6vw, 5.5rem); margin-bottom: 20px; line-height: 1.1; }
         .hero-section p { color: var(--text-muted); font-size: 1.1rem; max-width: 500px; margin: 0 auto; padding: 0 10px; }
 
-        #events-container, #my-events-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr)); gap: 25px; width: 100%; }
+        /* Responsive Grid */
+        #events-container, #my-events-container { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr)); 
+            gap: 25px; 
+            width: 100%;
+        }
         
         .card { 
             background: var(--glass-bg); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
@@ -154,11 +163,14 @@
             overflow: hidden; width: 100%; transition: transform 0.3s ease, border-color 0.3s, box-shadow 0.3s, background 0.4s ease; 
         }
         .event-card { position: relative; }
-        .event-card:hover { transform: translateY(-5px); border-color: var(--text-muted); box-shadow: 0 10px 30px rgba(0,0,0,0.15); }
+        .event-card:hover { transform: translateY(-5px); border-color: rgba(255,255,255,0.3); box-shadow: 0 10px 30px rgba(0,0,0,0.15); }
         
         .card-cover { 
-            width: calc(100% + 60px); aspect-ratio: 2 / 1; margin: -30px -30px 20px -30px; 
-            background-size: cover; background-repeat: no-repeat; background-position: center; 
+            width: calc(100% + 60px); 
+            aspect-ratio: 2 / 1; 
+            margin: -30px -30px 20px -30px; 
+            background-size: 100% 100%; /* Stretch image perfectly inside 2:1 container */
+            background-repeat: no-repeat; background-position: center; 
             border-bottom: 1px solid var(--border); position: relative; 
         }
         
@@ -203,36 +215,35 @@
         .badge { background: var(--primary); color: var(--primary-invert); padding: 2px 10px; border-radius: 20px; font-size: 14px; margin-left: 10px; font-weight: 600; }
         .form-input { width: 100%; padding: 14px; margin-bottom: 15px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; background: var(--bg-body); color: var(--text-main); outline: none; transition: background 0.4s, color 0.4s; }
 
-        /* --- Animated Logout Button --- */
+        /* --- MAGIC ANIMATED LOGOUT BUTTON --- */
         .logout-anim-btn {
             display: flex; align-items: center; justify-content: space-between;
             background: var(--bg-surface); color: #ef4444; 
             border: 1px solid var(--border); border-radius: 12px;
             padding: 14px 20px; width: 100%; cursor: pointer;
-            transition: all 0.3s ease; margin-top: 15px;
+            transition: background 0.4s ease, color 0.4s ease, border-color 0.4s ease; 
+            margin-top: 15px; font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600;
         }
-        .logout-anim-btn:hover {
-            background: #ef4444; color: #fff; border-color: #ef4444;
+        .logout-anim-btn:hover { background: #ef4444; color: #ffffff; border-color: #ef4444; }
+        
+        .logout-icon-container { position: relative; width: 30px; height: 20px; display: flex; align-items: center; justify-content: flex-end; }
+        
+        .logout-arrow { 
+            position: absolute; right: 18px; width: 16px; height: 16px; opacity: 0; 
+            transform: translateX(-10px); transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); z-index: 1; 
         }
-        .logout-anim-wrap {
-            position: relative; width: 24px; height: 24px;
-            display: flex; align-items: center; overflow: hidden;
+        .logout-door { 
+            position: relative; width: 12px; height: 18px; border: 2px solid currentColor; 
+            border-radius: 2px; border-left: none; z-index: 2; display: flex; align-items: center; 
         }
-        .logout-anim-person {
-            position: absolute; left: 0px; width: 18px; height: 18px;
-            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+        .logout-door-flap { 
+            position: absolute; left: -2px; top: -2px; width: 12px; height: 18px; 
+            background: currentColor; border: 2px solid currentColor; border-radius: 2px; 
+            transform-origin: left; transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
         }
-        .logout-anim-door {
-            position: absolute; right: 0; width: 12px; height: 18px;
-            border: 2px solid currentColor; border-radius: 2px;
-            border-left: none; transition: transform 0.3s ease;
-        }
-        .logout-anim-door::before {
-            content: ''; position: absolute; left: -2px; top: -2px; bottom: -2px; width: 2px;
-            background: currentColor; transition: transform 0.4s ease; transform-origin: left;
-        }
-        .logout-anim-btn:hover .logout-anim-person { transform: translateX(10px); opacity: 0; }
-        .logout-anim-btn:hover .logout-anim-door::before { transform: perspective(50px) rotateY(-70deg); }
+        
+        .logout-anim-btn:hover .logout-arrow { opacity: 1; transform: translateX(12px); }
+        .logout-anim-btn:hover .logout-door-flap { transform: perspective(100px) rotateY(-80deg); }
 
         /* Media Queries for Mobile Responsiveness */
         @media (max-width: 768px) {
@@ -413,7 +424,7 @@
         </div>
     </div>
 
-    <!-- Profile Modal (Now includes Animated Logout Button) -->
+    <!-- Profile Modal (Includes Animated Logout Button) -->
     <div class="modal-overlay" id="profileModal">
         <div class="modal-content">
             <div class="modal-header"><h2>Identity</h2><button class="close-btn" onclick="closeModal('profileModal')">✕</button></div>
@@ -434,15 +445,19 @@
                 
                 <button type="submit" class="btn btn-primary" style="width: 100%;">Save Updates</button>
                 
-                <!-- Magic Animated Logout Button -->
+                <!-- Matching CodePen Animation Logout Button -->
                 <button type="button" class="logout-anim-btn" onclick="logout()">
-                    <span style="font-weight: 600;">Log Out</span>
-                    <div class="logout-anim-wrap">
-                        <svg class="logout-anim-person" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <circle cx="12" cy="7" r="2.5" fill="currentColor"></circle>
-                            <path d="M12 10.5v4m-2.5 4l2.5-4 2.5 4m-4-8h4"></path>
+                    <span>Log Out</span>
+                    <div class="logout-icon-container">
+                        <!-- Sliding Right Arrow -->
+                        <svg class="logout-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="2" y1="12" x2="20" y2="12"></line>
+                            <polyline points="14 6 20 12 14 18"></polyline>
                         </svg>
-                        <div class="logout-anim-door"></div>
+                        <!-- 3D Opening Door -->
+                        <div class="logout-door">
+                            <div class="logout-door-flap"></div>
+                        </div>
                     </div>
                 </button>
 
@@ -558,7 +573,6 @@
             if (isHoverable) cursor.classList.add('hover');
             else cursor.classList.remove('hover');
 
-            // Adapt glow color based on theme
             const isLight = document.body.classList.contains('light-mode');
             const glowColor = isLight ? 'rgba(0, 0, 0, 0.04)' : 'rgba(255, 255, 255, 0.04)';
             bg.style.background = `radial-gradient(circle at ${x}px ${y}px, ${glowColor} 0%, transparent 40%)`;
@@ -573,7 +587,7 @@
         });
 
         document.addEventListener("DOMContentLoaded", () => { 
-            updateThemeIcon(); // Ensure icon matches loaded theme
+            updateThemeIcon(); 
             updateNavbar(); loadEvents(); setInterval(updateCountdowns, 60000); 
             if(currentUser) startNotificationPolling();
         });
